@@ -748,12 +748,21 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 let supabase = null;
 
 function initSupabase() {
+  if (!window.supabase) {
+    console.warn('Supabase SDK not loaded. Using local-only mode.');
+    return false;
+  }
   if (SUPABASE_URL.includes('YOUR-PROJECT-ID')) {
     console.warn('Supabase not configured. Using local-only mode.');
     return false;
   }
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  return true;
+  try {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    return true;
+  } catch (e) {
+    console.warn('Supabase init failed. Using local-only mode.', e.message);
+    return false;
+  }
 }
 
 /* ═══════════════════════════════════════════════════
