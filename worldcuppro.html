@@ -745,7 +745,7 @@ footer strong { color: var(--gold); }
 const SUPABASE_URL = 'https://mnprhloxeqybmqcljpuq.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ucHJobG94ZXF5Ym1xY2xqcHVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5NTI2NjMsImV4cCI6MjA5NTUyODY2M30.y5nUUb-Xw8cPQjMJjeUrpDv2BfFYFlaYq20SyCz76Bo';
 
-let supabase = null;
+let sb = null;
 
 function initSupabase() {
   if (!window.supabase) {
@@ -757,7 +757,7 @@ function initSupabase() {
     return false;
   }
   try {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     return true;
   } catch (e) {
     console.warn('Supabase init failed. Using local-only mode.', e.message);
@@ -1020,7 +1020,7 @@ async function handleAuthSubmit(e) {
     let result;
 
     if (authMode === 'register') {
-      result = await supabase.auth.signUp({
+      result = await sb.auth.signUp({
         email,
         password,
         options: { data: { username } }
@@ -1034,11 +1034,11 @@ async function handleAuthSubmit(e) {
         return;
       }
       // Auto-login after registration
-      const { data: loginData, error: loginErr } = await supabase.auth.signInWithPassword({ email, password });
+      const { data: loginData, error: loginErr } = await sb.auth.signInWithPassword({ email, password });
       if (loginErr) { errEl.textContent = loginErr.message; return; }
       result = { data: loginData };
     } else {
-      result = await supabase.auth.signInWithPassword({ email, password });
+      result = await sb.auth.signInWithPassword({ email, password });
       if (result.error) {
         errEl.textContent = '用户名或密码错误';
         return;
@@ -1066,7 +1066,7 @@ function onLoginSuccess() {
 
 async function handleLogout() {
   if (SUPABASE_READY) {
-    await supabase.auth.signOut();
+    await sb.auth.signOut();
   }
   currentUser = null;
   userPredictions = {};
@@ -1096,7 +1096,7 @@ function updateNavUI() {
 async function checkSession() {
   if (!SUPABASE_READY) return;
   try {
-    const { data } = await supabase.auth.getSession();
+    const { data } = await sb.auth.getSession();
     if (data?.session?.user) {
       currentUser = {
         id: data.session.user.id,
@@ -1115,7 +1115,7 @@ async function loadUserData() {
   if (!currentUser || !SUPABASE_READY) return;
   try {
     // Load predictions
-    const { data: preds } = await supabase
+    const { data: preds } = await sb
       .from('predictions')
       .select('match_id, home_score, away_score')
       .eq('user_id', currentUser.id);
@@ -1126,7 +1126,7 @@ async function loadUserData() {
     }
 
     // Load match scores
-    const { data: scores } = await supabase
+    const { data: scores } = await sb
       .from('matches')
       .select('id, home_score, away_score, status');
     if (scores) {
@@ -1330,7 +1330,7 @@ async function submitPrediction(matchDbId, home, away) {
 
   try {
     // Upsert prediction
-    const { error } = await supabase
+    const { error } = await sb
       .from('predictions')
       .upsert({
         user_id: currentUser.id,
@@ -1386,7 +1386,7 @@ async function renderLeaderboard() {
   }
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await sb
       .from('leaderboard')
       .select('*')
       .limit(50);
@@ -1516,7 +1516,7 @@ function setupRealtimeSubscriptions() {
   if (!SUPABASE_READY) return;
 
   // Subscribe to match score changes
-  supabase
+  sb
     .channel('match-updates')
     .on('postgres_changes',
       { event: 'UPDATE', schema: 'public', table: 'matches' },
@@ -1533,7 +1533,7 @@ function setupRealtimeSubscriptions() {
     .subscribe();
 
   // Subscribe to leaderboard changes
-  supabase
+  sb
     .channel('leaderboard-updates')
     .on('postgres_changes',
       { event: 'UPDATE', schema: 'public', table: 'profiles' },
