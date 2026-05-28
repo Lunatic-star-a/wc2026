@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIFA World Cup 2026 — 世界杯预测</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* ═══════════════════════════════════════════════
+   FIFA WORLD CUP 2026 — DESIGN SYSTEM
+   ═══════════════════════════════════════════════ */
+:root {
+  --pitch: #0d8c3c;
+  --pitch-deep: #0a5c2a;
+  --pitch-bright: #0fa84a;
+  --gold: #d4a843;
+  --gold-bright: #f5c542;
+  --navy: #0a0e17;
+  --slate: #141a26;
+  --card: #151d2b;
+  --card-hover: #1a2333;
+  --text: #e8edf2;
+  --text-dim: #7d8899;
+  --accent-red: #c0392b;
+  --glow-green: rgba(13, 140, 60, 0.35);
+  --glow-gold: rgba(212, 168, 67, 0.3);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--navy);
+  color: var(--text);
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  top: -30%; left: 50%; transform: translateX(-50%);
+  width: 1200px; height: 800px;
+  background: radial-gradient(ellipse, var(--glow-green) 0%, transparent 70%);
+  pointer-events: none; z-index: 0; opacity: 0.6;
+}
+
+.container { max-width: 1320px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+/* ── Navigation ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(10, 14, 23, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.nav-inner {
+  max-width: 1320px; margin: 0 auto; padding: 0 24px;
+  display: flex; align-items: center; justify-content: space-between; height: 60px;
+}
+.nav-logo {
+  font-family: var(--font-display); font-size: 28px; letter-spacing: 2px;
+  color: var(--gold); text-transform: uppercase; cursor: pointer;
+  transition: text-shadow 0.3s;
+}
+.nav-logo:hover { text-shadow: 0 0 20px var(--glow-gold); }
+.nav-links { display: flex; gap: 24px; list-style: none; align-items: center; }
+.nav-links a {
+  color: var(--text-dim); text-decoration: none; font-size: 13px;
+  font-weight: 500; text-transform: uppercase; letter-spacing: 1px;
+  transition: color 0.25s; cursor: pointer;
+}
+.nav-links a:hover { color: var(--gold); }
+.nav-user {
+  display: flex; align-items: center; gap: 10px;
+}
+.nav-user-btn {
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: 1px;
+  padding: 7px 18px; border-radius: 100px; cursor: pointer;
+  border: 1px solid var(--gold); background: transparent;
+  color: var(--gold); transition: all 0.25s; text-transform: uppercase;
+}
+.nav-user-btn:hover { background: var(--gold); color: var(--navy); }
+.nav-user-btn.logout { border-color: rgba(255,255,255,0.2); color: var(--text-dim); }
+.nav-user-btn.logout:hover { background: var(--accent-red); border-color: var(--accent-red); color: #fff; }
+.nav-username {
+  font-size: 13px; color: var(--text); font-weight: 500;
+}
+
+/* ── Hero ── */
+.hero {
+  min-height: 100vh; display: flex; align-items: center;
+  padding: 120px 0 80px; position: relative;
+}
+.hero-content { max-width: 700px; }
+.hero-badge {
+  display: inline-block;
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: 3px;
+  color: var(--gold); border: 1px solid rgba(212,168,67,0.3);
+  padding: 6px 16px; border-radius: 100px;
+  margin-bottom: 28px; text-transform: uppercase;
+  animation: fadeInUp 0.8s ease;
+}
+.hero h1 {
+  font-family: var(--font-display); font-size: clamp(64px, 10vw, 120px);
+  line-height: 0.9; letter-spacing: -2px; text-transform: uppercase;
+  color: #fff; margin-bottom: 12px; animation: fadeInUp 0.8s ease 0.1s both;
+}
+.hero h1 .accent { color: transparent; -webkit-text-stroke: 2px var(--gold); }
+.hero-subtitle {
+  font-size: 18px; color: var(--text-dim); margin-bottom: 40px; max-width: 500px;
+  animation: fadeInUp 0.8s ease 0.2s both;
+}
+.hero-stats { display: flex; gap: 48px; animation: fadeInUp 0.8s ease 0.3s both; }
+.hero-stat { text-align: center; }
+.hero-stat-num {
+  font-family: var(--font-display); font-size: 48px; color: var(--pitch);
+  letter-spacing: 1px;
+}
+.hero-stat-label { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; }
+
+.hero-visual {
+  position: absolute; right: -60px; top: 50%; transform: translateY(-50%);
+  width: 500px; height: 500px;
+  background: radial-gradient(circle at 30% 70%, rgba(212,168,67,0.08) 0%, transparent 50%),
+              radial-gradient(circle at 70% 30%, rgba(13,140,60,0.06) 0%, transparent 50%);
+  border-radius: 50%; pointer-events: none;
+}
+
+/* ── Countdown ── */
+.countdown-bar {
+  background: linear-gradient(135deg, rgba(13,140,60,0.15), rgba(13,140,60,0.04));
+  border: 1px solid rgba(13,140,60,0.2);
+  border-radius: var(--radius);
+  padding: 20px 32px; margin-top: 40px; text-align: center;
+  animation: fadeInUp 0.8s ease 0.4s both;
+}
+.countdown-bar .cd-label {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 3px;
+  color: var(--text-dim); text-transform: uppercase; margin-bottom: 8px;
+}
+.countdown-bar .cd-time {
+  font-family: var(--font-display); font-size: 36px; letter-spacing: 4px;
+  color: var(--gold);
+}
+.countdown-bar .cd-time span {
+  display: inline-block; min-width: 48px;
+}
+
+/* ── Section Headers ── */
+.section-header { text-align: center; margin-bottom: 56px; }
+.section-tag {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 3px;
+  color: var(--pitch); text-transform: uppercase; margin-bottom: 12px;
+}
+.section-header h2 {
+  font-family: var(--font-display); font-size: clamp(40px, 6vw, 64px);
+  letter-spacing: 1px; text-transform: uppercase; color: #fff;
+}
+
+/* ── Groups Section ── */
+.groups-section { padding: 100px 0; position: relative; }
+.groups-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.group-card {
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.group-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(212,168,67,0.25);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 40px var(--glow-gold);
+}
+.group-header {
+  background: linear-gradient(135deg, rgba(13,140,60,0.15), rgba(13,140,60,0.02));
+  padding: 16px 18px;
+  font-family: var(--font-display); font-size: 22px; letter-spacing: 2px;
+  color: var(--pitch); border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.group-table { width: 100%; border-collapse: collapse; }
+.group-table th {
+  font-family: var(--font-mono); font-size: 10px; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: 1px; padding: 10px 12px 6px;
+  text-align: left; font-weight: 400;
+}
+.group-table th:last-child, .group-table th:nth-child(3),
+.group-table td:last-child, .group-table td:nth-child(3) { text-align: center; }
+.group-table td {
+  padding: 8px 12px; font-size: 13px; border-top: 1px solid rgba(255,255,255,0.02);
+}
+.team-flag { display: inline-block; width: 22px; text-align: center; margin-right: 6px; font-size: 14px; }
+.team-link {
+  color: var(--text); text-decoration: none; font-weight: 500; cursor: pointer;
+  transition: color 0.2s; border-bottom: 1px dashed transparent;
+}
+.team-link:hover { color: var(--gold); border-bottom-color: var(--gold); }
+.pts { font-weight: 700; color: var(--gold); }
+
+/* ── Schedule ── */
+.schedule-section { padding: 100px 0; position: relative; }
+.schedule-filters { display: flex; gap: 8px; margin-bottom: 40px; flex-wrap: wrap; justify-content: center; }
+.filter-btn {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 1px;
+  padding: 8px 16px; border-radius: 100px;
+  border: 1px solid rgba(255,255,255,0.1); background: transparent;
+  color: var(--text-dim); cursor: pointer; transition: all 0.25s;
+  text-transform: uppercase;
+}
+.filter-btn:hover, .filter-btn.active {
+  background: var(--pitch); color: #fff; border-color: var(--pitch);
+}
+.match-list { display: flex; flex-direction: column; gap: 10px; }
+.match-card {
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: var(--radius);
+  padding: 16px 24px;
+  display: grid;
+  grid-template-columns: 130px 1fr 100px;
+  align-items: center; gap: 16px;
+  transition: all 0.3s ease;
+  position: relative; overflow: hidden;
+}
+.match-card::after {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--pitch);
+  transform: scaleY(0); transition: transform 0.3s ease;
+}
+.match-card:hover::after { transform: scaleY(1); }
+.match-card:hover {
+  border-color: rgba(255,255,255,0.1);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+.match-card.live { border-color: rgba(212,168,67,0.3); animation: livePulse 2s ease-in-out infinite; }
+.match-card.finished { opacity: 0.7; }
+.match-date {
+  font-family: var(--font-mono); font-size: 12px; color: var(--text-dim);
+}
+.match-date strong { display: block; color: var(--text); font-size: 15px; margin-top: 2px; }
+.match-info { text-align: center; }
+.match-teams {
+  font-family: var(--font-display); font-size: 24px; letter-spacing: 1px;
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+}
+.match-score {
+  font-family: var(--font-mono); font-size: 22px; font-weight: 700;
+  color: var(--gold); padding: 2px 12px; border-radius: 6px;
+  background: rgba(212,168,67,0.1); min-width: 64px; text-align: center;
+}
+.match-score.live-score { animation: scoreBlink 1s ease-in-out infinite; }
+.match-vs { color: var(--text-dim); font-family: var(--font-body); font-size: 13px; font-weight: 400; }
+.match-venue { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+.match-badge {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 1px;
+  padding: 5px 12px; border-radius: 100px;
+  text-align: center; text-transform: uppercase; white-space: nowrap;
+}
+.badge-group { background: rgba(13,140,60,0.2); color: var(--pitch); }
+.badge-ko { background: rgba(212,168,67,0.2); color: var(--gold); }
+.badge-live { background: rgba(192,57,43,0.3); color: #e74c3c; }
+.live-dot {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  background: #e74c3c; margin-right: 4px;
+  animation: livePulse 1s ease-in-out infinite;
+}
+
+/* ── Prediction Section ── */
+.predict-section { padding: 100px 0; position: relative; }
+.predict-intro {
+  text-align: center; max-width: 560px; margin: 0 auto 48px;
+  color: var(--text-dim); font-size: 16px;
+}
+.predict-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+.predict-card {
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: var(--radius);
+  padding: 24px;
+  position: relative; overflow: hidden;
+  transition: all 0.3s ease;
+}
+.predict-card:hover {
+  border-color: rgba(212,168,67,0.2);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+}
+.predict-card-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px;
+}
+.predict-stage {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 2px;
+  color: var(--pitch); text-transform: uppercase;
+}
+.predict-card .predict-date {
+  font-size: 12px; color: var(--text-dim);
+}
+.predict-card-body {
+  display: flex; align-items: center; gap: 10px;
+}
+.predict-team-col {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; min-width: 0;
+}
+.predict-team-icon {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.predict-team-name { font-weight: 600; font-size: 14px; text-align: center; white-space: nowrap; }
+.predict-score-area { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.predict-score-input {
+  width: 40px; height: 40px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-sm);
+  color: #fff; font-family: var(--font-mono); font-size: 18px;
+  text-align: center; outline: none;
+  transition: all 0.25s;
+}
+.predict-score-input:focus {
+  border-color: var(--pitch); box-shadow: 0 0 0 3px var(--glow-green);
+  background: rgba(13,140,60,0.1);
+}
+.predict-vs-dot { font-family: var(--font-display); font-size: 18px; color: var(--text-dim); }
+.predict-submit {
+  width: 100%; margin-top: 16px;
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 12px; border-radius: var(--radius);
+  border: none; background: var(--pitch); color: #fff;
+  cursor: pointer; transition: all 0.25s;
+}
+.predict-submit:hover:not(:disabled) { background: var(--pitch-bright); box-shadow: 0 4px 24px var(--glow-green); }
+.predict-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+.predict-submit.saved { background: var(--gold); }
+.predict-result {
+  text-align: center; font-size: 12px; color: var(--gold); margin-top: 10px; min-height: 18px;
+}
+
+/* ── Leaderboard ── */
+.leaderboard {
+  margin-top: 60px; max-width: 640px; margin-left: auto; margin-right: auto;
+}
+.leaderboard h3 {
+  font-family: var(--font-display); font-size: 32px; letter-spacing: 2px;
+  text-align: center; margin-bottom: 20px; color: var(--gold);
+}
+.lb-row {
+  display: flex; align-items: center; gap: 14px; padding: 12px 20px;
+  background: var(--card); border: 1px solid rgba(255,255,255,0.04);
+  border-radius: var(--radius); margin-bottom: 6px;
+  transition: all 0.3s ease;
+}
+.lb-row:hover { border-color: rgba(255,255,255,0.1); background: var(--card-hover); }
+.lb-rank {
+  font-family: var(--font-display); font-size: 22px; color: var(--pitch); width: 36px; text-align: center;
+}
+.lb-rank.gold { color: var(--gold); }
+.lb-rank.silver { color: #c0c0c0; }
+.lb-rank.bronze { color: #cd7f32; }
+.lb-name { flex: 1; font-weight: 500; font-size: 14px; }
+.lb-meta { font-size: 11px; color: var(--text-dim); margin-right: 8px; }
+.lb-points { font-family: var(--font-mono); font-size: 15px; color: var(--gold); font-weight: 700; }
+
+/* ── Auth Modal ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden; transition: all 0.3s ease;
+}
+.modal-overlay.active { opacity: 1; visibility: visible; }
+.auth-modal {
+  background: var(--slate);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 40px 36px; width: 400px; max-width: 90vw;
+  position: relative;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+}
+.auth-modal h2 {
+  font-family: var(--font-display); font-size: 32px; letter-spacing: 2px;
+  color: #fff; text-align: center; margin-bottom: 8px;
+}
+.auth-modal .auth-subtitle {
+  text-align: center; color: var(--text-dim); font-size: 13px; margin-bottom: 28px;
+}
+.auth-tabs { display: flex; gap: 0; margin-bottom: 24px; border-radius: 100px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); }
+.auth-tab {
+  flex: 1; padding: 10px; text-align: center; cursor: pointer;
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: 1px;
+  text-transform: uppercase; background: transparent; color: var(--text-dim);
+  border: none; transition: all 0.25s;
+}
+.auth-tab.active { background: var(--pitch); color: #fff; }
+.auth-field { margin-bottom: 16px; }
+.auth-field label {
+  display: block; font-size: 11px; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--text-dim); margin-bottom: 6px;
+  font-family: var(--font-mono);
+}
+.auth-field input {
+  width: 100%; padding: 12px 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-sm);
+  color: #fff; font-family: var(--font-body); font-size: 15px;
+  outline: none; transition: all 0.25s;
+}
+.auth-field input:focus { border-color: var(--pitch); box-shadow: 0 0 0 3px var(--glow-green); }
+.auth-submit {
+  width: 100%; padding: 14px;
+  font-family: var(--font-mono); font-size: 13px; letter-spacing: 2px;
+  text-transform: uppercase; border-radius: var(--radius);
+  border: none; background: var(--pitch); color: #fff;
+  cursor: pointer; transition: all 0.25s; margin-top: 8px;
+}
+.auth-submit:hover { background: var(--pitch-bright); box-shadow: 0 4px 24px var(--glow-green); }
+.auth-error { color: var(--accent-red); font-size: 12px; text-align: center; min-height: 18px; margin-top: 8px; }
+.auth-close {
+  position: absolute; top: 16px; right: 16px;
+  background: none; border: none; color: var(--text-dim); font-size: 22px;
+  cursor: pointer; transition: color 0.2s;
+}
+.auth-close:hover { color: #fff; }
+
+/* ── Team Info Modal ── */
+.team-modal {
+  background: var(--slate);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 0; width: 480px; max-width: 90vw;
+  position: relative; overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+}
+.team-modal-header {
+  background: linear-gradient(135deg, rgba(13,140,60,0.2), rgba(13,140,60,0.05));
+  padding: 28px 28px 20px; text-align: center;
+}
+.team-modal-flag { font-size: 56px; margin-bottom: 8px; }
+.team-modal-name {
+  font-family: var(--font-display); font-size: 36px; letter-spacing: 2px;
+  color: #fff;
+}
+.team-modal-name-en { color: var(--text-dim); font-size: 14px; margin-bottom: 4px; }
+.team-modal-body { padding: 24px 28px; }
+.team-modal-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.team-modal-label { color: var(--text-dim); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-family: var(--font-mono); }
+.team-modal-value { color: var(--text); font-size: 14px; font-weight: 500; text-align: right; }
+.team-modal-players { margin-top: 16px; }
+.team-modal-players h4 {
+  font-family: var(--font-display); font-size: 18px; letter-spacing: 1px;
+  color: var(--gold); margin-bottom: 8px;
+}
+.team-modal-players .player-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.team-modal-players .player-tag {
+  font-size: 12px; padding: 4px 12px; border-radius: 100px;
+  background: rgba(255,255,255,0.05); color: var(--text);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.team-modal-footer { padding: 16px 28px 24px; text-align: center; }
+.team-modal-link {
+  display: inline-block; font-family: var(--font-mono); font-size: 12px; letter-spacing: 1px;
+  color: var(--gold); text-decoration: none; text-transform: uppercase;
+  padding: 8px 20px; border: 1px solid rgba(212,168,67,0.3); border-radius: 100px;
+  transition: all 0.25s;
+}
+.team-modal-link:hover { background: rgba(212,168,67,0.1); border-color: var(--gold); }
+.team-modal-close {
+  position: absolute; top: 16px; right: 16px;
+  background: rgba(0,0,0,0.3); border: none; color: #fff; font-size: 20px;
+  width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+  transition: background 0.2s; display: flex; align-items: center; justify-content: center;
+}
+.team-modal-close:hover { background: rgba(0,0,0,0.6); }
+
+/* ── Toast ── */
+.toast-container {
+  position: fixed; top: 80px; right: 24px; z-index: 1100;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.toast {
+  background: var(--slate); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius); padding: 14px 20px;
+  font-size: 13px; color: #fff;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  animation: slideInRight 0.3s ease, slideOutRight 0.3s ease 2.7s forwards;
+  max-width: 360px;
+}
+.toast.success { border-left: 3px solid var(--pitch); }
+.toast.error { border-left: 3px solid var(--accent-red); }
+
+/* ── Footer ── */
+footer {
+  text-align: center; padding: 60px 0; border-top: 1px solid rgba(255,255,255,0.04);
+  color: var(--text-dim); font-size: 13px; position: relative; z-index: 1;
+}
+footer strong { color: var(--gold); }
+
+/* ── Loading Skeleton ── */
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 4px;
+}
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* ── Animations ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(60px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideOutRight {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(60px); }
+}
+@keyframes livePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(231,76,60,0.4); }
+  50%      { box-shadow: 0 0 0 8px rgba(231,76,60,0); }
+}
+@keyframes scoreBlink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+@keyframes float-up {
+  0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+  10%  { opacity: 0.5; }
+  90%  { opacity: 0; }
+  100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+}
+
+/* ── Floating particles ── */
+.particles {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+}
+.particle {
+  position: absolute; border-radius: 50%;
+  background: var(--pitch);
+  animation: float-up linear infinite;
+  opacity: 0;
+}
+
+/* ── Scroll reveal ── */
+.reveal {
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .nav-links { gap: 14px; }
+  .nav-links a { font-size: 11px; letter-spacing: 0; }
+  .nav-user-btn { font-size: 10px; padding: 5px 12px; }
+  .hero h1 { font-size: 48px; }
+  .hero-stats { gap: 20px; }
+  .hero-visual { display: none; }
+  .match-card { grid-template-columns: 1fr; gap: 6px; padding: 14px 18px; }
+  .match-teams { font-size: 20px; }
+  .predict-cards { grid-template-columns: 1fr; }
+  .countdown-bar .cd-time { font-size: 24px; }
+  .auth-modal { padding: 28px 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Particles -->
+<div class="particles" id="particles"></div>
+
+<!-- Navigation -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo" onclick="scrollToTop()">⚽ WC26</div>
+    <ul class="nav-links">
+      <li><a href="#groups">小组赛</a></li>
+      <li><a href="#schedule">赛程</a></li>
+      <li><a href="#predict">预测</a></li>
+    </ul>
+    <div class="nav-user" id="navUser">
+      <button class="nav-user-btn" onclick="openAuthModal()" id="btnLogin">登录/注册</button>
+      <span class="nav-username" id="navUsername" style="display:none"></span>
+      <button class="nav-user-btn logout" onclick="handleLogout()" id="btnLogout" style="display:none">退出</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Auth Modal -->
+<div class="modal-overlay" id="authOverlay" onclick="closeAuthModal(event)">
+  <div class="auth-modal" onclick="event.stopPropagation()">
+    <button class="auth-close" onclick="closeAuthModal()">&times;</button>
+    <h2 id="authTitle">登录</h2>
+    <p class="auth-subtitle" id="authSubtitle">登录以参与预测和查看排行榜</p>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">登录</button>
+      <button class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">注册</button>
+    </div>
+    <form id="authForm" onsubmit="handleAuthSubmit(event)">
+      <div class="auth-field">
+        <label>用户名</label>
+        <input type="text" id="authUsername" placeholder="输入用户名" required minlength="2" maxlength="20" autocomplete="username">
+      </div>
+      <div class="auth-field">
+        <label>密码</label>
+        <input type="password" id="authPassword" placeholder="输入密码" required minlength="6" autocomplete="current-password">
+      </div>
+      <div class="auth-field" id="confirmField" style="display:none">
+        <label>确认密码</label>
+        <input type="password" id="authConfirm" placeholder="再次输入密码" minlength="6">
+      </div>
+      <div class="auth-error" id="authError"></div>
+      <button type="submit" class="auth-submit" id="authSubmitBtn">登录</button>
+    </form>
+  </div>
+</div>
+
+<!-- Team Info Modal -->
+<div class="modal-overlay" id="teamOverlay" onclick="closeTeamModal(event)">
+  <div class="team-modal" id="teamModal" onclick="event.stopPropagation()">
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<main>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content reveal">
+        <span class="hero-badge">USA &bull; Canada &bull; Mexico 2026</span>
+        <h1>World<br><span class="accent">Cup</span></h1>
+        <p class="hero-subtitle">
+          48 支球队，12 个小组，104 场比赛，横跨北美三国。这是史上规模最大的世界杯，新时代的序幕已经拉开。
+        </p>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="hero-stat-num">48</div><div class="hero-stat-label">参赛球队</div></div>
+          <div class="hero-stat"><div class="hero-stat-num">16</div><div class="hero-stat-label">主办城市</div></div>
+          <div class="hero-stat"><div class="hero-stat-num">104</div><div class="hero-stat-label">场比赛</div></div>
+        </div>
+        <div class="countdown-bar">
+          <div class="cd-label">距开幕还有</div>
+          <div class="cd-time" id="countdown">-- 天 -- 时 -- 分 -- 秒</div>
+        </div>
+      </div>
+      <div class="hero-visual"></div>
+    </div>
+  </section>
+
+  <!-- Groups -->
+  <section class="groups-section" id="groups">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-tag">Stage 1 · 48 Teams · 12 Groups</div>
+        <h2>小组赛分组</h2>
+      </div>
+      <div class="groups-grid" id="groupsGrid"></div>
+    </div>
+  </section>
+
+  <!-- Schedule -->
+  <section class="schedule-section" id="schedule">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-tag">104 Matches</div>
+        <h2>比赛日程</h2>
+      </div>
+      <div class="schedule-filters reveal">
+        <button class="filter-btn active" data-filter="all">全部</button>
+        <button class="filter-btn" data-filter="group">小组赛</button>
+        <button class="filter-btn" data-filter="r32">1/16 决赛</button>
+        <button class="filter-btn" data-filter="r16">1/8 决赛</button>
+        <button class="filter-btn" data-filter="qf">1/4 决赛</button>
+        <button class="filter-btn" data-filter="sf">半决赛</button>
+        <button class="filter-btn" data-filter="3rd">季军赛</button>
+        <button class="filter-btn" data-filter="final">决赛</button>
+      </div>
+      <div class="match-list" id="matchList"></div>
+    </div>
+  </section>
+
+  <!-- Prediction -->
+  <section class="predict-section" id="predict">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-tag">Play & Win</div>
+        <h2>比赛预测</h2>
+      </div>
+      <p class="predict-intro reveal">
+        猜对胜负得 <strong style="color:var(--gold)">1 分</strong>，猜对比分得 <strong style="color:var(--gold)">3 分</strong>。截止开赛前提交。实时排行榜，看看谁是真正的预言家！
+      </p>
+      <div class="predict-cards" id="predictCards">
+        <div style="text-align:center;padding:40px;color:var(--text-dim);grid-column:1/-1" id="predictLoginHint">
+          请先 <a href="#" onclick="openAuthModal();return false" style="color:var(--gold)">登录</a> 以参与预测
+        </div>
+      </div>
+
+      <!-- Leaderboard -->
+      <div class="leaderboard reveal" id="leaderboard">
+        <h3>🏆 预测排行</h3>
+        <div id="lbList"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      Made for the love of <strong>Football</strong> &middot; FIFA World Cup 2026
+    </div>
+  </footer>
+</main>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   SUPABASE CONFIGURATION
+   Replace with your Supabase project credentials
+   ═══════════════════════════════════════════════════ */
+const SUPABASE_URL = 'https://mnprhloxeqybmqcljpuq.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ucHJobG94ZXF5Ym1xY2xqcHVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5NTI2NjMsImV4cCI6MjA5NTUyODY2M30.y5nUUb-Xw8cPQjMJjeUrpDv2BfFYFlaYq20SyCz76Bo';
+
+let supabase = null;
+
+function initSupabase() {
+  if (SUPABASE_URL.includes('YOUR-PROJECT-ID')) {
+    console.warn('Supabase not configured. Using local-only mode.');
+    return false;
+  }
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  return true;
+}
+
+/* ═══════════════════════════════════════════════════
+   DATA: 12 Groups, 48 Teams
+   ═══════════════════════════════════════════════════ */
+const GROUPS = [
+  { name:'A', teams:[
+    { name:'美国',      name_en:'USA',          flag:'🇺🇸', conf:'CONCACAF', rank:11, apps:12, best:'季军 (1930)',  players:['Christian Pulisic','Giovanni Reyna','Tim Weah','Folarin Balogun'] },
+    { name:'塞内加尔',  name_en:'Senegal',      flag:'🇸🇳', conf:'CAF',      rank:18, apps:4,  best:'八强 (2002)',  players:['Sadio Mané','Kalidou Koulibaly','Ismaïla Sarr','Nicolas Jackson'] },
+    { name:'丹麦',      name_en:'Denmark',       flag:'🇩🇰', conf:'UEFA',     rank:21, apps:6,  best:'八强 (1998)',  players:['Rasmus Højlund','Christian Eriksen','Joachim Andersen','Kasper Schmeichel'] },
+    { name:'秘鲁',      name_en:'Peru',          flag:'🇵🇪', conf:'CONMEBOL', rank:33, apps:5,  best:'八强 (1970)',  players:['Gianluca Lapadula','André Carrillo','Pedro Aquino','Luis Advíncula'] }
+  ]},
+  { name:'B', teams:[
+    { name:'墨西哥',    name_en:'Mexico',        flag:'🇲🇽', conf:'CONCACAF', rank:14, apps:17, best:'八强 (1970,1986)', players:['Santiago Giménez','Hirving Lozano','Edson Álvarez','Guillermo Ochoa'] },
+    { name:'葡萄牙',    name_en:'Portugal',       flag:'🇵🇹', conf:'UEFA',     rank:6,  apps:9,  best:'冠军 (2022)',   players:['Cristiano Ronaldo','Bruno Fernandes','Rafael Leão','Rúben Dias'] },
+    { name:'韩国',      name_en:'Korea Republic', flag:'🇰🇷', conf:'AFC',      rank:22, apps:12, best:'四强 (2002)',   players:['Son Heung-min','Kim Min-jae','Lee Kang-in','Hwang Hee-chan'] },
+    { name:'尼日利亚',  name_en:'Nigeria',        flag:'🇳🇬', conf:'CAF',      rank:30, apps:6,  best:'十六强 (1994,1998,2014)', players:['Victor Osimhen','Ademola Lookman','Alex Iwobi','Samuel Chukwueze'] }
+  ]},
+  { name:'C', teams:[
+    { name:'阿根廷',    name_en:'Argentina',      flag:'🇦🇷', conf:'CONMEBOL', rank:1,  apps:19, best:'冠军 (1978,1986,2022)', players:['Lionel Messi','Julián Álvarez','Enzo Fernández','Emiliano Martínez'] },
+    { name:'荷兰',      name_en:'Netherlands',    flag:'🇳🇱', conf:'UEFA',     rank:7,  apps:11, best:'亚军 (1974,1978,2010)', players:['Virgil van Dijk','Frenkie de Jong','Cody Gakpo','Memphis Depay'] },
+    { name:'塞尔维亚',  name_en:'Serbia',         flag:'🇷🇸', conf:'UEFA',     rank:32, apps:3,  best:'小组赛',       players:['Aleksandar Mitrović','Dušan Vlahović','Sergej Milinković-Savić','Dušan Tadić'] },
+    { name:'阿联酋',    name_en:'UAE',            flag:'🇦🇪', conf:'AFC',      rank:67, apps:1,  best:'小组赛 (1990)',  players:['Ali Mabkhout','Fabio De Lima','Caio Canedo','Khalid Eisa'] }
+  ]},
+  { name:'D', teams:[
+    { name:'巴西',      name_en:'Brazil',         flag:'🇧🇷', conf:'CONMEBOL', rank:4,  apps:22, best:'冠军 (1958,1962,1970,1994,2002)', players:['Vinicius Jr','Rodrygo','Alisson Becker','Marquinhos'] },
+    { name:'乌拉圭',    name_en:'Uruguay',        flag:'🇺🇾', conf:'CONMEBOL', rank:13, apps:15, best:'冠军 (1930,1950)', players:['Federico Valverde','Darwin Núñez','Ronald Araújo','Manuel Ugarte'] },
+    { name:'摩洛哥',    name_en:'Morocco',        flag:'🇲🇦', conf:'CAF',      rank:12, apps:6,  best:'四强 (2022)',   players:['Achraf Hakimi','Brahim Díaz','Youssef En-Nesyri','Noussair Mazraoui'] },
+    { name:'挪威',      name_en:'Norway',         flag:'🇳🇴', conf:'UEFA',     rank:42, apps:3,  best:'十六强 (1998)', players:['Erling Haaland','Martin Ødegaard','Alexander Sørloth','Jens Petter Hauge'] }
+  ]},
+  { name:'E', teams:[
+    { name:'法国',      name_en:'France',         flag:'🇫🇷', conf:'UEFA',     rank:2,  apps:16, best:'冠军 (1998,2018)', players:['Kylian Mbappé','Aurélien Tchouaméni','Ousmane Dembélé','Mike Maignan'] },
+    { name:'哥伦比亚',  name_en:'Colombia',       flag:'🇨🇴', conf:'CONMEBOL', rank:9,  apps:6,  best:'八强 (2014)',   players:['Luis Díaz','James Rodríguez','Jhon Durán','Davinson Sánchez'] },
+    { name:'日本',      name_en:'Japan',          flag:'🇯🇵', conf:'AFC',      rank:15, apps:8,  best:'十六强 (2002,2010,2018,2022)', players:['Kaoru Mitoma','Takefusa Kubo','Wataru Endō','Ayase Ueda'] },
+    { name:'波兰',      name_en:'Poland',         flag:'🇵🇱', conf:'UEFA',     rank:26, apps:9,  best:'季军 (1974,1982)', players:['Robert Lewandowski','Piotr Zieliński','Jakub Kiwior','Nicola Zalewski'] }
+  ]},
+  { name:'F', teams:[
+    { name:'英格兰',    name_en:'England',        flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', conf:'UEFA', rank:3,  apps:16, best:'冠军 (1966)',    players:['Jude Bellingham','Harry Kane','Phil Foden','Declan Rice'] },
+    { name:'克罗地亚',  name_en:'Croatia',        flag:'🇭🇷', conf:'UEFA',     rank:10, apps:6,  best:'亚军 (2018)',    players:['Luka Modrić','Joško Gvardiol','Mateo Kovačić','Andrej Kramarić'] },
+    { name:'埃及',      name_en:'Egypt',          flag:'🇪🇬', conf:'CAF',      rank:36, apps:3,  best:'小组赛',         players:['Mohamed Salah','Omar Marmoush','Trézéguet','Mostafa Mohamed'] },
+    { name:'加拿大',    name_en:'Canada',         flag:'🇨🇦', conf:'CONCACAF', rank:40, apps:3,  best:'小组赛',         players:['Alphonso Davies','Jonathan David','Tajon Buchanan','Stephen Eustáquio'] }
+  ]},
+  { name:'G', teams:[
+    { name:'西班牙',    name_en:'Spain',          flag:'🇪🇸', conf:'UEFA',     rank:8,  apps:16, best:'冠军 (2010)',    players:['Lamine Yamal','Pedri','Rodri','Nico Williams'] },
+    { name:'瑞士',      name_en:'Switzerland',    flag:'🇨🇭', conf:'UEFA',     rank:17, apps:12, best:'八强 (1934,1938,1954)', players:['Granit Xhaka','Manuel Akanji','Breel Embolo','Xherdan Shaqiri'] },
+    { name:'喀麦隆',    name_en:'Cameroon',       flag:'🇨🇲', conf:'CAF',      rank:49, apps:8,  best:'八强 (1990)',   players:['André Onana','Vincent Aboubakar','Bryan Mbeumo','Karl Toko Ekambi'] },
+    { name:'哥斯达黎加',name_en:'Costa Rica',     flag:'🇨🇷', conf:'CONCACAF', rank:52, apps:6,  best:'八强 (2014)',   players:['Keylor Navas','Manfred Ugalde','Joel Campbell','Brandon Aguilera'] }
+  ]},
+  { name:'H', teams:[
+    { name:'德国',      name_en:'Germany',        flag:'🇩🇪', conf:'UEFA',     rank:5,  apps:20, best:'冠军 (1954,1974,1990,2014)', players:['Jamal Musiala','Florian Wirtz','Kai Havertz','Joshua Kimmich'] },
+    { name:'意大利',    name_en:'Italy',          flag:'🇮🇹', conf:'UEFA',     rank:16, apps:18, best:'冠军 (1934,1938,1982,2006)', players:['Nicolò Barella','Federico Chiesa','Gianluigi Donnarumma','Sandro Tonali'] },
+    { name:'澳大利亚',  name_en:'Australia',      flag:'🇦🇺', conf:'AFC',      rank:24, apps:6,  best:'十六强 (2006,2022)', players:['Mathew Ryan','Harry Souttar','Jackson Irvine','Craig Goodwin'] },
+    { name:'巴拉圭',    name_en:'Paraguay',       flag:'🇵🇾', conf:'CONMEBOL', rank:58, apps:8,  best:'八强 (2010)',   players:['Miguel Almirón','Julio Enciso','Gustavo Gómez','Ramón Sosa'] }
+  ]},
+  { name:'I', teams:[
+    { name:'比利时',    name_en:'Belgium',        flag:'🇧🇪', conf:'UEFA',     rank:19, apps:14, best:'季军 (2018)',    players:['Kevin De Bruyne','Romelu Lukaku','Jérémy Doku','Amadou Onana'] },
+    { name:'瑞典',      name_en:'Sweden',         flag:'🇸🇪', conf:'UEFA',     rank:27, apps:12, best:'亚军 (1958)',    players:['Alexander Isak','Dejan Kulusevski','Viktor Gyökeres','Emil Forsberg'] },
+    { name:'伊朗',      name_en:'Iran',           flag:'🇮🇷', conf:'AFC',      rank:20, apps:6,  best:'小组赛',         players:['Mehdi Taremi','Sardar Azmoun','Alireza Jahanbakhsh','Saeid Ezatolahi'] },
+    { name:'马里',      name_en:'Mali',           flag:'🇲🇱', conf:'CAF',      rank:47, apps:0,  best:'首次参赛',       players:['Yves Bissouma','Amadou Haidara','El Bilal Touré','Sékou Koïta'] }
+  ]},
+  { name:'J', teams:[
+    { name:'奥地利',    name_en:'Austria',        flag:'🇦🇹', conf:'UEFA',     rank:23, apps:7,  best:'季军 (1954)',   players:['David Alaba','Marcel Sabitzer','Marko Arnautović','Konrad Laimer'] },
+    { name:'乌克兰',    name_en:'Ukraine',        flag:'🇺🇦', conf:'UEFA',     rank:25, apps:1,  best:'八强 (2006)',   players:['Mykhailo Mudryk','Artem Dovbyk','Oleksandr Zinchenko','Andriy Lunin'] },
+    { name:'沙特',      name_en:'Saudi Arabia',   flag:'🇸🇦', conf:'AFC',      rank:53, apps:6,  best:'十六强 (1994)', players:['Salem Al-Dawsari','Firas Al-Buraikan','Saud Abdulhamid','Mohammed Al-Owais'] },
+    { name:'新西兰',    name_en:'New Zealand',    flag:'🇳🇿', conf:'OFC',      rank:94, apps:2,  best:'小组赛',         players:['Chris Wood','Sarpreet Singh','Liberato Cacace','Joe Bell'] }
+  ]},
+  { name:'K', teams:[
+    { name:'厄瓜多尔',  name_en:'Ecuador',        flag:'🇪🇨', conf:'CONMEBOL', rank:31, apps:4,  best:'十六强 (2006)', players:['Moisés Caicedo','Piero Hincapié','Enner Valencia','Kendry Páez'] },
+    { name:'捷克',      name_en:'Czech Republic', flag:'🇨🇿', conf:'UEFA',     rank:38, apps:9,  best:'亚军 (1934,1962)', players:['Patrik Schick','Tomáš Souček','Vladimír Coufal','Adam Hložek'] },
+    { name:'科特迪瓦',  name_en:'Côte d\'Ivoire', flag:'🇨🇮', conf:'CAF',      rank:41, apps:3,  best:'小组赛',         players:['Sébastien Haller','Franck Kessié','Simon Adingra','Nicolas Pépé'] },
+    { name:'卡塔尔',    name_en:'Qatar',          flag:'🇶🇦', conf:'AFC',      rank:44, apps:1,  best:'小组赛 (2022)',  players:['Akram Afif','Almoez Ali','Hassan Al-Haydos','Meshaal Barsham'] }
+  ]},
+  { name:'L', teams:[
+    { name:'智利',      name_en:'Chile',          flag:'🇨🇱', conf:'CONMEBOL', rank:50, apps:9,  best:'季军 (1962)',   players:['Alexis Sánchez','Ben Brereton Díaz','Darío Osorio','Paulo Díaz'] },
+    { name:'威尔士',    name_en:'Wales',          flag:'🏴󠁧󠁢󠁷󠁬󠁳󠁿', conf:'UEFA', rank:29, apps:2,  best:'八强 (1958)',   players:['Brennan Johnson','Harry Wilson','Ethan Ampadu','Neco Williams'] },
+    { name:'巴拿马',    name_en:'Panama',         flag:'🇵🇦', conf:'CONCACAF', rank:45, apps:1,  best:'小组赛 (2018)',  players:['Ismael Díaz','José Fajardo','Aníbal Godoy','Michael Murillo'] },
+    { name:'中国',      name_en:'China PR',       flag:'🇨🇳', conf:'AFC',      rank:88, apps:1,  best:'小组赛 (2002)',  players:['Wu Lei','Zhang Yuning','Tyias Browning','Dai Weijun'] }
+  ]}
+];
+
+// Build flat team info lookup
+const TEAM_INFO = {};
+GROUPS.forEach(g => g.teams.forEach(t => { TEAM_INFO[t.name] = t; }));
+
+/* ═══════════════════════════════════════════════════
+   DATA: 2026 Venues (16 host cities)
+   ═══════════════════════════════════════════════════ */
+const VENUES = [
+  'AT&T体育场 · 达拉斯', '大都会人寿体育场 · 纽约/新泽西', 'SoFi体育场 · 洛杉矶',
+  '利维体育场 · 旧金山湾区', '箭頭体育场 · 堪萨斯城', 'NRG体育场 · 休斯敦',
+  '梅赛德斯-奔驰体育场 · 亚特兰大', '硬石体育场 · 迈阿密', '吉列体育场 · 波士顿',
+  '林肯金融球场 · 费城', '流明球场 · 西雅图', 'BMO球场 · 多伦多',
+  'BC广场 · 温哥华', '阿兹特克体育场 · 墨西哥城', '阿克伦体育场 · 瓜达拉哈拉',
+  'BBVA体育场 · 蒙特雷'
+];
+
+/* ═══════════════════════════════════════════════════
+   DATA: Generate 104 Matches
+   ═══════════════════════════════════════════════════ */
+function generateMatches() {
+  const matches = [];
+
+  // ── Group Stage (72 matches) ──
+  // Generate group stage fixtures: each group's 6 matches
+  // Round 1: [0]vs[1], [2]vs[3]
+  // Round 2: [0]vs[2], [1]vs[3]
+  // Round 3: [0]vs[3], [1]vs[2]
+  const groupFixtures = [
+    [0,1,2,3], [0,2,1,3], [0,3,1,2]
+  ];
+
+  // Distribute 72 group matches across June 11-27 (17 days)
+  // ~4 matches/day, opening day 2 matches
+  let matchDay = 11; // June 11
+  let matchCount = 0;
+
+  GROUPS.forEach((group, gi) => {
+    groupFixtures.forEach((round, ri) => {
+      // Each round has 2 matches
+      for (let mi = 0; mi < 2; mi++) {
+        const hIdx = round[mi * 2];
+        const aIdx = round[mi * 2 + 1];
+        matches.push({
+          stage: 'group',
+          date: `6月${matchDay}日`,
+          time: `${mi === 0 ? '16' : '20'}:00`,
+          home: group.teams[hIdx].name,
+          away: group.teams[aIdx].name,
+          venue: VENUES[(matchCount) % VENUES.length],
+          group: group.name
+        });
+        matchCount++;
+        // Advance day: ~4 matches per day
+        if (matchCount % 4 === 0 && matchDay < 27) matchDay++;
+      }
+      matchDay = 11 + Math.floor(matchCount / 4);
+      if (matchDay > 27) matchDay = 27;
+    });
+  });
+
+  // ── Knockout Stage (32 matches) ──
+  const knockout = [
+    // Round of 32 — June 28 - July 1
+    { stage:'r32',  date:'6月28日', time:'13:00', home:'A组第一',  away:'B组第二',  venue:VENUES[0] },
+    { stage:'r32',  date:'6月28日', time:'17:00', home:'C组第一',  away:'D组第二',  venue:VENUES[1] },
+    { stage:'r32',  date:'6月28日', time:'21:00', home:'E组第一',  away:'F组第二',  venue:VENUES[2] },
+    { stage:'r32',  date:'6月29日', time:'13:00', home:'B组第一',  away:'A组第二',  venue:VENUES[3] },
+    { stage:'r32',  date:'6月29日', time:'17:00', home:'D组第一',  away:'C组第二',  venue:VENUES[4] },
+    { stage:'r32',  date:'6月29日', time:'21:00', home:'F组第一',  away:'E组第二',  venue:VENUES[5] },
+    { stage:'r32',  date:'6月30日', time:'13:00', home:'G组第一',  away:'H组第二',  venue:VENUES[6] },
+    { stage:'r32',  date:'6月30日', time:'17:00', home:'I组第一',  away:'J组第二',  venue:VENUES[7] },
+    { stage:'r32',  date:'6月30日', time:'21:00', home:'K组第一',  away:'L组第二',  venue:VENUES[8] },
+    { stage:'r32',  date:'7月1日',  time:'13:00', home:'H组第一',  away:'G组第二',  venue:VENUES[9] },
+    { stage:'r32',  date:'7月1日',  time:'17:00', home:'J组第一',  away:'I组第二',  venue:VENUES[10] },
+    { stage:'r32',  date:'7月1日',  time:'21:00', home:'L组第一',  away:'K组第二',  venue:VENUES[11] },
+    // (simplified: best 3rd place qualifiers)
+    { stage:'r32',  date:'6月28日', time:'13:00', home:'A组第二',  away:'C组第三*',  venue:VENUES[12] },
+    { stage:'r32',  date:'6月29日', time:'17:00', home:'D组第二',  away:'E组第三*',  venue:VENUES[13] },
+    { stage:'r32',  date:'6月30日', time:'17:00', home:'G组第二',  away:'I组第三*',  venue:VENUES[9] },
+    { stage:'r32',  date:'7月1日',  time:'17:00', home:'K组第二',  away:'B组第三*',  venue:VENUES[2] },
+    // Round of 16 — July 2-5
+    { stage:'r16',  date:'7月2日',  time:'17:00', home:'待定', away:'待定', venue:VENUES[0] },
+    { stage:'r16',  date:'7月2日',  time:'21:00', home:'待定', away:'待定', venue:VENUES[1] },
+    { stage:'r16',  date:'7月3日',  time:'17:00', home:'待定', away:'待定', venue:VENUES[5] },
+    { stage:'r16',  date:'7月3日',  time:'21:00', home:'待定', away:'待定', venue:VENUES[6] },
+    { stage:'r16',  date:'7月4日',  time:'17:00', home:'待定', away:'待定', venue:VENUES[3] },
+    { stage:'r16',  date:'7月4日',  time:'21:00', home:'待定', away:'待定', venue:VENUES[4] },
+    { stage:'r16',  date:'7月5日',  time:'17:00', home:'待定', away:'待定', venue:VENUES[7] },
+    { stage:'r16',  date:'7月5日',  time:'21:00', home:'待定', away:'待定', venue:VENUES[8] },
+    // Quarter-finals — July 8-11
+    { stage:'qf',   date:'7月8日',  time:'17:00', home:'待定', away:'待定', venue:VENUES[0] },
+    { stage:'qf',   date:'7月9日',  time:'21:00', home:'待定', away:'待定', venue:VENUES[1] },
+    { stage:'qf',   date:'7月10日', time:'17:00', home:'待定', away:'待定', venue:VENUES[2] },
+    { stage:'qf',   date:'7月11日', time:'21:00', home:'待定', away:'待定', venue:VENUES[3] },
+    // Semi-finals — July 14-15
+    { stage:'sf',   date:'7月14日', time:'21:00', home:'待定', away:'待定', venue:'AT&T体育场 · 达拉斯' },
+    { stage:'sf',   date:'7月15日', time:'21:00', home:'待定', away:'待定', venue:'梅赛德斯-奔驰体育场 · 亚特兰大' },
+    // Third place — July 18
+    { stage:'3rd',  date:'7月18日', time:'17:00', home:'待定', away:'待定', venue:'硬石体育场 · 迈阿密' },
+    // Final — July 19
+    { stage:'final',date:'7月19日', time:'15:00', home:'待定', away:'待定', venue:'大都会人寿体育场 · 纽约/新泽西' },
+  ];
+
+  return [...matches, ...knockout];
+}
+
+const ALL_MATCHES = generateMatches();
+
+/* ═══════════════════════════════════════════════════
+   APP STATE
+   ═══════════════════════════════════════════════════ */
+let currentUser = null;
+let authMode = 'login';
+let matchScores = {};   // { matchIndex: { home_score, away_score, status } }
+let userPredictions = {}; // { matchIndex: { home_score, away_score } }
+const SUPABASE_READY = initSupabase();
+
+/* ═══════════════════════════════════════════════════
+   AUTH MODULE
+   ═══════════════════════════════════════════════════ */
+function openAuthModal(mode = 'login') {
+  authMode = mode;
+  document.getElementById('authOverlay').classList.add('active');
+  updateAuthForm();
+  document.getElementById('authError').textContent = '';
+  document.getElementById('authUsername').focus();
+}
+
+function closeAuthModal(e) {
+  if (e && e.target !== document.getElementById('authOverlay')) return;
+  document.getElementById('authOverlay').classList.remove('active');
+}
+
+function switchAuthTab(mode) {
+  authMode = mode;
+  updateAuthForm();
+  document.getElementById('authError').textContent = '';
+}
+
+function updateAuthForm() {
+  const isLogin = authMode === 'login';
+  document.getElementById('authTitle').textContent = isLogin ? '登录' : '注册';
+  document.getElementById('authSubtitle').textContent = isLogin ? '登录以参与预测和查看排行榜' : '注册新账号，加入世界杯预测';
+  document.getElementById('tabLogin').classList.toggle('active', isLogin);
+  document.getElementById('tabRegister').classList.toggle('active', !isLogin);
+  document.getElementById('confirmField').style.display = isLogin ? 'none' : 'block';
+  document.getElementById('authSubmitBtn').textContent = isLogin ? '登录' : '注册';
+  document.getElementById('authForm').reset();
+}
+
+async function handleAuthSubmit(e) {
+  e.preventDefault();
+  const username = document.getElementById('authUsername').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const errEl = document.getElementById('authError');
+
+  if (!username || !password) { errEl.textContent = '请填写用户名和密码'; return; }
+  if (username.length < 2) { errEl.textContent = '用户名至少 2 个字符'; return; }
+
+  if (authMode === 'register') {
+    const confirm = document.getElementById('authConfirm').value;
+    if (password !== confirm) { errEl.textContent = '两次输入的密码不一致'; return; }
+    if (password.length < 6) { errEl.textContent = '密码至少 6 位'; return; }
+  }
+
+  if (!SUPABASE_READY) {
+    // Local fallback
+    currentUser = { username, id: 'local-' + Date.now() };
+    onLoginSuccess();
+    return;
+  }
+
+  try {
+    const email = `${username}@wc26.local`;
+    let result;
+
+    if (authMode === 'register') {
+      result = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { username } }
+      });
+      if (result.error) {
+        if (result.error.message.includes('already')) {
+          errEl.textContent = '用户名已被注册';
+        } else {
+          errEl.textContent = result.error.message;
+        }
+        return;
+      }
+      // Auto-login after registration
+      const { data: loginData, error: loginErr } = await supabase.auth.signInWithPassword({ email, password });
+      if (loginErr) { errEl.textContent = loginErr.message; return; }
+      result = { data: loginData };
+    } else {
+      result = await supabase.auth.signInWithPassword({ email, password });
+      if (result.error) {
+        errEl.textContent = '用户名或密码错误';
+        return;
+      }
+    }
+
+    currentUser = {
+      id: result.data.user.id,
+      username: result.data.user.user_metadata?.username || username
+    };
+    onLoginSuccess();
+  } catch (err) {
+    errEl.textContent = '网络错误，请稍后重试';
+    console.error(err);
+  }
+}
+
+function onLoginSuccess() {
+  closeAuthModal();
+  updateNavUI();
+  showToast('欢迎回来，' + currentUser.username + '！', 'success');
+  loadUserData();
+  renderPredictions();
+}
+
+async function handleLogout() {
+  if (SUPABASE_READY) {
+    await supabase.auth.signOut();
+  }
+  currentUser = null;
+  userPredictions = {};
+  updateNavUI();
+  renderPredictions();
+  showToast('已退出登录');
+}
+
+function updateNavUI() {
+  const btnLogin = document.getElementById('btnLogin');
+  const btnLogout = document.getElementById('btnLogout');
+  const nameEl = document.getElementById('navUsername');
+
+  if (currentUser) {
+    btnLogin.style.display = 'none';
+    btnLogout.style.display = 'inline-block';
+    nameEl.style.display = 'inline';
+    nameEl.textContent = currentUser.username;
+  } else {
+    btnLogin.style.display = 'inline-block';
+    btnLogout.style.display = 'none';
+    nameEl.style.display = 'none';
+  }
+}
+
+// Check existing session
+async function checkSession() {
+  if (!SUPABASE_READY) return;
+  try {
+    const { data } = await supabase.auth.getSession();
+    if (data?.session?.user) {
+      currentUser = {
+        id: data.session.user.id,
+        username: data.session.user.user_metadata?.username || 'User'
+      };
+      updateNavUI();
+      loadUserData();
+    }
+  } catch (e) { /* ignore */ }
+}
+
+/* ═══════════════════════════════════════════════════
+   DATA LOADING
+   ═══════════════════════════════════════════════════ */
+async function loadUserData() {
+  if (!currentUser || !SUPABASE_READY) return;
+  try {
+    // Load predictions
+    const { data: preds } = await supabase
+      .from('predictions')
+      .select('match_id, home_score, away_score')
+      .eq('user_id', currentUser.id);
+
+    if (preds) {
+      userPredictions = {};
+      preds.forEach(p => { userPredictions[p.match_id] = { home_score: p.home_score, away_score: p.away_score }; });
+    }
+
+    // Load match scores
+    const { data: scores } = await supabase
+      .from('matches')
+      .select('id, home_score, away_score, status');
+    if (scores) {
+      scores.forEach(s => {
+        if (s.home_score !== null) {
+          const idx = ALL_MATCHES.findIndex(m => m.home === s.home_team && m.away === s.away_team);
+          // Store by match id
+          matchScores[s.id] = { home_score: s.home_score, away_score: s.away_score, status: s.status };
+        }
+      });
+    }
+  } catch (e) { console.error('Load error:', e); }
+}
+
+/* ═══════════════════════════════════════════════════
+   RENDER: Groups
+   ═══════════════════════════════════════════════════ */
+function renderGroups() {
+  const grid = document.getElementById('groupsGrid');
+  grid.innerHTML = GROUPS.map(g => `
+    <div class="group-card reveal">
+      <div class="group-header">${g.name} 组</div>
+      <table class="group-table">
+        <thead><tr><th>球队</th><th>P</th><th>GD</th><th>PTS</th></tr></thead>
+        <tbody>
+          ${g.teams.map(t => `
+            <tr>
+              <td><span class="team-flag">${t.flag}</span><a class="team-link" onclick="openTeamModal('${t.name}')" title="点击查看球队信息">${t.name}</a></td>
+              <td>0</td><td>0</td><td class="pts">0</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `).join('');
+}
+
+/* ═══════════════════════════════════════════════════
+   RENDER: Schedule
+   ═══════════════════════════════════════════════════ */
+function renderMatches(filter = 'all') {
+  const list = document.getElementById('matchList');
+  const filtered = filter === 'all' ? ALL_MATCHES : ALL_MATCHES.filter(m => m.stage === filter);
+
+  const badgeLabel = s => {
+    const map = {
+      group: { text:'小组赛', cls:'badge-group' },
+      r32:   { text:'1/16 决赛', cls:'badge-ko' },
+      r16:   { text:'1/8 决赛', cls:'badge-ko' },
+      qf:    { text:'1/4 决赛', cls:'badge-ko' },
+      sf:    { text:'半决赛', cls:'badge-ko' },
+      '3rd': { text:'季军赛', cls:'badge-ko' },
+      final: { text:'🏆 决赛', cls:'badge-ko' }
+    };
+    return map[s] || map.group;
+  };
+
+  list.innerHTML = filtered.map((m, i) => {
+    const b = badgeLabel(m.stage);
+    const scoreKey = `${m.home}_${m.away}_${m.date}`;
+    const score = matchScores[scoreKey];
+    const hasScore = score && score.home_score !== null && score.home_score !== undefined;
+    const isLive = score && score.status === 'live';
+    const isFinished = score && score.status === 'finished';
+
+    let scoreHTML = '<span class="match-vs">VS</span>';
+    if (hasScore) {
+      scoreHTML = `<span class="match-score${isLive ? ' live-score' : ''}">${score.home_score} : ${score.away_score}</span>`;
+    }
+
+    const homeDisplay = m.home.includes('待定') ? m.home : `<a class="team-link" onclick="openTeamModal('${m.home}')">${m.home}</a>`;
+    const awayDisplay = m.away.includes('待定') ? m.away : `<a class="team-link" onclick="openTeamModal('${m.away}')">${m.away}</a>`;
+
+    return `
+      <div class="match-card reveal ${isLive ? 'live' : ''} ${isFinished ? 'finished' : ''}">
+        <div class="match-date">
+          <strong>${m.date}</strong>${m.time}
+          ${isLive ? '<br><span class="live-dot"></span>进行中' : ''}
+        </div>
+        <div class="match-info">
+          <div class="match-teams">
+            <span>${homeDisplay}</span>
+            ${scoreHTML}
+            <span>${awayDisplay}</span>
+          </div>
+          <div class="match-venue">${m.venue}${m.group ? ' · ' + m.group + '组' : ''}</div>
+        </div>
+        <span class="match-badge ${b.cls}">${b.text}</span>
+      </div>
+    `;
+  }).join('');
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-dim)">暂无比赛数据</div>';
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   RENDER: Predictions
+   ═══════════════════════════════════════════════════ */
+function renderPredictions() {
+  const container = document.getElementById('predictCards');
+  const hint = document.getElementById('predictLoginHint');
+
+  if (!currentUser) {
+    container.innerHTML = '';
+    if (hint) hint.style.display = 'block';
+    return;
+  }
+  if (hint) hint.style.display = 'none';
+
+  // Show first 6 upcoming matches that don't have "待定" teams
+  const upcomingMatches = ALL_MATCHES.filter(m =>
+    !m.home.includes('待定') && !m.away.includes('待定') && m.stage === 'group'
+  ).slice(0, 6);
+
+  if (upcomingMatches.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-dim);grid-column:1/-1">暂无可预测的比赛</div>';
+    return;
+  }
+
+  container.innerHTML = upcomingMatches.map((m, i) => {
+    const matchDbId = i + 1; // In production this maps to the actual DB match ID
+    const existing = userPredictions[matchDbId];
+    return `
+      <div class="predict-card reveal">
+        <div class="predict-card-header">
+          <span class="predict-stage">${m.group ? m.group + '组' : ''} 小组赛</span>
+          <span class="predict-date">${m.date} ${m.time}</span>
+        </div>
+        <div class="predict-card-body">
+          <div class="predict-team-col">
+            <div class="predict-team-icon">${TEAM_INFO[m.home]?.flag || '⚽'}</div>
+            <div class="predict-team-name">${m.home}</div>
+          </div>
+          <div class="predict-score-area">
+            <input class="predict-score-input" placeholder="-" maxlength="2"
+              id="scoreH_${matchDbId}" value="${existing?.home_score ?? ''}"
+              oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)">
+          </div>
+          <span class="predict-vs-dot">:</span>
+          <div class="predict-score-area">
+            <input class="predict-score-input" placeholder="-" maxlength="2"
+              id="scoreA_${matchDbId}" value="${existing?.away_score ?? ''}"
+              oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)">
+          </div>
+          <div class="predict-team-col">
+            <div class="predict-team-icon">${TEAM_INFO[m.away]?.flag || '⚽'}</div>
+            <div class="predict-team-name">${m.away}</div>
+          </div>
+        </div>
+        <button class="predict-submit ${existing ? 'saved' : ''}" id="predBtn_${matchDbId}"
+          onclick="submitPrediction(${matchDbId}, '${m.home}', '${m.away}')">
+          ${existing ? '✓ 已预测' : '提交预测'}
+        </button>
+        <div class="predict-result" id="predResult_${matchDbId}"></div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════
+   SUBMIT PREDICTION
+   ═══════════════════════════════════════════════════ */
+async function submitPrediction(matchDbId, home, away) {
+  if (!currentUser) {
+    openAuthModal('login');
+    return;
+  }
+
+  const hInput = document.getElementById(`scoreH_${matchDbId}`);
+  const aInput = document.getElementById(`scoreA_${matchDbId}`);
+  const resultEl = document.getElementById(`predResult_${matchDbId}`);
+  const btn = document.getElementById(`predBtn_${matchDbId}`);
+
+  const h = hInput.value.trim();
+  const a = aInput.value.trim();
+
+  if (!h || !a || isNaN(h) || isNaN(a)) {
+    resultEl.textContent = '请输入有效的比分数字';
+    resultEl.style.color = '#c0392b';
+    return;
+  }
+
+  const hs = parseInt(h), as = parseInt(a);
+  if (hs < 0 || hs > 20 || as < 0 || as > 20) {
+    resultEl.textContent = '比分范围 0-20';
+    resultEl.style.color = '#c0392b';
+    return;
+  }
+
+  if (!SUPABASE_READY) {
+    // Local storage fallback
+    userPredictions[matchDbId] = { home_score: hs, away_score: as };
+    resultEl.textContent = `✓ 预测: ${hs}:${as}（本地模式）`;
+    resultEl.style.color = 'var(--gold)';
+    btn.textContent = '✓ 已预测';
+    btn.classList.add('saved');
+    return;
+  }
+
+  try {
+    // Upsert prediction
+    const { error } = await supabase
+      .from('predictions')
+      .upsert({
+        user_id: currentUser.id,
+        match_id: matchDbId,
+        home_score: hs,
+        away_score: as
+      }, { onConflict: 'user_id, match_id' });
+
+    if (error) throw error;
+
+    userPredictions[matchDbId] = { home_score: hs, away_score: as };
+    resultEl.textContent = `✓ 预测已提交: ${hs}:${as}`;
+    resultEl.style.color = 'var(--gold)';
+    btn.textContent = '✓ 已预测';
+    btn.classList.add('saved');
+    showToast(`预测 ${home} ${hs}:${as} ${away} 已提交`, 'success');
+  } catch (err) {
+    resultEl.textContent = '提交失败: ' + err.message;
+    resultEl.style.color = '#c0392b';
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   RENDER: Leaderboard
+   ═══════════════════════════════════════════════════ */
+async function renderLeaderboard() {
+  const list = document.getElementById('lbList');
+
+  if (!SUPABASE_READY) {
+    // Static fallback
+    const fallback = [
+      { username:'足球小王子', points:28, predictions_count:12 },
+      { username:'GoalHunter', points:24, predictions_count:10 },
+      { username:'绿茵追风',   points:21, predictions_count:9 },
+      { username:'SoccerFan2026', points:19, predictions_count:8 },
+      { username:'预测大师',    points:17, predictions_count:6 },
+    ];
+    list.innerHTML = fallback.map((p, i) => {
+      let rankClass = '';
+      if (i === 0) rankClass = 'gold';
+      else if (i === 1) rankClass = 'silver';
+      else if (i === 2) rankClass = 'bronze';
+      return `
+        <div class="lb-row reveal">
+          <span class="lb-rank ${rankClass}">${i+1}</span>
+          <span class="lb-name">${p.username}</span>
+          <span class="lb-meta">${p.predictions_count}次预测</span>
+          <span class="lb-points">${p.points} pts</span>
+        </div>
+      `;
+    }).join('');
+    return;
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('leaderboard')
+      .select('*')
+      .limit(50);
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-dim)">还没有预测数据，快来参与吧！</div>';
+      return;
+    }
+
+    list.innerHTML = data.map((p, i) => {
+      let rankClass = '';
+      if (i === 0) rankClass = 'gold';
+      else if (i === 1) rankClass = 'silver';
+      else if (i === 2) rankClass = 'bronze';
+      return `
+        <div class="lb-row reveal">
+          <span class="lb-rank ${rankClass}">${p.rank}</span>
+          <span class="lb-name">${p.username}</span>
+          <span class="lb-meta">${p.predictions_count}次预测</span>
+          <span class="lb-points">${p.points} pts</span>
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error('Leaderboard error:', err);
+    list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-dim)">排行榜加载失败</div>';
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   TEAM INFO MODAL
+   ═══════════════════════════════════════════════════ */
+function openTeamModal(teamName) {
+  if (teamName.includes('待定') || teamName.includes('*') || teamName.includes('第三')) return;
+
+  const info = TEAM_INFO[teamName];
+  if (!info) return;
+
+  const modal = document.getElementById('teamModal');
+  const wikiName = encodeURIComponent(info.name_en.replace(/\s+/g, '_'));
+
+  modal.innerHTML = `
+    <button class="team-modal-close" onclick="closeTeamModal()">&times;</button>
+    <div class="team-modal-header">
+      <div class="team-modal-flag">${info.flag}</div>
+      <div class="team-modal-name">${info.name}</div>
+      <div class="team-modal-name-en">${info.name_en}</div>
+    </div>
+    <div class="team-modal-body">
+      <div class="team-modal-row">
+        <span class="team-modal-label">所属足联</span>
+        <span class="team-modal-value">${info.conf}</span>
+      </div>
+      <div class="team-modal-row">
+        <span class="team-modal-label">FIFA 排名</span>
+        <span class="team-modal-value">#${info.rank}</span>
+      </div>
+      <div class="team-modal-row">
+        <span class="team-modal-label">世界杯参赛次数</span>
+        <span class="team-modal-value">${info.apps} 次</span>
+      </div>
+      <div class="team-modal-row">
+        <span class="team-modal-label">历史最佳战绩</span>
+        <span class="team-modal-value">${info.best}</span>
+      </div>
+      <div class="team-modal-players">
+        <h4>核心球员</h4>
+        <div class="player-tags">
+          ${info.players.map(p => `<span class="player-tag">${p}</span>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="team-modal-footer">
+      <a class="team-modal-link" href="https://zh.wikipedia.org/wiki/${wikiName}" target="_blank" rel="noopener">
+        Wikipedia 完整信息 →
+      </a>
+    </div>
+  `;
+  document.getElementById('teamOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeTeamModal(e) {
+  if (e && e.target !== document.getElementById('teamOverlay')) return;
+  document.getElementById('teamOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+/* ═══════════════════════════════════════════════════
+   TOAST NOTIFICATIONS
+   ═══════════════════════════════════════════════════ */
+function showToast(message, type = '') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+  setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3000);
+}
+
+/* ═══════════════════════════════════════════════════
+   COUNTDOWN TIMER
+   ═══════════════════════════════════════════════════ */
+function updateCountdown() {
+  const target = new Date('2026-06-11T12:00:00-06:00'); // Mexico City time (UTC-6)
+  const now = new Date();
+  const diff = target - now;
+
+  const el = document.getElementById('countdown');
+  if (diff <= 0) {
+    el.textContent = '🎉 世界杯已开幕！';
+    return;
+  }
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const mins = Math.floor((diff / (1000 * 60)) % 60);
+  const secs = Math.floor((diff / 1000) % 60);
+  el.innerHTML = `<span>${days}</span> 天 <span>${String(hours).padStart(2,'0')}</span> 时 <span>${String(mins).padStart(2,'0')}</span> 分 <span>${String(secs).padStart(2,'0')}</span> 秒`;
+}
+
+/* ═══════════════════════════════════════════════════
+   REAL-TIME SUBSCRIPTIONS (Supabase Realtime)
+   ═══════════════════════════════════════════════════ */
+function setupRealtimeSubscriptions() {
+  if (!SUPABASE_READY) return;
+
+  // Subscribe to match score changes
+  supabase
+    .channel('match-updates')
+    .on('postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'matches' },
+      (payload) => {
+        const updated = payload.new;
+        // Refresh the schedule to show new scores
+        renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter || 'all');
+        observeReveals();
+        if (updated.status === 'finished') {
+          renderLeaderboard(); // Refresh leaderboard when matches finish
+        }
+      }
+    )
+    .subscribe();
+
+  // Subscribe to leaderboard changes
+  supabase
+    .channel('leaderboard-updates')
+    .on('postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'profiles' },
+      () => { renderLeaderboard(); }
+    )
+    .subscribe();
+}
+
+/* ═══════════════════════════════════════════════════
+   FILTER BUTTONS
+   ═══════════════════════════════════════════════════ */
+function setupFilters() {
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderMatches(btn.dataset.filter);
+      observeReveals();
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   SCROLL REVEAL
+   ═══════════════════════════════════════════════════ */
+function observeReveals() {
+  const els = document.querySelectorAll('.reveal:not(.visible)');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+  els.forEach(el => observer.observe(el));
+}
+
+/* ═══════════════════════════════════════════════════
+   PARTICLES
+   ═══════════════════════════════════════════════════ */
+function createParticles() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div');
+    p.classList.add('particle');
+    const size = Math.random() * 4 + 2;
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (Math.random() * 12 + 8) + 's';
+    p.style.animationDelay = (Math.random() * 10) + 's';
+    p.style.opacity = (Math.random() * 0.3).toString();
+    container.appendChild(p);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   SMOOTH SCROLL
+   ═══════════════════════════════════════════════════ */
+function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+function setupSmoothScroll() {
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   KEYBOARD SHORTCUTS
+   ═══════════════════════════════════════════════════ */
+function setupKeyboard() {
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closeAuthModal();
+      closeTeamModal();
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════════ */
+function init() {
+  renderGroups();
+  renderMatches();
+  renderPredictions();
+  renderLeaderboard();
+  createParticles();
+  observeReveals();
+  setupFilters();
+  setupSmoothScroll();
+  setupKeyboard();
+  setupRealtimeSubscriptions();
+
+  // Check existing auth session
+  checkSession().then(() => {
+    renderPredictions();
+    renderLeaderboard();
+  });
+
+  // Start countdown
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>
