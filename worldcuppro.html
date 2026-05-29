@@ -608,7 +608,7 @@ function renderMatches(filter='all'){
   const days={};filtered.forEach(m=>{if(!days[m.date])days[m.date]=[];days[m.date].push(m);});
   const todayKey=findTodayKey();
   list.innerHTML=Object.entries(days).map(([date,matches])=>{
-    const isToday=date===todayKey;
+    const isToday=todayKey&&date===todayKey;
     const dayId='day-'+date.replace(/[月日]/g,'-');
     return `<div class="schedule-day reveal"><div class="day-header" onclick="toggleDay('${dayId}')"><span class="day-header-text">📅 ${date} ${isToday?'<span style="color:var(--gold);font-size:12px;">(今天)</span>':''}</span><span class="day-header-meta">${matches.length}场比赛</span><span class="day-arrow" id="arrow-${dayId}">▼</span></div><div class="day-matches ${isToday?'open':''}" id="${dayId}">${matches.map(m=>renderMatchCard(m,badgeLabel)).join('')}</div></div>`;
   }).join('');
@@ -624,18 +624,11 @@ function renderMatchCard(m,badgeLabel){
   const watchHTML=m.stage!=='3rd'?`<a class="watch-link" href="https://www.fifa.com/en/watch" target="_blank" rel="noopener">📺 观赛</a>`:'';
   return `<div class="match-card reveal ${isLive?'live':''}"><div class="match-date"><strong>${m.date}</strong>${m.time} ET</div><div class="match-info"><div class="match-teams"><span>${homeDisplay}</span>${scoreHTML}<span>${awayDisplay}</span></div><div class="match-venue">${m.venue}${m.group?' · '+m.group+'组':''}</div></div><div class="match-actions"><span class="match-badge ${b.cls}">${b.text}</span>${watchHTML}</div></div>`;
 }
-function findTodayKey(){
-  const now=new Date();const m=now.getMonth()+1,d=now.getDate();const test=`${m}月${d}日`;
-  return ALL_MATCHES.find(m=>m.date===test)?test:ALL_MATCHES[0]?.date||'6月11日';
-}
+function findTodayKey(){const now=new Date();const m=now.getMonth()+1,d=now.getDate();const test=m+'月'+d+'日';return ALL_MATCHES.find(m=>m.date===test)?test:null;}
 function toggleDay(dayId){document.getElementById(dayId).classList.toggle('open');const a=document.getElementById('arrow-'+dayId);if(a)a.classList.toggle('open');}
 function expandAll(){document.querySelectorAll('.day-matches').forEach(d=>d.classList.add('open'));document.querySelectorAll('.day-arrow').forEach(a=>a.classList.add('open'));}
 function collapseAll(){document.querySelectorAll('.day-matches').forEach(d=>d.classList.remove('open'));document.querySelectorAll('.day-arrow').forEach(a=>a.classList.remove('open'));}
-function scrollToToday(){
-  collapseAll();
-  const todayKey=findTodayKey();const dayId='day-'+todayKey.replace(/[月日]/g,'-');
-  const el=document.getElementById(dayId);if(el){el.classList.add('open');const a=document.getElementById('arrow-'+dayId);if(a)a.classList.add('open');el.scrollIntoView({behavior:'smooth',block:'center'});}
-}
+function scrollToToday(){collapseAll();const todayKey=findTodayKey();if(!todayKey){showToast('今天没有比赛，已显示首日赛程');expandAll();return;}const dayId='day-'+todayKey.replace(/[月日]/g,'-');const el=document.getElementById(dayId);if(el){el.classList.add('open');const a=document.getElementById('arrow-'+dayId);if(a)a.classList.add('open');el.scrollIntoView({behavior:'smooth',block:'center'});}}
 
 /* ═══ FILTERS ═══ */
 function setupFilters(){
