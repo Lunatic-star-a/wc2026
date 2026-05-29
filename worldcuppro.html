@@ -526,9 +526,8 @@ const ALL_MATCHES=RAW_MATCHES.map(formatMatch);
    ════════════════════════════════════════════════════ */
 let currentUser=null,authMode='login',matchScores={},userPredictions={};
 
-function isTodayMatch(m){
-  const now=new Date();const mDate=new Date(2026,m.date.split('月')[0]-1,parseInt(m.date.split('月')[1]));
-  return mDate.toDateString()===now.toDateString();
+function getSimDate(){const p=new URLSearchParams(location.search);const d=p.get('date');if(d){const parts=d.split('.');if(parts.length===2)return new Date(2026,parseInt(parts[0])-1,parseInt(parts[1]));}return new Date();}
+function isTodayMatch(m){const now=getSimDate();const mDate=new Date(2026,m.date.split('月')[0]-1,parseInt(m.date.split('月')[1]));return mDate.toDateString()===now.toDateString();
 }
 
 /* ═══ AUTH ═══ */
@@ -624,7 +623,7 @@ function renderMatchCard(m,badgeLabel){
   const watchHTML=m.stage!=='3rd'?`<a class="watch-link" href="https://www.fifa.com/en/watch" target="_blank" rel="noopener">📺 观赛</a>`:'';
   return `<div class="match-card reveal ${isLive?'live':''}"><div class="match-date"><strong>${m.date}</strong>${m.time} ET</div><div class="match-info"><div class="match-teams"><span>${homeDisplay}</span>${scoreHTML}<span>${awayDisplay}</span></div><div class="match-venue">${m.venue}${m.group?' · '+m.group+'组':''}</div></div><div class="match-actions"><span class="match-badge ${b.cls}">${b.text}</span>${watchHTML}</div></div>`;
 }
-function findTodayKey(){const now=new Date();const m=now.getMonth()+1,d=now.getDate();const test=m+'月'+d+'日';return ALL_MATCHES.find(m=>m.date===test)?test:null;}
+function findTodayKey(){const now=getSimDate();const m=now.getMonth()+1,d=now.getDate();const test=m+'月'+d+'日';return ALL_MATCHES.find(m=>m.date===test)?test:null;}
 function toggleDay(dayId){document.getElementById(dayId).classList.toggle('open');const a=document.getElementById('arrow-'+dayId);if(a)a.classList.toggle('open');}
 function expandAll(){document.querySelectorAll('.day-matches').forEach(d=>d.classList.add('open'));document.querySelectorAll('.day-arrow').forEach(a=>a.classList.add('open'));}
 function collapseAll(){document.querySelectorAll('.day-matches').forEach(d=>d.classList.remove('open'));document.querySelectorAll('.day-arrow').forEach(a=>a.classList.remove('open'));}
@@ -718,7 +717,7 @@ function closeTeamModal(e){if(e&&e.target!==document.getElementById('teamOverlay
 function showToast(message,type=''){const c=document.getElementById('toastContainer');const t=document.createElement('div');t.className='toast '+type;t.textContent=message;c.appendChild(t);setTimeout(()=>{if(t.parentNode)t.remove();},3000);}
 
 /* ═══ COUNTDOWN ═══ */
-function updateCountdown(){const target=new Date('2026-06-11T15:00:00-04:00');const now=new Date();const diff=target-now;const el=document.getElementById('countdown');if(diff<=0){el.textContent='🎉 世界杯已开幕！';return;}const days=Math.floor(diff/(86400000));const hours=Math.floor((diff/3600000)%24);const mins=Math.floor((diff/60000)%60);const secs=Math.floor((diff/1000)%60);el.innerHTML='<span>'+days+'</span> 天 <span>'+String(hours).padStart(2,'0')+'</span> 时 <span>'+String(mins).padStart(2,'0')+'</span> 分 <span>'+String(secs).padStart(2,'0')+'</span> 秒';}
+function updateCountdown(){const target=new Date('2026-06-11T15:00:00-04:00');const now=getSimDate();const diff=target-now;const el=document.getElementById('countdown');if(diff<=0){el.textContent='🎉 世界杯已开幕！';return;}const days=Math.floor(diff/(86400000));const hours=Math.floor((diff/3600000)%24);const mins=Math.floor((diff/60000)%60);const secs=Math.floor((diff/1000)%60);el.innerHTML='<span>'+days+'</span> 天 <span>'+String(hours).padStart(2,'0')+'</span> 时 <span>'+String(mins).padStart(2,'0')+'</span> 分 <span>'+String(secs).padStart(2,'0')+'</span> 秒';}
 
 /* ═══ REALTIME ═══ */
 function setupRealtimeSubscriptions(){
