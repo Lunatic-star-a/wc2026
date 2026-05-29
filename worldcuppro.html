@@ -645,8 +645,9 @@ function setupFilters(){
 /* ═══ RENDER: Predictions (today's matches) ═══ */
 function renderPredictions(){
   const container=document.getElementById('predictCards');
-  if(!currentUser){container.innerHTML='';document.getElementById('predictLoginHint').style.display='block';return;}
-  document.getElementById('predictLoginHint').style.display='none';
+  const hintHTML='<div style="text-align:center;padding:40px;color:var(--text-dim);grid-column:1/-1">请先<a href="#" onclick="openAuthModal();return false" style="color:var(--gold)">登录</a>以参与预测</div>';
+  if(!currentUser){container.innerHTML=hintHTML;return;}
+  container.innerHTML='';
   // Show today's matches + next upcoming
   let upcoming=ALL_MATCHES.filter(m=>m.stage==='group'&&!m.home.includes('胜者')&&!m.home.includes('第一')&&!m.home.includes('第二')&&!m.home.includes('第三'));
   const todayKey=findTodayKey();
