@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 <title>FIFA World Cup 2026 — 世界杯预测 · 赛程 · 观赛</title>
+<script>if(location.protocol==='http:'&&!location.hostname.includes('localhost')&&!location.hostname.includes('127.0.0.1')){location.protocol='https:'}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -103,6 +105,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 .pred-inline-vs{font-size:10px;color:var(--text-dim)}
 .pred-inline-btn{font-size:10px;padding:3px 8px;border-radius:5px;border:1px solid var(--pitch);background:rgba(13,140,60,0.2);color:var(--pitch-bright);cursor:pointer;font-family:var(--font-mono);transition:all 0.2s;white-space:nowrap}
 .pred-inline-btn:hover{background:var(--pitch);color:#fff}
+@keyframes predSuccess{0%{transform:scale(1)}50%{transform:scale(1.2);background:var(--gold);color:#000}100%{transform:scale(1);background:var(--pitch);color:#fff}}
+.pred-inline-btn.saved{animation:predSuccess 0.5s ease;background:var(--pitch);color:#fff;border-color:var(--pitch)}
+.pred-saved-flash{animation:goalFlash 0.6s ease 3}
+@keyframes goalFlash{0%,100%{box-shadow:0 0 0 0 rgba(13,140,60,0.4)}50%{box-shadow:0 0 0 8px rgba(13,140,60,0)}}
 .watch-link{font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:var(--pitch-bright);text-decoration:none;padding:3px 10px;border:1px solid rgba(13,140,60,0.3);border-radius:100px;transition:all 0.2s;text-transform:uppercase;white-space:nowrap;}
 .watch-link:hover{background:rgba(13,140,60,0.2);}
 .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#e74c3c;margin-right:4px;animation:livePulse 1s ease-in-out infinite;}
@@ -229,11 +235,39 @@ footer strong{color:var(--gold);}
 /* Skeleton loading */
 .skeleton{background:linear-gradient(90deg,rgba(255,255,255,0.03) 0%,rgba(255,255,255,0.06) 50%,rgba(255,255,255,0.03) 100%);background-size:200% 100%;animation:shimmer 1.5s ease-in-out infinite;border-radius:4px;}
 @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+@keyframes pageEnter{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+@keyframes heroGlow{0%,100%{opacity:0.5}50%{opacity:0.85}}
+body.loaded .hero{animation:pageEnter 0.8s ease}
+body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
+@keyframes bounceIn{0%{transform:scale(0)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
+.toast{animation:bounceIn 0.4s ease,slideOutRight 0.3s ease 2.7s forwards}
+.match-card{transition:transform 0.2s ease,box-shadow 0.2s ease,border-color 0.2s ease}
+.match-card:hover{transform:translateX(4px)}
+.pred-inline-btn:active,.expand-btn:active,.filter-btn:active{transform:scale(0.95)}
 .mobile-menu{display:none;position:fixed;top:60px;left:0;right:0;background:rgba(10,14,23,0.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.06);padding:16px 24px;flex-direction:column;gap:12px;z-index:99;}
 .mobile-menu.open{display:flex;}
 .mobile-menu a{color:var(--text);text-decoration:none;font-size:16px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);text-transform:uppercase;letter-spacing:1px;}
+/* Bracket */
+.bracket-tree{display:flex;gap:4px;min-width:900px;justify-content:center;padding:20px 0;align-items:stretch}
+.bracket-round{display:flex;flex-direction:column;justify-content:space-around;gap:2px;min-width:150px;flex-shrink:0}
+.bracket-round-label{font-family:var(--font-mono);font-size:10px;color:var(--text-dim);text-align:center;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;padding:4px 0}
+.bracket-match{background:var(--card);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:8px 10px;min-width:135px;transition:all 0.25s;flex-shrink:0}
+.bracket-match:hover{border-color:rgba(212,168,67,0.3);box-shadow:0 4px 16px rgba(0,0,0,0.3)}
+.bracket-slot{display:flex;align-items:center;gap:4px;padding:3px 0}
+.bracket-slot input.team-input{flex:1;min-width:0;padding:4px 6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:4px;color:#fff;font-size:11px;font-family:var(--font-body);outline:none;transition:all 0.2s}
+.bracket-slot input.team-input:focus{border-color:var(--pitch);box-shadow:0 0 0 2px var(--glow-green)}
+.bracket-slot .slot-score{width:22px;height:22px;text-align:center;font-family:var(--font-mono);font-size:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:4px;color:#fff;outline:none}
+.bracket-slot .slot-score:focus{border-color:var(--pitch)}
+.bracket-connector{width:24px;display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:18px;flex-shrink:0}
+.bracket-final .bracket-match{border-color:rgba(212,168,67,0.3);background:linear-gradient(135deg,rgba(212,168,67,0.1),rgba(212,168,67,0.02))}
+.bracket-final .bracket-round-label{color:var(--gold);font-size:13px}
+.bracket-champion{text-align:center;margin-top:12px;font-family:var(--font-display);font-size:28px;letter-spacing:2px;color:var(--gold);text-shadow:0 0 20px var(--glow-gold)}
+@media(max-width:768px){.bracket-container{overflow-x:auto;-webkit-overflow-scrolling:touch}.bracket-tree{min-width:800px;font-size:10px}.bracket-round{min-width:120px}.bracket-match{min-width:105px}.bracket-slot input.team-input{font-size:9px;padding:3px 4px}.bracket-slot .slot-score{width:18px;height:18px;font-size:9px}}
 /* Responsive */
+.group-card-toggle{display:none}
 @media(max-width:768px){
+.group-card-toggle{display:inline-block;float:right;background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:16px;padding:0 4px}
+.group-card.collapsed .group-table{display:none}
 .nav-links{display:none;}
 .hamburger{display:flex;}
 .search-wrap{position:static}
@@ -344,6 +378,31 @@ footer strong{color:var(--gold);}
     <div class="container">
       <div class="section-header reveal"><div class="section-tag">Stage 1 · 48 Teams · 12 Groups</div><h2>小组赛分组</h2></div>
       <div class="groups-grid" id="groupsGrid"></div>
+      <div class="third-place-section reveal" style="margin-top:24px">
+        <div class="third-place-header" onclick="toggleThirdPlace()" style="background:linear-gradient(135deg,rgba(212,168,67,0.1),rgba(212,168,67,0.02));padding:16px 20px;border:1px solid rgba(212,168,67,0.2);border-radius:var(--radius);cursor:pointer;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-family:var(--font-display);font-size:18px;letter-spacing:1px;color:var(--gold)">📊 小组第三排名</span>
+          <span style="font-size:12px;color:var(--text-dim)">前8名晋级32强淘汰赛 <span id="tpArrow">▼</span></span>
+        </div>
+        <div id="thirdPlaceBody" style="display:none;margin-top:8px">
+          <table class="group-table" style="width:100%;background:var(--card);border-radius:var(--radius);border:1px solid rgba(255,255,255,0.04)">
+            <thead><tr><th>排名</th><th>球队</th><th>小组</th><th>P</th><th>GD</th><th>PTS</th></tr></thead>
+            <tbody id="thirdPlaceTbody"><tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:20px">小组赛结束后更新</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="rules-section reveal" style="margin-top:16px">
+        <div onclick="toggleRules()" style="cursor:pointer;padding:12px 20px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:13px;color:var(--text-dim)">📖 2026世界杯完整赛制规则</span>
+          <span id="rulesArrow" style="color:var(--text-dim)">▶</span>
+        </div>
+        <div id="rulesBody" style="display:none;padding:20px;background:var(--card);border:1px solid rgba(255,255,255,0.04);border-radius:0 0 var(--radius) var(--radius);font-size:13px;color:var(--text-dim);line-height:1.8">
+          <p><strong style="color:var(--gold)">赛制概览：</strong>48支球队分为12个小组(A-L)，每组4队。小组赛采用单循环赛制，每队踢3场比赛。</p>
+          <p><strong style="color:var(--gold)">晋级规则：</strong>12个小组第一 + 12个小组第二 = 24队直接晋级。12个小组第三中，成绩最好的<strong style="color:#fff">8队</strong>晋级32强淘汰赛。</p>
+          <p><strong style="color:var(--gold)">小组排名规则：</strong>1.积分 → 2.净胜球 → 3.进球数 → 4.相互战绩 → 5.公平竞赛积分 → 6.抽签</p>
+          <p><strong style="color:var(--gold)">淘汰赛阶段：</strong>32强 → 16强 → 8强 → 半决赛 → 决赛（含季军赛）。单场淘汰制，平局进入加时赛(30分钟)，仍平局进入点球大战。</p>
+          <p><strong style="color:var(--gold)">比赛时间：</strong>2026年6月11日至7月19日，共104场比赛，横跨美国、加拿大、墨西哥16座城市。</p>
+        </div>
+      </div>
     </div>
   </section>
   <section class="schedule-section" id="schedule">
@@ -364,7 +423,19 @@ footer strong{color:var(--gold);}
         <button class="filter-btn" data-filter="3rd">季军赛</button>
         <button class="filter-btn" data-filter="final">决赛</button>
       </div>
-      <div class="match-list" id="matchList"></div>
+      <div class="schedule-jump reveal" style="text-align:center;margin-bottom:16px"><select class="jump-select" onchange="jumpToDate(this.value)" style="padding:8px 16px;border-radius:100px;background:var(--card);color:var(--text);border:1px solid rgba(255,255,255,0.1);font-family:var(--font-body);font-size:13px;cursor:pointer"><option value="">📍 快速跳转到...</option><optgroup label="小组赛"></optgroup><optgroup label="淘汰赛"></optgroup></select></div><div class="match-list" id="matchList"></div>
+    </div>
+  </section>
+  <section class="bracket-section" id="bracket" style="padding:100px 0;position:relative">
+    <div class="container">
+      <div class="section-header reveal"><div class="section-tag">Road to the Final</div><h2>淘汰赛对阵图</h2></div>
+      <div class="bracket-controls reveal" style="text-align:center;margin-bottom:24px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <button class="expand-btn" onclick="resetBracket()">🔄 重置预测</button>
+        <button class="expand-btn" onclick="exportBracket()">📸 导出预测图</button>
+        <button class="expand-btn" onclick="submitBracketPredictions()">💾 提交全部预测</button>
+      </div>
+      <div class="bracket-container reveal" id="bracketContainer" style="overflow-x:auto"></div>
+      <div id="bracketMsg" style="text-align:center;padding:16px;color:var(--text-dim);font-size:12px">小组赛结束后将确定具体对阵。现在可以提前预测淘汰赛走势！</div>
     </div>
   </section>
   <section class="predict-section" id="predict">
@@ -646,7 +717,7 @@ async function loadUserData(){
 
 /* ═══ RENDER: Groups ═══ */
 function renderGroups(){
-  document.getElementById('groupsGrid').innerHTML=GROUPS.map(g=>`<div class="group-card reveal"><div class="group-header">${g.name} 组</div><table class="group-table"><thead><tr><th>球队</th><th>P</th><th>GD</th><th>PTS</th></tr></thead><tbody>${g.teams.map(t=>`<tr><td>${flagImg(t.cc,24)} <a class="team-link" onclick="openTeamPage('${t.name}')" title="点击查看球队详情">${t.name}</a></td><td>0</td><td>0</td><td class="pts">0</td></tr>`).join('')}</tbody></table></div>`).join('');
+  document.getElementById('groupsGrid').innerHTML=GROUPS.map(g=>`<div class="group-card reveal"><div class="group-header">${g.name} 组<button class="group-card-toggle" onclick="event.stopPropagation();this.closest('.group-card').classList.toggle('collapsed');this.textContent=this.closest('.group-card').classList.contains('collapsed')?'▶':'▼'">▼</button></div><table class="group-table"><thead><tr><th>球队</th><th>P</th><th>GD</th><th>PTS</th></tr></thead><tbody>${g.teams.map(t=>`<tr><td>${flagImg(t.cc,24)} <a class="team-link" onclick="openTeamPage('${t.name}')" title="点击查看球队详情">${t.name}</a></td><td>0</td><td>0</td><td class="pts">0</td></tr>`).join('')}</tbody></table></div>`).join('');
 }
 
 /* ═══ RENDER: Schedule (collapsible by date) ═══ */
@@ -678,6 +749,10 @@ function toggleDay(dayId){document.getElementById(dayId).classList.toggle('open'
 function expandAll(){document.querySelectorAll('.day-matches').forEach(d=>d.classList.add('open'));document.querySelectorAll('.day-arrow').forEach(a=>a.classList.add('open'));}
 function collapseAll(){document.querySelectorAll('.day-matches').forEach(d=>d.classList.remove('open'));document.querySelectorAll('.day-arrow').forEach(a=>a.classList.remove('open'));}
 function scrollToToday(){collapseAll();const todayKey=findTodayKey();if(!todayKey){showToast('今天没有比赛，已显示首日赛程');expandAll();return;}const dayId='day-'+todayKey.replace(/[月日]/g,'-');const el=document.getElementById(dayId);if(el){el.classList.add('open');const a=document.getElementById('arrow-'+dayId);if(a)a.classList.add('open');el.scrollIntoView({behavior:'smooth',block:'center'});}}
+function buildJumpMenu(){const sel=document.querySelector('.jump-select');if(!sel)return;const dates=[...new Set(ALL_MATCHES.map(m=>m.date))];const ga=sel.querySelector('optgroup[label="小组赛"]');const ka=sel.querySelector('optgroup[label="淘汰赛"]');dates.forEach(d=>{const ms=ALL_MATCHES.filter(m=>m.date===d);const isGrp=ms[0]&&ms[0].stage==='group';const opt=document.createElement('option');opt.value=d;opt.textContent=d+' ('+ms.length+'场)'; (isGrp?ga:ka).appendChild(opt);});}
+function jumpToDate(d){if(!d)return;const dayId='day-'+d.replace(/[月日]/g,'-');expandAll();setTimeout(()=>{const el=document.getElementById(dayId);if(el){el.classList.add('open');const a=document.getElementById('arrow-'+dayId);if(a)a.classList.add('open');el.scrollIntoView({behavior:'smooth',block:'start'});}},150);}
+function toggleThirdPlace(){const b=document.getElementById('thirdPlaceBody');const a=document.getElementById('tpArrow');const o=b.style.display!=='none';b.style.display=o?'none':'block';if(a)a.textContent=o?'▼':'▲';}
+function toggleRules(){const b=document.getElementById('rulesBody');const a=document.getElementById('rulesArrow');const o=b.style.display!=='none';b.style.display=o?'none':'block';if(a)a.textContent=o?'▶':'▼';}
 
 /* ═══ FILTERS ═══ */
 function setupFilters(){
@@ -712,16 +787,16 @@ async function submitPrediction(matchDbId,home,away,src){
   const resultEl=document.getElementById('predResult_'+matchDbId)||document.getElementById(prefix+'Result_'+matchDbId);
   const btn=document.getElementById('predBtn_'+matchDbId)||document.getElementById(prefix+'Btn_'+matchDbId);
   const h=hInput.value.trim(),a=aInput.value.trim();
-  if(!h||!a||isNaN(h)||isNaN(a)){if(resultEl){resultEl.textContent='请输入有效的比分数字（0-20）';resultEl.style.color='#c0392b';}return;}
+  if(!h||!a||isNaN(h)||isNaN(a)){showToast('请输入有效的比分数字（0-20）','error');if(resultEl){resultEl.textContent='请输入有效的比分数字（0-20）';resultEl.style.color='#c0392b';}return;}
   const hs=parseInt(h),as=parseInt(a);
-  if(hs<0||hs>20||as<0||as>20){if(resultEl){resultEl.textContent='比分范围应为0-20';resultEl.style.color='#c0392b';}return;}
-  if(!SUPABASE_READY){userPredictions[matchDbId]={home_score:hs,away_score:as};if(resultEl){resultEl.textContent='✓ 预测:'+hs+':'+as+'（本地模式）';resultEl.style.color='var(--gold)';}if(btn){btn.textContent='✓ 已预测';btn.classList.add('saved');}return;}
+  if(hs<0||hs>20||as<0||as>20){showToast('比分范围应为0-20','error');if(resultEl){resultEl.textContent='比分范围应为0-20';resultEl.style.color='#c0392b';}return;}
+  if(!SUPABASE_READY){userPredictions[matchDbId]={home_score:hs,away_score:as};if(resultEl){resultEl.textContent='✓ 预测:'+hs+':'+as+'（本地模式）';resultEl.style.color='var(--gold)';}if(btn){btn.textContent='✓ 已预测';btn.classList.add('saved');}showToast('预测 '+home+' '+hs+':'+as+' '+away+' 已保存（本地模式）','success');return;}
   try{
     const{error}=await sb.from('predictions').upsert({user_id:currentUser.id,match_id:matchDbId,home_score:hs,away_score:as},{onConflict:'user_id, match_id'});
     if(error)throw error;
     userPredictions[matchDbId]={home_score:hs,away_score:as};if(resultEl){resultEl.textContent='✓ 预测已提交: '+hs+':'+as;resultEl.style.color='var(--gold)';}if(btn){btn.textContent='✓ 已预测';btn.classList.add('saved');}
     showToast('预测 '+home+' '+hs+':'+as+' '+away+' 已提交','success');
-  }catch(err){if(resultEl){resultEl.textContent='提交失败: '+err.message;resultEl.style.color='#c0392b';}}
+  }catch(err){showToast('提交失败: '+err.message,'error');if(resultEl){resultEl.textContent='提交失败: '+err.message;resultEl.style.color='#c0392b';}}
 }
 
 /* ═══ LEADERBOARD ═══ */
@@ -802,6 +877,61 @@ function setupRealtimeSubscriptions(){
   sb.channel('leaderboard-updates').on('postgres_changes',{event:'UPDATE',schema:'public',table:'profiles'},()=>{renderLeaderboard();}).subscribe();
 }
 
+/* ═══ BRACKET ═══ */
+const BRACKET_ROUNDS=[{name:'32强',slots:16,label:'R32'},{name:'16强',slots:8,label:'R16'},{name:'8强',slots:4,label:'QF'},{name:'半决赛',slots:2,label:'SF'},{name:'决赛',slots:1,label:'FINAL'}];
+let bracketData={};
+function getPlaceholder(key,pos){
+  const[lbl,idx]=key.split('-');const n=parseInt(idx)+1;
+  if(lbl==='R32')return pos==='home'?'小组第1/'+n:'对手待定';
+  if(lbl==='FINAL')return pos==='home'?'半决赛胜者1':'半决赛胜者2';
+  return (lbl==='R16'?'R32胜者':lbl==='QF'?'R16胜者':lbl==='SF'?'QF胜者':'')+' '+(pos==='home'?(n*2-1):(n*2));
+}
+function renderBracket(){
+  const container=document.getElementById('bracketContainer');
+  let html='<div class="bracket-tree">';
+  BRACKET_ROUNDS.forEach((round,rIdx)=>{
+    const isFinal=round.label==='FINAL';
+    html+=`<div class="bracket-round ${isFinal?'bracket-final':''}"><div class="bracket-round-label">${round.name}</div>`;
+    for(let i=0;i<round.slots;i++){
+      const key=round.label+'-'+i;const d=bracketData[key]||{};
+      html+=`<div class="bracket-match" style="margin:${isFinal?'6px 0':'1px 0'}">
+        <div class="bracket-slot">${flagImg(null,14)}<input class="team-input" placeholder="${getPlaceholder(key,'home')}" value="${d.home||''}" onchange="updateBracket('${key}','home',this.value)"> <input class="slot-score" placeholder="-" value="${d.hScore||''}" onchange="updateBracket('${key}','hScore',this.value)" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)"></div>
+        <div class="bracket-slot">${flagImg(null,14)}<input class="team-input" placeholder="${getPlaceholder(key,'away')}" value="${d.away||''}" onchange="updateBracket('${key}','away',this.value)"> <input class="slot-score" placeholder="-" value="${d.aScore||''}" onchange="updateBracket('${key}','aScore',this.value)" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)"></div>
+      </div>`;
+    }
+    html+='</div>';
+    if(rIdx<BRACKET_ROUNDS.length-1)html+='<div class="bracket-connector">→</div>';
+  });
+  html+='</div>';
+  const champ=document.getElementById('bracketChampion')?.textContent||'';
+  html+=`<div class="bracket-champion" id="bracketChampion">${champ||'🏆'}</div>`;
+  container.innerHTML=html;
+}
+function updateBracket(key,field,value){
+  if(!bracketData[key])bracketData[key]={};
+  bracketData[key][field]=value;
+  // Auto-detect champion
+  const finalD=bracketData['FINAL-0']||{};
+  const hDiff=(parseInt(finalD.hScore)||0)-(parseInt(finalD.aScore)||0);
+  let champ='';if(finalD.home&&finalD.away&&(finalD.hScore||finalD.aScore)){champ=hDiff>0?finalD.home:(hDiff<0?finalD.away:'');}
+  if(champ){const el=document.getElementById('bracketChampion');if(el)el.textContent='🏆 '+champ;}
+}
+function resetBracket(){bracketData={};renderBracket();showToast('淘汰赛预测已重置');}
+function exportBracket(){
+  const w=window.open('','bracketExport','width=1100,height=750');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>世界杯2026淘汰赛预测</title><style>body{font-family:system-ui,sans-serif;background:#0a0e17;color:#e8edf2;padding:32px}h1{text-align:center;color:#d4a843;font-size:28px}.bracket{display:flex;gap:12px;justify-content:center;font-size:12px}.round{display:flex;flex-direction:column;gap:4px}.lbl{text-align:center;color:#7d8899;font-size:10px;text-transform:uppercase;letter-spacing:2px;margin-bottom:2px}.m{border:1px solid rgba(255,255,255,0.2);padding:6px 12px;border-radius:6px;min-width:130px;background:#151d2b}.s{display:flex;align-items:center;gap:6px;padding:2px 0}.arr{color:#7d8899;font-size:16px;padding:0 4px}.champ{text-align:center;font-size:24px;color:#d4a843;margin-top:16px;font-weight:700}.footer{text-align:center;color:#7d8899;font-size:11px;margin-top:32px}</style></head><body><h1>🏆 2026世界杯淘汰赛预测</h1><p style="text-align:center;color:#7d8899;font-size:11px">预测时间: ${new Date().toLocaleString('zh-CN')}</p><div class="bracket">${BRACKET_ROUNDS.map((r,rIdx)=>{let h='<div class="round"><div class="lbl">'+r.name+'</div>';for(let i=0;i<r.slots;i++){const d=bracketData[r.label+'-'+i]||{};h+=`<div class="m"><div class="s">${d.home||'—'} ${d.hScore||''}</div><div class="s">${d.away||'—'} ${d.aScore||''}</div></div>`;}h+='</div>';if(rIdx<BRACKET_ROUNDS.length-1)h+='<div class="arr">→</div>';return h;}).join('')}</div><p class="footer">世界杯2026预测平台 · wc2026-1y8.pages.dev</p></body></html>`);
+  w.document.close();showToast('预测图已生成！可用 Ctrl+P 保存为PDF','success');
+}
+async function submitBracketPredictions(){
+  if(!currentUser){openAuthModal('login');return;}
+  const preds=[];
+  Object.entries(bracketData).forEach(([key,d])=>{if(d.home&&d.away&&(d.hScore||d.aScore))preds.push({slot:key,...d});});
+  if(preds.length===0){showToast('请先在淘汰赛图中填写预测','error');return;}
+  localStorage.setItem('bracketPredictions',JSON.stringify(bracketData));
+  showToast('✓ '+preds.length+'场淘汰赛预测已保存','success');
+  exportBracket();
+}
+
 /* ═══ HELPERS ═══ */
 function observeReveals(){const els=document.querySelectorAll('.reveal:not(.visible)');const observer=new IntersectionObserver((entries)=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('visible');observer.unobserve(entry.target);}});},{threshold:0.15,rootMargin:'0px 0px -40px 0px'});els.forEach(el=>observer.observe(el));}
 function createParticles(){const c=document.getElementById('particles');for(let i=0;i<30;i++){const p=document.createElement('div');p.classList.add('particle');const s=Math.random()*4+2;p.style.width=s+'px';p.style.height=s+'px';p.style.left=Math.random()*100+'%';p.style.animationDuration=(Math.random()*12+8)+'s';p.style.animationDelay=(Math.random()*10)+'s';p.style.opacity=(Math.random()*0.3).toString();c.appendChild(p);}}
@@ -813,33 +943,36 @@ function setupKeyboard(){document.addEventListener('keydown',e=>{if(e.key==='Esc
 let searchTimer=null;
 function buildSearchIndex(){
   const idx=[];
-  // Teams
   Object.values(TEAM_INFO).forEach(t=>{
-    idx.push({type:'team',icon:'🏴',name:t.name,sub:t.en+' · '+t.conf+' · 排名#'+t.rank,keywords:[t.name,t.en,t.conf,'FIFA'],action:()=>openTeamPage(t.name)});
-    t.players.forEach(p=>{idx.push({type:'player',icon:'👤',name:p.n,sub:t.name+' 球员',keywords:[p.n,t.name],action:()=>openTeamPage(t.name)});});
+    idx.push({type:'team',icon:'🏴',name:t.name,sub:t.en+' · '+t.conf+' · 排名#'+t.rank,keywords:[t.name,t.en,t.conf,'FIFA'],act:'team',data:t.name});
+    t.players.forEach(p=>{idx.push({type:'player',icon:'👤',name:p.n,sub:t.name+' 球员',keywords:[p.n,t.name],act:'team',data:t.name});});
   });
-  // Matches
   ALL_MATCHES.forEach((m,i)=>{
-    const venue=m.venue;const group=m.group||'';const date=m.date;
-    idx.push({type:'match',icon:'⚽',name:m.home+' VS '+m.away,sub:date+' '+m.time+' · '+venue+(group?' · '+group+'组':''),keywords:[m.home,m.away,date,venue,group,'比赛'],action:()=>{const dayId='day-'+date.replace(/[月日]/g,'-');expandAll();setTimeout(()=>{const el=document.getElementById(dayId);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},100);}});
+    const venue=m.venue,group=m.group||'',date=m.date;
+    idx.push({type:'match',icon:'⚽',name:m.home+' VS '+m.away,sub:date+' '+m.time+' · '+venue+(group?' · '+group+'组':''),keywords:[m.home,m.away,date,venue,group,'比赛'],act:'match',data:date});
   });
-  // Venues
-  [...new Set(VENUES)].forEach(v=>{
-    idx.push({type:'venue',icon:'🏟️',name:v.split('·')[0],sub:'比赛场馆',keywords:[v,'球场','场馆'],action:()=>{window.scrollTo({top:document.getElementById('schedule').offsetTop-80,behavior:'smooth'});}});
-  });
-  // Dates
+  [...new Set(VENUES)].forEach(v=>{idx.push({type:'venue',icon:'🏟️',name:v.split('·')[0],sub:'比赛场馆',keywords:[v,'球场','场馆'],act:'section',data:'schedule'});});
   [...new Set(ALL_MATCHES.map(m=>m.date))].forEach(d=>{
     const cnt=ALL_MATCHES.filter(m=>m.date===d).length;
-    idx.push({type:'date',icon:'📅',name:d,sub:cnt+'场比赛',keywords:[d,'日期'],action:()=>{const dayId='day-'+d.replace(/[月日]/g,'-');expandAll();setTimeout(()=>{const el=document.getElementById(dayId);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},100);}});
+    idx.push({type:'date',icon:'📅',name:d,sub:cnt+'场比赛',keywords:[d,'日期'],act:'match',data:d});
   });
-  // Groups
-  GROUPS.forEach(g=>{
-    idx.push({type:'group',icon:'📋',name:g.name+'组',sub:g.teams.map(t=>t.name).join('、'),keywords:[g.name+'组',...g.teams.map(t=>t.name)],action:()=>{window.scrollTo({top:document.getElementById('groups').offsetTop-80,behavior:'smooth'});}});
-  });
+  GROUPS.forEach(g=>{idx.push({type:'group',icon:'📋',name:g.name+'组',sub:g.teams.map(t=>t.name).join('、'),keywords:[g.name+'组',...g.teams.map(t=>t.name)],act:'section',data:'groups'});});
   return idx;
 }
 let SEARCH_IDX=null;
 function getSearchIdx(){if(!SEARCH_IDX)SEARCH_IDX=buildSearchIndex();return SEARCH_IDX;}
+function executeSearchAction(item){
+  document.getElementById('searchDropdown').classList.remove('open');
+  document.getElementById('searchInput').value='';
+  if(!item)return;
+  if(item.act==='team'){openTeamPage(item.data);return;}
+  if(item.act==='match'){
+    const dayId='day-'+item.data.replace(/[月日]/g,'-');expandAll();
+    setTimeout(()=>{const el=document.getElementById(dayId);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},150);
+    return;
+  }
+  if(item.act==='section'){const sec=document.getElementById(item.data);if(sec)sec.scrollIntoView({behavior:'smooth'});}
+}
 function openSearch(){const dd=document.getElementById('searchDropdown');const q=document.getElementById('searchInput').value.trim();if(q)dd.classList.add('open');}
 function closeSearch(){document.getElementById('searchDropdown').classList.remove('open');}
 function doSearch(){
@@ -852,18 +985,22 @@ function doSearch(){
     const results=idx.filter(item=>item.keywords.some(k=>k.toLowerCase().includes(q))).slice(0,15);
     if(results.length===0){dd.innerHTML='<div class="search-no-results">未找到匹配结果</div>';dd.classList.add('open');return;}
     function hl(t){const re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');return t.replace(re,'<span class="search-result-highlight">$1</span>');}
-    dd.innerHTML=results.map(r=>`<div class="search-result" onmousedown="event.preventDefault()" onclick="document.getElementById('searchDropdown').classList.remove('open');document.getElementById('searchInput').value='';(${r.action.toString()})()"><span class="search-result-icon">${r.icon}</span><div class="search-result-text">${hl(r.name)}<div class="search-result-sub">${hl(r.sub)}</div></div></div>`).join('');
+    window.__searchResults=results;
+    dd.innerHTML=results.map((r,i)=>`<div class="search-result" onmousedown="event.preventDefault()" onclick="executeSearchAction(window.__searchResults[${i}])"><span class="search-result-icon">${r.icon}</span><div class="search-result-text">${hl(r.name)}<div class="search-result-sub">${hl(r.sub)}</div></div></div>`).join('');
     dd.classList.add('open');
   },250);
 }
 
 /* ═══ INIT ═══ */
 function init(){
-  getSearchIdx(); // pre-build search index
-  renderGroups();renderMatches();renderPredictions();renderLeaderboard();
+  getSearchIdx();
+  renderGroups();renderMatches();renderBracket();renderPredictions();renderLeaderboard();
+  buildJumpMenu();
+  setTimeout(()=>{const tk=findTodayKey();if(tk){const did='day-'+tk.replace(/[月日]/g,'-');const el=document.getElementById(did);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}},600);
   createParticles();observeReveals();setupFilters();setupSmoothScroll();setupKeyboard();setupRealtimeSubscriptions();
   checkSession().then(()=>{renderPredictions();renderLeaderboard();});
   updateCountdown();setInterval(updateCountdown,1000);
+  document.body.classList.add('loaded');
 }
 document.addEventListener('DOMContentLoaded',init);
 </script>
