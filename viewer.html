@@ -68,10 +68,15 @@ let sourceBuffer = null;
 let ws = null;
 let pendingChunks = [];
 let everPlayed = false;
+let reconnectAttempts = 0;
+const MAX_RECONNECT = 10;
 
 function connect() {
-  ws = new WebSocket(`ws://${location.hostname}:${PORT}/viewer`);
+  const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  ws = new WebSocket(`${protocol}//${location.hostname}:${PORT}/viewer`);
+  ws.binaryType = 'arraybuffer';
   ws.onopen = () => {
+    reconnectAttempts = 0;
     statusText.textContent = '已连接，等待视频流...';
   };
   ws.onmessage = (e) => {
@@ -81,28 +86,58 @@ function connect() {
       statusText.textContent = '直播中';
     }
     if (sourceBuffer && !sourceBuffer.updating && mediaSource.readyState === 'open') {
-      sourceBuffer.appendBuffer(new Uint8Array(e.data));
+      try {
+        sourceBuffer.appendBuffer(new Uint8Array(e.data));
+      } catch (_) { /* QuotaExceededError or similar */ }
     } else {
       pendingChunks.push(new Uint8Array(e.data));
     }
   };
   ws.onclose = () => {
+    pendingChunks = [];
+    if (reconnectAttempts >= MAX_RECONNECT) {
+      statusDot.className = 'status-dot waiting';
+      statusText.textContent = '连接失败，请刷新页面重试';
+      return;
+    }
+    const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
+    reconnectAttempts++;
     statusDot.className = 'status-dot waiting';
-    statusText.textContent = '连接断开，5秒后重连...';
-    setTimeout(connect, 5000);
+    statusText.textContent = `连接断开，${Math.round(delay / 1000)}秒后重连...`;
+    setTimeout(connect, delay);
   };
   ws.onerror = () => ws.close();
 }
 
 function setupMediaSource() {
+  if (mediaSource && mediaSource.readyState !== 'closed') {
+    try { mediaSource.endOfStream(); } catch (_) {}
+  }
   mediaSource = new MediaSource();
   video.src = URL.createObjectURL(mediaSource);
 
   mediaSource.addEventListener('sourceopen', () => {
-    sourceBuffer = mediaSource.addSourceBuffer('video/webm;codecs=vp8');
+    try {
+      sourceBuffer = mediaSource.addSourceBuffer('video/webm;codecs=vp8');
+    } catch (e) {
+      statusDot.className = 'status-dot waiting';
+      statusText.textContent = '浏览器不支持该视频格式';
+      return;
+    }
+    sourceBuffer.addEventListener('error', () => {
+      statusDot.className = 'status-dot waiting';
+      statusText.textContent = '播放出错，正在重连...';
+      if (mediaSource.readyState === 'open') {
+        mediaSource.endOfStream();
+      }
+      URL.revokeObjectURL(video.src);
+      setupMediaSource();
+    });
     sourceBuffer.addEventListener('updateend', () => {
       if (pendingChunks.length > 0 && !sourceBuffer.updating) {
-        sourceBuffer.appendBuffer(pendingChunks.shift());
+        try {
+          sourceBuffer.appendBuffer(pendingChunks.shift());
+        } catch (_) {}
       }
     });
     connect();
@@ -110,6 +145,16 @@ function setupMediaSource() {
 }
 
 setupMediaSource();
+
+video.addEventListener('error', () => {
+  statusDot.className = 'status-dot waiting';
+  statusText.textContent = '视频播放出错';
+});
+
+window.addEventListener('beforeunload', () => {
+  if (ws) { ws.onclose = null; ws.onerror = null; ws.close(); }
+  if (video.src) URL.revokeObjectURL(video.src);
+});
 </script>
 </body>
 </html>
