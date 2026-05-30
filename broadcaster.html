@@ -98,11 +98,13 @@ function setStatus(state) {
 }
 
 async function startStream() {
+  if (stream || ws) return;
   try {
     stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
     video.srcObject = stream;
 
-    ws = new WebSocket(`ws://${location.hostname}:${PORT}/broadcaster`);
+    const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    ws = new WebSocket(`${protocol}//${location.hostname}:${PORT}/broadcaster`);
     ws.onopen = () => {
       setStatus('connected');
       startRecording();
@@ -111,15 +113,31 @@ async function startStream() {
     ws.onerror = () => stopStream();
 
   } catch (e) {
-    if (e.name !== 'AbortError') alert('无法获取屏幕画面: ' + e.message);
+    setStatusText('屏幕共享取消或不被支持');
   }
 }
 
 function startRecording() {
-  recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp8' });
+  if (!window.MediaRecorder) {
+    setStatusText('浏览器不支持录制');
+    stopStream();
+    return;
+  }
+  const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+    ? 'video/webm;codecs=vp9'
+    : MediaRecorder.isTypeSupported('video/webm;codecs=vp8')
+    ? 'video/webm;codecs=vp8'
+    : 'video/webm';
+  try {
+    recorder = new MediaRecorder(stream, { mimeType });
+  } catch (e) {
+    setStatusText('录制初始化失败');
+    stopStream();
+    return;
+  }
   recorder.ondataavailable = (e) => {
     if (e.data.size > 0 && ws && ws.readyState === 1) {
-      ws.send(e.data);
+      try { ws.send(e.data); } catch (_) { /* socket closing */ }
     }
   };
   recorder.start(500);
@@ -128,10 +146,24 @@ function startRecording() {
   btnStop.style.display = '';
 }
 
+function setStatusText(text) {
+  statusDot.className = 'status-dot';
+  statusText.textContent = text;
+}
+
+let stopping = false;
+
 function stopStream() {
+  if (stopping) return;
+  stopping = true;
+
   if (recorder && recorder.state !== 'inactive') recorder.stop();
   if (stream) stream.getTracks().forEach(t => t.stop());
-  if (ws) ws.close();
+  if (ws) {
+    ws.onclose = null;
+    ws.onerror = null;
+    ws.close();
+  }
   stream = null;
   recorder = null;
   ws = null;
@@ -139,7 +171,13 @@ function stopStream() {
   setStatus('idle');
   btnStart.style.display = '';
   btnStop.style.display = 'none';
+  stopping = false;
 }
+window.addEventListener('beforeunload', () => {
+  if (recorder && recorder.state !== 'inactive') recorder.stop();
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  if (ws) { ws.onclose = null; ws.onerror = null; ws.close(); }
+});
 </script>
 </body>
 </html>
