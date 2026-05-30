@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>直播推流</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0f0f0f;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 24px;
+  }
+  video {
+    width: 100%;
+    max-width: 720px;
+    border-radius: 12px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+  }
+  .status {
+    font-size: 14px;
+    color: #888;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #555;
+    transition: background 0.3s;
+  }
+  .status-dot.live { background: #ef4444; }
+  .status-dot.connected { background: #f59e0b; }
+  button {
+    padding: 14px 36px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .btn-start { background: #ef4444; color: #fff; }
+  .btn-start:hover { background: #dc2626; }
+  .btn-stop { background: #333; color: #fff; }
+  .btn-stop:hover { background: #444; }
+  .info {
+    font-size: 13px;
+    color: #666;
+    text-align: center;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+  <video id="preview" autoplay muted playsinline></video>
+
+  <div class="status">
+    <span class="status-dot" id="statusDot"></span>
+    <span id="statusText">未连接</span>
+  </div>
+
+  <button class="btn-start" id="btnStart" onclick="startStream()">开始直播</button>
+  <button class="btn-stop" id="btnStop" onclick="stopStream()" style="display:none;">停止直播</button>
+
+  <div class="info">点击"开始直播"后选择要分享的屏幕或窗口</div>
+
+<script>
+const PORT = location.port || '8080';
+const video = document.getElementById('preview');
+const statusDot = document.getElementById('statusDot');
+const statusText = document.getElementById('statusText');
+const btnStart = document.getElementById('btnStart');
+const btnStop = document.getElementById('btnStop');
+
+let stream = null;
+let recorder = null;
+let ws = null;
+
+function setStatus(state) {
+  const states = {
+    idle: { cls: '', text: '未连接' },
+    connected: { cls: 'connected', text: '已连接服务器' },
+    live: { cls: 'live', text: '直播中' },
+  };
+  const s = states[state];
+  statusDot.className = 'status-dot ' + s.cls;
+  statusText.textContent = s.text;
+}
+
+async function startStream() {
+  try {
+    stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+    video.srcObject = stream;
+
+    ws = new WebSocket(`ws://${location.hostname}:${PORT}/broadcaster`);
+    ws.onopen = () => {
+      setStatus('connected');
+      startRecording();
+    };
+    ws.onclose = () => stopStream();
+    ws.onerror = () => stopStream();
+
+  } catch (e) {
+    if (e.name !== 'AbortError') alert('无法获取屏幕画面: ' + e.message);
+  }
+}
+
+function startRecording() {
+  recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp8' });
+  recorder.ondataavailable = (e) => {
+    if (e.data.size > 0 && ws && ws.readyState === 1) {
+      ws.send(e.data);
+    }
+  };
+  recorder.start(500);
+  setStatus('live');
+  btnStart.style.display = 'none';
+  btnStop.style.display = '';
+}
+
+function stopStream() {
+  if (recorder && recorder.state !== 'inactive') recorder.stop();
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  if (ws) ws.close();
+  stream = null;
+  recorder = null;
+  ws = null;
+  video.srcObject = null;
+  setStatus('idle');
+  btnStart.style.display = '';
+  btnStop.style.display = 'none';
+}
+</script>
+</body>
+</html>
