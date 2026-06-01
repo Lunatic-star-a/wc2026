@@ -180,6 +180,19 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 .auth-error{color:var(--accent-red);font-size:12px;text-align:center;min-height:18px;margin-top:8px;}
 .auth-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text-dim);font-size:22px;cursor:pointer;transition:color 0.2s;}
 .auth-close:hover{color:#fff;}
+/* Player Card Modal */
+.player-card-overlay{position:fixed;inset:0;z-index:1100;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:all 0.25s ease}
+.player-card-overlay.active{opacity:1;visibility:visible}
+.player-card{background:var(--slate);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:28px 24px;width:340px;max-width:90vw;text-align:center;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.player-card-close{position:absolute;top:10px;right:14px;background:none;border:none;color:var(--text-dim);font-size:22px;cursor:pointer;transition:color 0.2s}
+.player-card-close:hover{color:#fff}
+.player-card-flag{font-size:48px;margin-bottom:4px}
+.player-card-name{font-family:var(--font-display);font-size:24px;letter-spacing:1px;color:#fff;margin-bottom:12px}
+.player-card-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:left}
+.player-stat{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:8px 12px}
+.player-stat-label{font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;font-family:var(--font-mono)}
+.player-stat-value{font-size:14px;color:#fff;font-weight:500}
+.player-card-club{margin-top:12px;padding:8px 16px;background:rgba(13,140,60,0.1);border-radius:100px;color:var(--pitch-bright);font-size:13px;font-family:var(--font-mono)}
 /* Team Info Modal */
 .team-modal{background:var(--slate);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:0;width:520px;max-width:90vw;position:relative;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,0.5);}
 .team-modal-header{background:linear-gradient(135deg,rgba(13,140,60,0.2),rgba(13,140,60,0.05));padding:32px 28px 24px;text-align:center;position:relative;}
@@ -226,6 +239,16 @@ footer strong{color:var(--gold);}
 @keyframes livePulse{0%,100%{box-shadow:0 0 0 0 rgba(231,76,60,0.4);}50%{box-shadow:0 0 0 8px rgba(231,76,60,0);}}
 @keyframes scoreBlink{0%,100%{opacity:1;}50%{opacity:0.5;}}
 @keyframes float-up{0%{transform:translateY(100vh) scale(0);opacity:0;}10%{opacity:0.5;}90%{opacity:0;}100%{transform:translateY(-10vh) scale(1.5);opacity:0;}}
+/* Splash */
+.splash{position:fixed;inset:0;z-index:9999;background:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.6s ease,visibility 0.6s ease}
+.splash.hide{opacity:0;visibility:hidden;pointer-events:none}
+.splash-ball{font-size:64px;animation:splashBounce 0.8s ease infinite alternate}
+@keyframes splashBounce{from{transform:translateY(0) scale(1)}to{transform:translateY(-20px) scale(1.1)}}
+.splash-ring{width:80px;height:80px;border:3px solid var(--pitch);border-radius:50%;margin-top:-14px;animation:splashPulse 1.5s ease infinite}
+@keyframes splashPulse{0%,100%{transform:scale(0.8);opacity:0.3}50%{transform:scale(1.3);opacity:1}}
+.splash-text{font-family:var(--font-display);font-size:28px;letter-spacing:4px;color:var(--gold);margin-top:24px;animation:splashFade 1.5s ease infinite}
+@keyframes splashFade{0%,100%{opacity:0.4}50%{opacity:1}}
+.splash-sub{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);letter-spacing:2px;margin-top:8px}
 /* Particles */
 .particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
 .particle{position:absolute;border-radius:50%;background:var(--pitch);animation:float-up linear infinite;opacity:0;}
@@ -248,21 +271,45 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
 .mobile-menu.open{display:flex;}
 .mobile-menu a{color:var(--text);text-decoration:none;font-size:16px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);text-transform:uppercase;letter-spacing:1px;}
 /* Bracket */
-.bracket-tree{display:flex;gap:4px;min-width:900px;justify-content:center;padding:20px 0;align-items:stretch}
-.bracket-round{display:flex;flex-direction:column;justify-content:space-around;gap:2px;min-width:150px;flex-shrink:0}
-.bracket-round-label{font-family:var(--font-mono);font-size:10px;color:var(--text-dim);text-align:center;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;padding:4px 0}
-.bracket-match{background:var(--card);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:8px 10px;min-width:135px;transition:all 0.25s;flex-shrink:0}
-.bracket-match:hover{border-color:rgba(212,168,67,0.3);box-shadow:0 4px 16px rgba(0,0,0,0.3)}
-.bracket-slot{display:flex;align-items:center;gap:4px;padding:3px 0}
-.bracket-slot input.team-input{flex:1;min-width:0;padding:4px 6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:4px;color:#fff;font-size:11px;font-family:var(--font-body);outline:none;transition:all 0.2s}
-.bracket-slot input.team-input:focus{border-color:var(--pitch);box-shadow:0 0 0 2px var(--glow-green)}
-.bracket-slot .slot-score{width:22px;height:22px;text-align:center;font-family:var(--font-mono);font-size:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:4px;color:#fff;outline:none}
-.bracket-slot .slot-score:focus{border-color:var(--pitch)}
-.bracket-connector{width:24px;display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:18px;flex-shrink:0}
-.bracket-final .bracket-match{border-color:rgba(212,168,67,0.3);background:linear-gradient(135deg,rgba(212,168,67,0.1),rgba(212,168,67,0.02))}
-.bracket-final .bracket-round-label{color:var(--gold);font-size:13px}
-.bracket-champion{text-align:center;margin-top:12px;font-family:var(--font-display);font-size:28px;letter-spacing:2px;color:var(--gold);text-shadow:0 0 20px var(--glow-gold)}
-@media(max-width:768px){.bracket-container{overflow-x:auto;-webkit-overflow-scrolling:touch}.bracket-tree{min-width:800px;font-size:10px}.bracket-round{min-width:120px}.bracket-match{min-width:105px}.bracket-slot input.team-input{font-size:9px;padding:3px 4px}.bracket-slot .slot-score{width:18px;height:18px;font-size:9px}}
+.bracket-wrap{position:relative}
+.bracket-toggle-btn{display:flex;justify-content:center;margin-bottom:16px}
+.bracket-tree{display:flex;gap:0;justify-content:center;padding:20px 0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.1) transparent}
+.bracket-tree::-webkit-scrollbar{height:4px}
+.bracket-tree::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:4px}
+.bracket-col{display:flex;flex-direction:column;justify-content:space-around;min-width:170px;flex-shrink:0;position:relative}
+.bracket-col-title{font-family:var(--font-mono);font-size:10px;color:var(--gold);text-align:center;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.bracket-col-title.final-col{color:var(--gold-bright);font-size:12px}
+.bracket-node{position:relative;padding:4px 8px}
+.bracket-node-inner{background:var(--card);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:8px 10px;transition:all 0.2s}
+.bracket-node-inner:hover{border-color:rgba(212,168,67,0.3);box-shadow:0 2px 12px rgba(0,0,0,0.3)}
+.bracket-node-inner .team-row{display:flex;align-items:center;gap:6px;padding:2px 0}
+.bracket-node-inner .team-row input{width:100%;min-width:70px;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.08);color:#fff;font-size:12px;padding:3px 4px;outline:none;font-family:var(--font-body)}
+.bracket-node-inner .team-row input:focus{border-bottom-color:var(--pitch)}
+.bracket-node-inner .team-row input::placeholder{color:rgba(255,255,255,0.2);font-size:10px}
+.bracket-node-inner .score-dot{width:20px;height:20px;border-radius:4px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:10px;text-align:center;font-family:var(--font-mono);outline:none;flex-shrink:0}
+.bracket-node-inner .score-dot:focus{border-color:var(--pitch)}
+.bracket-conn{display:flex;align-items:center;justify-content:center;min-width:40px;flex-shrink:0;position:relative}
+.bracket-conn svg{width:40px;height:100%}
+.bracket-final .bracket-node-inner{border-color:rgba(212,168,67,0.35);background:linear-gradient(135deg,rgba(212,168,67,0.08),var(--card))}
+.bracket-final .bracket-col-title{color:var(--gold-bright)}
+.bracket-champion{margin-top:16px;text-align:center;font-family:var(--font-display);font-size:32px;letter-spacing:3px;color:var(--gold);text-shadow:0 0 30px rgba(212,168,67,0.3)}
+@media(max-width:768px){
+.bracket-col{min-width:135px}
+.bracket-col-title{font-size:8px}
+.bracket-node-inner{padding:5px 6px}
+.bracket-node-inner .team-row input{font-size:10px;min-width:55px}
+.bracket-node-inner .score-dot{width:16px;height:16px;font-size:8px}
+.bracket-conn{min-width:24px}
+.bracket-conn svg{width:24px}
+.bracket-champion{font-size:22px}
+}
+@media(max-width:480px){
+.bracket-col{min-width:110px}
+.bracket-node-inner{padding:4px}
+.bracket-node-inner .team-row input{font-size:9px;min-width:45px}
+.bracket-conn{min-width:16px}
+.bracket-conn svg{width:16px}
+}
 /* Responsive */
 .group-card-toggle{display:none}
 @media(max-width:768px){
@@ -311,6 +358,12 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
 </style>
 </head>
 <body>
+<div class="splash" id="splash">
+  <div class="splash-ball">⚽</div>
+  <div class="splash-ring"></div>
+  <div class="splash-text">FIFA WORLD CUP 2026</div>
+  <div class="splash-sub">Loading...</div>
+</div>
 <div class="particles" id="particles"></div>
 <nav>
   <div class="nav-inner">
@@ -356,6 +409,7 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   </div>
 </div>
 <div class="modal-overlay" id="teamOverlay" onclick="closeTeamModal(event)"><div class="team-modal" id="teamModal" onclick="event.stopPropagation()"></div></div>
+<div class="player-card-overlay" id="playerCardOverlay" onclick="closePlayerCard()"><div class="player-card" id="playerCard" onclick="event.stopPropagation()"></div></div>
 <div class="toast-container" id="toastContainer"></div>
 <main>
   <section class="hero">
@@ -429,12 +483,13 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   <section class="bracket-section" id="bracket" style="padding:100px 0;position:relative">
     <div class="container">
       <div class="section-header reveal"><div class="section-tag">Road to the Final</div><h2>淘汰赛对阵图</h2></div>
+      <div class="bracket-toggle-btn reveal"><button class="expand-btn" onclick="toggleBracket()" id="bracketToggleBtn">收起对阵图 ▲</button></div>
       <div class="bracket-controls reveal" style="text-align:center;margin-bottom:24px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-        <button class="expand-btn" onclick="resetBracket()">🔄 重置预测</button>
+        <button class="expand-btn" onclick="resetBracket()">🔄 重置</button>
         <button class="expand-btn" onclick="exportBracket()">📸 导出预测图</button>
-        <button class="expand-btn" onclick="submitBracketPredictions()">💾 提交全部预测</button>
+        <button class="expand-btn" onclick="submitBracketPredictions()">💾 提交预测</button>
       </div>
-      <div class="bracket-container reveal" id="bracketContainer" style="overflow-x:auto"></div>
+      <div class="bracket-wrap reveal" id="bracketWrap"><div class="bracket-container" id="bracketContainer"></div></div>
       <div id="bracketMsg" style="text-align:center;padding:16px;color:var(--text-dim);font-size:12px">小组赛结束后将确定具体对阵。现在可以提前预测淘汰赛走势！</div>
     </div>
   </section>
@@ -502,70 +557,70 @@ const SUPABASE_READY=initSupabase();
    ════════════════════════════════════════════════════ */
 const GROUPS=[
   {name:'A',teams:[
-    {name:'墨西哥',en:'Mexico',cc:'mx',conf:'CONCACAF',rank:15,apps:18,best:'八强(1970,1986)',players:[{n:'Santiago Giménez',w:'Santiago_Giménez'},{n:'Hirving Lozano',w:'Hirving_Lozano'},{n:'Edson Álvarez',w:'Edson_Álvarez'},{n:'Guillermo Ochoa',w:'Guillermo_Ochoa'}]},
-    {name:'南非',en:'South Africa',cc:'za',conf:'CAF',rank:61,apps:3,best:'小组赛',players:[{n:'Percy Tau',w:'Percy_Tau'},{n:'Ronwen Williams',w:'Ronwen_Williams'},{n:'Themba Zwane',w:'Themba_Zwane'},{n:'Lyle Foster',w:'Lyle_Foster'}]},
-    {name:'韩国',en:'South Korea',cc:'kr',conf:'AFC',rank:22,apps:12,best:'四强(2002)',players:[{n:'Son Heung-min',w:'Son_Heung-min'},{n:'Kim Min-jae',w:'Kim_Min-jae'},{n:'Lee Kang-in',w:'Lee_Kang-in'},{n:'Hwang Hee-chan',w:'Hwang_Hee-chan'}]},
-    {name:'捷克',en:'Czech Republic',cc:'cz',conf:'UEFA',rank:38,apps:9,best:'亚军(1934,1962)',players:[{n:'Patrik Schick',w:'Patrik_Schick'},{n:'Tomáš Souček',w:'Tomáš_Souček'},{n:'Vladimír Coufal',w:'Vladimír_Coufal'},{n:'Adam Hložek',w:'Adam_Hložek'}]}
+    {name:'墨西哥',en:'Mexico',cc:'mx',conf:'CONCACAF',rank:15,apps:18,best:'八强(1970,1986)',players:[{n:'Santiago Giménez',age:24,club:'AC Milan',num:9,pos:'ST',val:'€50M'},{n:'Edson Álvarez',age:28,club:'West Ham',num:4,pos:'CDM',val:'€35M'}]},
+    {name:'南非',en:'South Africa',cc:'za',conf:'CAF',rank:61,apps:3,best:'小组赛',players:[{n:'Percy Tau',age:31,club:'Al Ahly',num:10,pos:'FW',val:'€3M'},{n:'Ronwen Williams',age:33,club:'Mamelodi Sundowns',num:1,pos:'GK',val:'€2M'}]},
+    {name:'韩国',en:'South Korea',cc:'kr',conf:'AFC',rank:22,apps:12,best:'四强(2002)',players:[{n:'Son Heung-min',age:33,club:'Tottenham',num:7,pos:'LW',val:'€45M'},{n:'Kim Min-jae',age:29,club:'Bayern Munich',num:4,pos:'CB',val:'€55M'}]},
+    {name:'捷克',en:'Czech Republic',cc:'cz',conf:'UEFA',rank:38,apps:9,best:'亚军(1934,1962)',players:[{n:'Patrik Schick',age:29,club:'Bayer Leverkusen',num:10,pos:'ST',val:'€35M'},{n:'Tomáš Souček',age:30,club:'West Ham',num:28,pos:'CM',val:'€25M'}]}
   ]},
   {name:'B',teams:[
-    {name:'加拿大',en:'Canada',cc:'ca',conf:'CONCACAF',rank:35,apps:3,best:'小组赛',players:[{n:'Alphonso Davies',w:'Alphonso_Davies'},{n:'Jonathan David',w:'Jonathan_David'},{n:'Tajon Buchanan',w:'Tajon_Buchanan'},{n:'Stephen Eustáquio',w:'Stephen_Eustáquio'}]},
-    {name:'波黑',en:'Bosnia and Herzegovina',cc:'ba',conf:'UEFA',rank:62,apps:1,best:'小组赛(2014)',players:[{n:'Edin Džeko',w:'Edin_Džeko'},{n:'Miralem Pjanić',w:'Miralem_Pjanić'},{n:'Ermedin Demirović',w:'Ermedin_Demirović'},{n:'Sead Kolašinac',w:'Sead_Kolašinac'}]},
-    {name:'卡塔尔',en:'Qatar',cc:'qa',conf:'AFC',rank:48,apps:2,best:'小组赛',players:[{n:'Akram Afif',w:'Akram_Afif'},{n:'Almoez Ali',w:'Almoez_Ali'},{n:'Hassan Al-Haydos',w:'Hassan_Al-Haydos'},{n:'Meshaal Barsham',w:'Meshaal_Barsham'}]},
-    {name:'瑞士',en:'Switzerland',cc:'ch',conf:'UEFA',rank:19,apps:13,best:'八强(1934,1938,1954)',players:[{n:'Granit Xhaka',w:'Granit_Xhaka'},{n:'Manuel Akanji',w:'Manuel_Akanji'},{n:'Breel Embolo',w:'Breel_Embolo'},{n:'Xherdan Shaqiri',w:'Xherdan_Shaqiri'}]}
+    {name:'加拿大',en:'Canada',cc:'ca',conf:'CONCACAF',rank:35,apps:3,best:'小组赛',players:[{n:'Alphonso Davies',age:25,club:'Bayern Munich',num:19,pos:'LB',val:'€50M'},{n:'Jonathan David',age:26,club:'Lille',num:20,pos:'ST',val:'€55M'}]},
+    {name:'波黑',en:'Bosnia and Herzegovina',cc:'ba',conf:'UEFA',rank:62,apps:1,best:'小组赛(2014)',players:[{n:'Edin Džeko',age:39,club:'Fenerbahçe',num:11,pos:'ST',val:'€2M'},{n:'Miralem Pjanić',age:35,club:'Al Sharjah',num:10,pos:'CM',val:'€5M'}]},
+    {name:'卡塔尔',en:'Qatar',cc:'qa',conf:'AFC',rank:48,apps:2,best:'小组赛',players:[{n:'Akram Afif',age:29,club:'Al Sadd',num:11,pos:'LW',val:'€8M'},{n:'Almoez Ali',age:29,club:'Al Duhail',num:19,pos:'ST',val:'€5M'}]},
+    {name:'瑞士',en:'Switzerland',cc:'ch',conf:'UEFA',rank:19,apps:13,best:'八强(1934,1938,1954)',players:[{n:'Granit Xhaka',age:33,club:'Bayer Leverkusen',num:10,pos:'CM',val:'€20M'},{n:'Manuel Akanji',age:30,club:'Man City',num:25,pos:'CB',val:'€45M'}]}
   ]},
   {name:'C',teams:[
-    {name:'巴西',en:'Brazil',cc:'br',conf:'CONMEBOL',rank:4,apps:23,best:'冠军(1958,1962,1970,1994,2002)',players:[{n:'Vinícius Júnior',w:'Vinícius_Júnior'},{n:'Rodrygo',w:'Rodrygo'},{n:'Alisson Becker',w:'Alisson_Becker'},{n:'Marquinhos',w:'Marquinhos'}]},
-    {name:'摩洛哥',en:'Morocco',cc:'ma',conf:'CAF',rank:12,apps:7,best:'四强(2022)',players:[{n:'Achraf Hakimi',w:'Achraf_Hakimi'},{n:'Brahim Díaz',w:'Brahim_Díaz'},{n:'Youssef En-Nesyri',w:'Youssef_En-Nesyri'},{n:'Noussair Mazraoui',w:'Noussair_Mazraoui'}]},
-    {name:'海地',en:'Haiti',cc:'ht',conf:'CONCACAF',rank:85,apps:1,best:'小组赛(1974)',players:[{n:'Frantzdy Pierrot',w:'Frantzdy_Pierrot'},{n:'Duckens Nazon',w:'Duckens_Nazon'},{n:'Carlens Arcus',w:'Carlens_Arcus'},{n:'Johny Placide',w:'Johny_Placide'}]},
-    {name:'苏格兰',en:'Scotland',cc:'gb-sct',conf:'UEFA',rank:28,apps:9,best:'小组赛',players:[{n:'Andy Robertson',w:'Andy_Robertson'},{n:'Scott McTominay',w:'Scott_McTominay'},{n:'John McGinn',w:'John_McGinn'},{n:'Billy Gilmour',w:'Billy_Gilmour'}]}
+    {name:'巴西',en:'Brazil',cc:'br',conf:'CONMEBOL',rank:4,apps:23,best:'冠军(1958,1962,1970,1994,2002)',players:[{n:'Vinícius Júnior',age:25,club:'Real Madrid',num:7,pos:'LW',val:'€200M'},{n:'Rodrygo',age:25,club:'Real Madrid',num:11,pos:'RW',val:'€110M'}]},
+    {name:'摩洛哥',en:'Morocco',cc:'ma',conf:'CAF',rank:12,apps:7,best:'四强(2022)',players:[{n:'Achraf Hakimi',age:27,club:'PSG',num:2,pos:'RB',val:'€60M'},{n:'Brahim Díaz',age:26,club:'Real Madrid',num:10,pos:'AM',val:'€40M'}]},
+    {name:'海地',en:'Haiti',cc:'ht',conf:'CONCACAF',rank:85,apps:1,best:'小组赛(1974)',players:[{n:'Frantzdy Pierrot',age:30,club:'Maccabi Haifa',num:9,pos:'ST',val:'€2M'},{n:'Duckens Nazon',age:31,club:'Kayserispor',num:10,pos:'FW',val:'€1M'}]},
+    {name:'苏格兰',en:'Scotland',cc:'gb-sct',conf:'UEFA',rank:28,apps:9,best:'小组赛',players:[{n:'Andy Robertson',age:31,club:'Liverpool',num:3,pos:'LB',val:'€30M'},{n:'Scott McTominay',age:29,club:'Napoli',num:39,pos:'CM',val:'€35M'}]}
   ]},
   {name:'D',teams:[
-    {name:'美国',en:'United States',cc:'us',conf:'CONCACAF',rank:13,apps:12,best:'季军(1930)',players:[{n:'Christian Pulisic',w:'Christian_Pulisic'},{n:'Giovanni Reyna',w:'Giovanni_Reyna'},{n:'Tim Weah',w:'Tim_Weah'},{n:'Folarin Balogun',w:'Folarin_Balogun'}]},
-    {name:'巴拉圭',en:'Paraguay',cc:'py',conf:'CONMEBOL',rank:56,apps:8,best:'八强(2010)',players:[{n:'Miguel Almirón',w:'Miguel_Almirón'},{n:'Julio Enciso',w:'Julio_Enciso'},{n:'Gustavo Gómez',w:'Gustavo_Gómez'},{n:'Ramón Sosa',w:'Ramón_Sosa'}]},
-    {name:'澳大利亚',en:'Australia',cc:'au',conf:'AFC',rank:26,apps:7,best:'十六强(2006,2022)',players:[{n:'Mathew Ryan',w:'Mathew_Ryan'},{n:'Harry Souttar',w:'Harry_Souttar'},{n:'Jackson Irvine',w:'Jackson_Irvine'},{n:'Craig Goodwin',w:'Craig_Goodwin'}]},
-    {name:'土耳其',en:'Turkey',cc:'tr',conf:'UEFA',rank:32,apps:3,best:'季军(2002)',players:[{n:'Hakan Çalhanoğlu',w:'Hakan_Çalhanoğlu'},{n:'Arda Güler',w:'Arda_Güler'},{n:'Kenan Yıldız',w:'Kenan_Yıldız'},{n:'Orkun Kökçü',w:'Orkun_Kökçü'}]}
+    {name:'美国',en:'United States',cc:'us',conf:'CONCACAF',rank:13,apps:12,best:'季军(1930)',players:[{n:'Christian Pulisic',age:27,club:'AC Milan',num:11,pos:'LW',val:'€45M'},{n:'Giovanni Reyna',age:23,club:'B. Dortmund',num:7,pos:'AM',val:'€25M'}]},
+    {name:'巴拉圭',en:'Paraguay',cc:'py',conf:'CONMEBOL',rank:56,apps:8,best:'八强(2010)',players:[{n:'Miguel Almirón',age:31,club:'Newcastle',num:24,pos:'RW',val:'€20M'},{n:'Julio Enciso',age:22,club:'Brighton',num:19,pos:'FW',val:'€25M'}]},
+    {name:'澳大利亚',en:'Australia',cc:'au',conf:'AFC',rank:26,apps:7,best:'十六强(2006,2022)',players:[{n:'Mathew Ryan',age:33,club:'AZ Alkmaar',num:1,pos:'GK',val:'€3M'},{n:'Harry Souttar',age:27,club:'Leicester City',num:19,pos:'CB',val:'€10M'}]},
+    {name:'土耳其',en:'Turkey',cc:'tr',conf:'UEFA',rank:32,apps:3,best:'季军(2002)',players:[{n:'Hakan Çalhanoğlu',age:31,club:'Inter Milan',num:20,pos:'CM',val:'€40M'},{n:'Arda Güler',age:20,club:'Real Madrid',num:15,pos:'AM',val:'€55M'}]}
   ]},
   {name:'E',teams:[
-    {name:'德国',en:'Germany',cc:'de',conf:'UEFA',rank:5,apps:21,best:'冠军(1954,1974,1990,2014)',players:[{n:'Jamal Musiala',w:'Jamal_Musiala'},{n:'Florian Wirtz',w:'Florian_Wirtz'},{n:'Kai Havertz',w:'Kai_Havertz'},{n:'Joshua Kimmich',w:'Joshua_Kimmich'}]},
-    {name:'库拉索',en:'Curaçao',cc:'cw',conf:'CONCACAF',rank:91,apps:0,best:'首次参赛',players:[{n:'Leandro Bacuna',w:'Leandro_Bacuna'},{n:'Juninho Bacuna',w:'Juninho_Bacuna'},{n:'Rangelo Janga',w:'Rangelo_Janga'},{n:'Cuco Martina',w:'Cuco_Martina'}]},
-    {name:'科特迪瓦',en:'Ivory Coast',cc:'ci',conf:'CAF',rank:41,apps:4,best:'小组赛',players:[{n:'Sébastien Haller',w:'Sébastien_Haller'},{n:'Franck Kessié',w:'Franck_Kessié'},{n:'Simon Adingra',w:'Simon_Adingra'},{n:'Nicolas Pépé',w:'Nicolas_Pépé'}]},
-    {name:'厄瓜多尔',en:'Ecuador',cc:'ec',conf:'CONMEBOL',rank:31,apps:5,best:'十六强(2006)',players:[{n:'Moisés Caicedo',w:'Moisés_Caicedo'},{n:'Piero Hincapié',w:'Piero_Hincapié'},{n:'Enner Valencia',w:'Enner_Valencia'},{n:'Kendry Páez',w:'Kendry_Páez'}]}
+    {name:'德国',en:'Germany',cc:'de',conf:'UEFA',rank:5,apps:21,best:'冠军(1954,1974,1990,2014)',players:[{n:'Jamal Musiala',age:22,club:'Bayern Munich',num:42,pos:'AM',val:'€140M'},{n:'Florian Wirtz',age:22,club:'Bayer Leverkusen',num:10,pos:'AM',val:'€130M'}]},
+    {name:'库拉索',en:'Curaçao',cc:'cw',conf:'CONCACAF',rank:91,apps:0,best:'首次参赛',players:[{n:'Leandro Bacuna',age:34,club:'FC Groningen',num:10,pos:'CM',val:'€800K'},{n:'Juninho Bacuna',age:28,club:'Birmingham City',num:20,pos:'CM',val:'€3M'}]},
+    {name:'科特迪瓦',en:'Ivory Coast',cc:'ci',conf:'CAF',rank:41,apps:4,best:'小组赛',players:[{n:'Franck Kessié',age:29,club:'Al Ahli',num:79,pos:'CM',val:'€25M'},{n:'Simon Adingra',age:24,club:'Brighton',num:24,pos:'LW',val:'€30M'}]},
+    {name:'厄瓜多尔',en:'Ecuador',cc:'ec',conf:'CONMEBOL',rank:31,apps:5,best:'十六强(2006)',players:[{n:'Moisés Caicedo',age:24,club:'Chelsea',num:25,pos:'CDM',val:'€90M'},{n:'Piero Hincapié',age:23,club:'Bayer Leverkusen',num:3,pos:'CB',val:'€40M'}]}
   ]},
   {name:'F',teams:[
-    {name:'荷兰',en:'Netherlands',cc:'nl',conf:'UEFA',rank:7,apps:12,best:'亚军(1974,1978,2010)',players:[{n:'Virgil van Dijk',w:'Virgil_van_Dijk'},{n:'Frenkie de Jong',w:'Frenkie_de_Jong'},{n:'Cody Gakpo',w:'Cody_Gakpo'},{n:'Memphis Depay',w:'Memphis_Depay'}]},
-    {name:'日本',en:'Japan',cc:'jp',conf:'AFC',rank:16,apps:8,best:'十六强(2002,2010,2018,2022)',players:[{n:'Kaoru Mitoma',w:'Kaoru_Mitoma'},{n:'Takefusa Kubo',w:'Takefusa_Kubo'},{n:'Wataru Endō',w:'Wataru_Endō'},{n:'Ayase Ueda',w:'Ayase_Ueda'}]},
-    {name:'瑞典',en:'Sweden',cc:'se',conf:'UEFA',rank:25,apps:12,best:'亚军(1958)',players:[{n:'Alexander Isak',w:'Alexander_Isak'},{n:'Dejan Kulusevski',w:'Dejan_Kulusevski'},{n:'Viktor Gyökeres',w:'Viktor_Gyökeres'},{n:'Emil Forsberg',w:'Emil_Forsberg'}]},
-    {name:'突尼斯',en:'Tunisia',cc:'tn',conf:'CAF',rank:45,apps:7,best:'小组赛',players:[{n:'Ellyes Skhiri',w:'Ellyes_Skhiri'},{n:'Hannibal Mejbri',w:'Hannibal_Mejbri'},{n:'Aïssa Laïdouni',w:'Aïssa_Laïdouni'},{n:'Youssef Msakni',w:'Youssef_Msakni'}]}
+    {name:'荷兰',en:'Netherlands',cc:'nl',conf:'UEFA',rank:7,apps:12,best:'亚军(1974,1978,2010)',players:[{n:'Virgil van Dijk',age:34,club:'Liverpool',num:4,pos:'CB',val:'€30M'},{n:'Frenkie de Jong',age:28,club:'Barcelona',num:21,pos:'CM',val:'€60M'}]},
+    {name:'日本',en:'Japan',cc:'jp',conf:'AFC',rank:16,apps:8,best:'十六强(2002,2010,2018,2022)',players:[{n:'Kaoru Mitoma',age:28,club:'Brighton',num:22,pos:'LW',val:'€45M'},{n:'Takefusa Kubo',age:24,club:'Real Sociedad',num:10,pos:'RW',val:'€50M'}]},
+    {name:'瑞典',en:'Sweden',cc:'se',conf:'UEFA',rank:25,apps:12,best:'亚军(1958)',players:[{n:'Alexander Isak',age:26,club:'Newcastle',num:14,pos:'ST',val:'€85M'},{n:'Dejan Kulusevski',age:25,club:'Tottenham',num:21,pos:'RW',val:'€55M'}]},
+    {name:'突尼斯',en:'Tunisia',cc:'tn',conf:'CAF',rank:45,apps:7,best:'小组赛',players:[{n:'Ellyes Skhiri',age:29,club:'Frankfurt',num:15,pos:'CM',val:'€15M'},{n:'Hannibal Mejbri',age:23,club:'Burnley',num:10,pos:'AM',val:'€10M'}]}
   ]},
   {name:'G',teams:[
-    {name:'比利时',en:'Belgium',cc:'be',conf:'UEFA',rank:8,apps:15,best:'季军(2018)',players:[{n:'Kevin De Bruyne',w:'Kevin_De_Bruyne'},{n:'Romelu Lukaku',w:'Romelu_Lukaku'},{n:'Jérémy Doku',w:'Jérémy_Doku'},{n:'Amadou Onana',w:'Amadou_Onana'}]},
-    {name:'埃及',en:'Egypt',cc:'eg',conf:'CAF',rank:34,apps:4,best:'小组赛',players:[{n:'Mohamed Salah',w:'Mohamed_Salah'},{n:'Omar Marmoush',w:'Omar_Marmoush'},{n:'Trézéguet',w:'Trézéguet'},{n:'Mostafa Mohamed',w:'Mostafa_Mohamed'}]},
-    {name:'伊朗',en:'Iran',cc:'ir',conf:'AFC',rank:20,apps:7,best:'小组赛',players:[{n:'Mehdi Taremi',w:'Mehdi_Taremi'},{n:'Sardar Azmoun',w:'Sardar_Azmoun'},{n:'Alireza Jahanbakhsh',w:'Alireza_Jahanbakhsh'},{n:'Saeid Ezatolahi',w:'Saeid_Ezatolahi'}]},
-    {name:'新西兰',en:'New Zealand',cc:'nz',conf:'OFC',rank:94,apps:3,best:'小组赛',players:[{n:'Chris Wood',w:'Chris_Wood_(footballer)'},{n:'Sarpreet Singh',w:'Sarpreet_Singh'},{n:'Liberato Cacace',w:'Liberato_Cacace'},{n:'Joe Bell',w:'Joe_Bell_(footballer)'}]}
+    {name:'比利时',en:'Belgium',cc:'be',conf:'UEFA',rank:8,apps:15,best:'季军(2018)',players:[{n:'Kevin De Bruyne',age:34,club:'Man City',num:17,pos:'CM',val:'€50M'},{n:'Jérémy Doku',age:23,club:'Man City',num:11,pos:'RW',val:'€55M'}]},
+    {name:'埃及',en:'Egypt',cc:'eg',conf:'CAF',rank:34,apps:4,best:'小组赛',players:[{n:'Mohamed Salah',age:33,club:'Liverpool',num:11,pos:'RW',val:'€55M'},{n:'Omar Marmoush',age:26,club:'Man City',num:7,pos:'ST',val:'€60M'}]},
+    {name:'伊朗',en:'Iran',cc:'ir',conf:'AFC',rank:20,apps:7,best:'小组赛',players:[{n:'Mehdi Taremi',age:33,club:'Inter Milan',num:99,pos:'ST',val:'€10M'},{n:'Sardar Azmoun',age:30,club:'Shabab Al Ahli',num:20,pos:'ST',val:'€8M'}]},
+    {name:'新西兰',en:'New Zealand',cc:'nz',conf:'OFC',rank:94,apps:3,best:'小组赛',players:[{n:'Chris Wood',age:34,club:'Nottm Forest',num:9,pos:'ST',val:'€5M'},{n:'Sarpreet Singh',age:26,club:'Union Berlin',num:10,pos:'AM',val:'€1M'}]}
   ]},
   {name:'H',teams:[
-    {name:'西班牙',en:'Spain',cc:'es',conf:'UEFA',rank:3,apps:17,best:'冠军(2010)',players:[{n:'Lamine Yamal',w:'Lamine_Yamal'},{n:'Pedri',w:'Pedri'},{n:'Rodri',w:'Rodri_(footballer)'},{n:'Nico Williams',w:'Nico_Williams'}]},
-    {name:'佛得角',en:'Cape Verde',cc:'cv',conf:'CAF',rank:72,apps:0,best:'首次参赛',players:[{n:'Ryan Mendes',w:'Ryan_Mendes'},{n:'Jovane Cabral',w:'Jovane_Cabral'},{n:'Bebé',w:'Bebé'},{n:'Stopira',w:'Stopira'}]},
-    {name:'沙特',en:'Saudi Arabia',cc:'sa',conf:'AFC',rank:53,apps:7,best:'十六强(1994)',players:[{n:'Salem Al-Dawsari',w:'Salem_Al-Dawsari'},{n:'Firas Al-Buraikan',w:'Firas_Al-Buraikan'},{n:'Saud Abdulhamid',w:'Saud_Abdulhamid'},{n:'Mohammed Al-Owais',w:'Mohammed_Al-Owais'}]},
-    {name:'乌拉圭',en:'Uruguay',cc:'uy',conf:'CONMEBOL',rank:14,apps:15,best:'冠军(1930,1950)',players:[{n:'Federico Valverde',w:'Federico_Valverde'},{n:'Darwin Núñez',w:'Darwin_Núñez'},{n:'Ronald Araújo',w:'Ronald_Araújo'},{n:'Manuel Ugarte',w:'Manuel_Ugarte'}]}
+    {name:'西班牙',en:'Spain',cc:'es',conf:'UEFA',rank:3,apps:17,best:'冠军(2010)',players:[{n:'Lamine Yamal',age:18,club:'Barcelona',num:19,pos:'RW',val:'€180M'},{n:'Pedri',age:23,club:'Barcelona',num:8,pos:'CM',val:'€100M'}]},
+    {name:'佛得角',en:'Cape Verde',cc:'cv',conf:'CAF',rank:72,apps:0,best:'首次参赛',players:[{n:'Ryan Mendes',age:35,club:'Fatih Karagümrük',num:10,pos:'FW',val:'€500K'},{n:'Jovane Cabral',age:27,club:'Sporting CP',num:7,pos:'LW',val:'€3M'}]},
+    {name:'沙特',en:'Saudi Arabia',cc:'sa',conf:'AFC',rank:53,apps:7,best:'十六强(1994)',players:[{n:'Salem Al-Dawsari',age:34,club:'Al Hilal',num:10,pos:'LW',val:'€3M'},{n:'Firas Al-Buraikan',age:25,club:'Al Ahli',num:9,pos:'ST',val:'€2M'}]},
+    {name:'乌拉圭',en:'Uruguay',cc:'uy',conf:'CONMEBOL',rank:14,apps:15,best:'冠军(1930,1950)',players:[{n:'Federico Valverde',age:27,club:'Real Madrid',num:8,pos:'CM',val:'€130M'},{n:'Darwin Núñez',age:26,club:'Liverpool',num:9,pos:'ST',val:'€65M'}]}
   ]},
   {name:'I',teams:[
-    {name:'法国',en:'France',cc:'fr',conf:'UEFA',rank:2,apps:17,best:'冠军(1998,2018)',players:[{n:'Kylian Mbappé',w:'Kylian_Mbappé'},{n:'Aurélien Tchouaméni',w:'Aurélien_Tchouaméni'},{n:'Ousmane Dembélé',w:'Ousmane_Dembélé'},{n:'Mike Maignan',w:'Mike_Maignan'}]},
-    {name:'塞内加尔',en:'Senegal',cc:'sn',conf:'CAF',rank:18,apps:4,best:'八强(2002)',players:[{n:'Sadio Mané',w:'Sadio_Mané'},{n:'Kalidou Koulibaly',w:'Kalidou_Koulibaly'},{n:'Ismaïla Sarr',w:'Ismaïla_Sarr'},{n:'Nicolas Jackson',w:'Nicolas_Jackson'}]},
-    {name:'伊拉克',en:'Iraq',cc:'iq',conf:'AFC',rank:69,apps:1,best:'小组赛(1986)',players:[{n:'Aymen Hussein',w:'Aymen_Hussein'},{n:'Ali Jasim',w:'Ali_Jasim'},{n:'Zidane Iqbal',w:'Zidane_Iqbal'},{n:'Jalal Hassan',w:'Jalal_Hassan'}]},
-    {name:'挪威',en:'Norway',cc:'no',conf:'UEFA',rank:42,apps:4,best:'十六强(1998)',players:[{n:'Erling Haaland',w:'Erling_Haaland'},{n:'Martin Ødegaard',w:'Martin_Ødegaard'},{n:'Alexander Sørloth',w:'Alexander_Sørloth'},{n:'Jens Petter Hauge',w:'Jens_Petter_Hauge'}]}
+    {name:'法国',en:'France',cc:'fr',conf:'UEFA',rank:2,apps:17,best:'冠军(1998,2018)',players:[{n:'Kylian Mbappé',age:27,club:'Real Madrid',num:9,pos:'ST',val:'€180M'},{n:'Aurélien Tchouaméni',age:26,club:'Real Madrid',num:14,pos:'CDM',val:'€90M'}]},
+    {name:'塞内加尔',en:'Senegal',cc:'sn',conf:'CAF',rank:18,apps:4,best:'八强(2002)',players:[{n:'Sadio Mané',age:33,club:'Al Nassr',num:10,pos:'LW',val:'€20M'},{n:'Kalidou Koulibaly',age:34,club:'Al Hilal',num:3,pos:'CB',val:'€15M'}]},
+    {name:'伊拉克',en:'Iraq',cc:'iq',conf:'AFC',rank:69,apps:1,best:'小组赛(1986)',players:[{n:'Aymen Hussein',age:29,club:'Al Shorta',num:9,pos:'ST',val:'€500K'},{n:'Ali Jasim',age:21,club:'Como',num:10,pos:'LW',val:'€3M'}]},
+    {name:'挪威',en:'Norway',cc:'no',conf:'UEFA',rank:42,apps:4,best:'十六强(1998)',players:[{n:'Erling Haaland',age:25,club:'Man City',num:9,pos:'ST',val:'€200M'},{n:'Martin Ødegaard',age:27,club:'Arsenal',num:8,pos:'CM',val:'€100M'}]}
   ]},
   {name:'J',teams:[
-    {name:'阿根廷',en:'Argentina',cc:'ar',conf:'CONMEBOL',rank:1,apps:19,best:'冠军(1978,1986,2022)',players:[{n:'Lionel Messi',w:'Lionel_Messi'},{n:'Julián Álvarez',w:'Julián_Álvarez'},{n:'Enzo Fernández',w:'Enzo_Fernández'},{n:'Emiliano Martínez',w:'Emiliano_Martínez'}]},
-    {name:'阿尔及利亚',en:'Algeria',cc:'dz',conf:'CAF',rank:39,apps:5,best:'十六强(2014)',players:[{n:'Riyad Mahrez',w:'Riyad_Mahrez'},{n:'Ismaël Bennacer',w:'Ismaël_Bennacer'},{n:'Amine Gouiri',w:'Amine_Gouiri'},{n:'Rayan Aït-Nouri',w:'Rayan_Aït-Nouri'}]},
-    {name:'奥地利',en:'Austria',cc:'at',conf:'UEFA',rank:23,apps:8,best:'季军(1954)',players:[{n:'David Alaba',w:'David_Alaba'},{n:'Marcel Sabitzer',w:'Marcel_Sabitzer'},{n:'Marko Arnautović',w:'Marko_Arnautović'},{n:'Konrad Laimer',w:'Konrad_Laimer'}]},
-    {name:'约旦',en:'Jordan',cc:'jo',conf:'AFC',rank:68,apps:0,best:'首次参赛',players:[{n:'Musa Al-Taamari',w:'Musa_Al-Taamari'},{n:'Yazan Al-Naimat',w:'Yazan_Al-Naimat'},{n:'Ihsan Haddad',w:'Ihsan_Haddad'},{n:'Yazid Abu Layla',w:'Yazid_Abu_Layla'}]}
+    {name:'阿根廷',en:'Argentina',cc:'ar',conf:'CONMEBOL',rank:1,apps:19,best:'冠军(1978,1986,2022)',players:[{n:'Lionel Messi',age:38,club:'Inter Miami',num:10,pos:'RW',val:'€25M'},{n:'Julián Álvarez',age:25,club:'Atlético Madrid',num:19,pos:'ST',val:'€90M'}]},
+    {name:'阿尔及利亚',en:'Algeria',cc:'dz',conf:'CAF',rank:39,apps:5,best:'十六强(2014)',players:[{n:'Riyad Mahrez',age:34,club:'Al Ahli',num:7,pos:'RW',val:'€15M'},{n:'Ismaël Bennacer',age:28,club:'AC Milan',num:4,pos:'CM',val:'€25M'}]},
+    {name:'奥地利',en:'Austria',cc:'at',conf:'UEFA',rank:23,apps:8,best:'季军(1954)',players:[{n:'David Alaba',age:33,club:'Real Madrid',num:4,pos:'CB',val:'€20M'},{n:'Marcel Sabitzer',age:31,club:'B. Dortmund',num:20,pos:'CM',val:'€25M'}]},
+    {name:'约旦',en:'Jordan',cc:'jo',conf:'AFC',rank:68,apps:0,best:'首次参赛',players:[{n:'Musa Al-Taamari',age:28,club:'Montpellier',num:10,pos:'RW',val:'€6M'},{n:'Yazan Al-Naimat',age:25,club:'Al Ahli',num:11,pos:'ST',val:'€2M'}]}
   ]},
   {name:'K',teams:[
-    {name:'葡萄牙',en:'Portugal',cc:'pt',conf:'UEFA',rank:6,apps:9,best:'冠军(2016)',players:[{n:'Cristiano Ronaldo',w:'Cristiano_Ronaldo'},{n:'Bruno Fernandes',w:'Bruno_Fernandes'},{n:'Rafael Leão',w:'Rafael_Leão'},{n:'Rúben Dias',w:'Rúben_Dias'}]},
-    {name:'刚果(金)',en:'DR Congo',cc:'cd',conf:'CAF',rank:55,apps:1,best:'小组赛(1974)',players:[{n:'Yoane Wissa',w:'Yoane_Wissa'},{n:'Chancel Mbemba',w:'Chancel_Mbemba'},{n:'Gaël Kakuta',w:'Gaël_Kakuta'},{n:'Silas Katompa',w:'Silas_Katompa'}]},
-    {name:'乌兹别克斯坦',en:'Uzbekistan',cc:'uz',conf:'AFC',rank:58,apps:0,best:'首次参赛',players:[{n:'Eldor Shomurodov',w:'Eldor_Shomurodov'},{n:'Jaloliddin Masharipov',w:'Jaloliddin_Masharipov'},{n:'Oston Urunov',w:'Oston_Urunov'},{n:'Utkir Yusupov',w:'Utkir_Yusupov'}]},
-    {name:'哥伦比亚',en:'Colombia',cc:'co',conf:'CONMEBOL',rank:9,apps:7,best:'八强(2014)',players:[{n:'Luis Díaz',w:'Luis_Díaz'},{n:'James Rodríguez',w:'James_Rodríguez'},{n:'Jhon Durán',w:'Jhon_Durán'},{n:'Davinson Sánchez',w:'Davinson_Sánchez'}]}
+    {name:'葡萄牙',en:'Portugal',cc:'pt',conf:'UEFA',rank:6,apps:9,best:'冠军(2016)',players:[{n:'Cristiano Ronaldo',age:40,club:'Al Nassr',num:7,pos:'ST',val:'€12M'},{n:'Bruno Fernandes',age:31,club:'Man United',num:8,pos:'AM',val:'€65M'}]},
+    {name:'刚果(金)',en:'DR Congo',cc:'cd',conf:'CAF',rank:55,apps:1,best:'小组赛(1974)',players:[{n:'Yoane Wissa',age:29,club:'Brentford',num:11,pos:'FW',val:'€25M'},{n:'Chancel Mbemba',age:31,club:'Marseille',num:5,pos:'CB',val:'€8M'}]},
+    {name:'乌兹别克斯坦',en:'Uzbekistan',cc:'uz',conf:'AFC',rank:58,apps:0,best:'首次参赛',players:[{n:'Eldor Shomurodov',age:29,club:'Roma',num:14,pos:'ST',val:'€5M'},{n:'Jaloliddin Masharipov',age:32,club:'Esteghlal',num:10,pos:'LW',val:'€2M'}]},
+    {name:'哥伦比亚',en:'Colombia',cc:'co',conf:'CONMEBOL',rank:9,apps:7,best:'八强(2014)',players:[{n:'Luis Díaz',age:28,club:'Liverpool',num:7,pos:'LW',val:'€85M'},{n:'James Rodríguez',age:34,club:'Rayo Vallecano',num:10,pos:'AM',val:'€4M'}]}
   ]},
   {name:'L',teams:[
     {name:'英格兰',en:'England',cc:'gb-eng',conf:'UEFA',rank:10,apps:17,best:'冠军(1966)',players:[{n:'Jude Bellingham',w:'Jude_Bellingham'},{n:'Harry Kane',w:'Harry_Kane'},{n:'Phil Foden',w:'Phil_Foden'},{n:'Declan Rice',w:'Declan_Rice'}]},
@@ -717,7 +772,10 @@ async function loadUserData(){
 
 /* ═══ RENDER: Groups ═══ */
 function renderGroups(){
-  document.getElementById('groupsGrid').innerHTML=GROUPS.map(g=>`<div class="group-card reveal"><div class="group-header">${g.name} 组<button class="group-card-toggle" onclick="event.stopPropagation();this.closest('.group-card').classList.toggle('collapsed');this.textContent=this.closest('.group-card').classList.contains('collapsed')?'▶':'▼'">▼</button></div><table class="group-table"><thead><tr><th>球队</th><th>P</th><th>GD</th><th>PTS</th></tr></thead><tbody>${g.teams.map(t=>`<tr><td>${flagImg(t.cc,24)} <a class="team-link" onclick="openTeamPage('${t.name}')" title="点击查看球队详情">${t.name}</a></td><td>0</td><td>0</td><td class="pts">0</td></tr>`).join('')}</tbody></table></div>`).join('');
+  document.getElementById('groupsGrid').innerHTML=GROUPS.map(g=>{
+    const sorted=[...g.teams].sort((a,b)=>a.name.localeCompare(b.name,'zh'));
+    return`<div class="group-card reveal"><div class="group-header">${g.name} 组<button class="group-card-toggle" onclick="event.stopPropagation();this.closest('.group-card').classList.toggle('collapsed');this.textContent=this.closest('.group-card').classList.contains('collapsed')?'▶':'▼'">▼</button></div><table class="group-table"><thead><tr><th>球队</th><th>P</th><th>GD</th><th>PTS</th></tr></thead><tbody>${sorted.map(t=>`<tr><td>${flagImg(t.cc,24)} <a class="team-link" onclick="openTeamPage('${t.name}')" title="点击查看球队详情">${t.name}</a></td><td>0</td><td>0</td><td class="pts">0</td></tr>`).join('')}</tbody></table></div>`;
+  }).join('');
 }
 
 /* ═══ RENDER: Schedule (collapsible by date) ═══ */
@@ -741,16 +799,43 @@ function renderMatchCard(m,idx){
   const aFlag=aInfo?flagImg(aInfo.cc,28):'';
   const hName=isTBD?`<span style="color:var(--text-dim);font-size:13px">${m.home}</span>`:`<a class="team-link" onclick="openTeamPage('${m.home}')">${hFlag} ${m.home}</a>`;
   const aName=isTBD?`<span style="color:var(--text-dim);font-size:13px">${m.away}</span>`:`<a class="team-link" onclick="openTeamPage('${m.away}')">${aFlag} ${m.away}</a>`;
-  const predHTML=!isTBD?`<div class="match-pred-inline"><input class="pred-inline-input" placeholder="-" maxlength="2" id="schH_${idx}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onclick="event.stopPropagation()"><span class="pred-inline-vs">:</span><input class="pred-inline-input" placeholder="-" maxlength="2" id="schA_${idx}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onclick="event.stopPropagation()"><button class="pred-inline-btn" onclick="event.stopPropagation();submitPrediction(${idx+1},'${m.home.replace(/'/g,"\\'")}','${m.away.replace(/'/g,"\\'")}','sch')" title="快速预测">猜</button></div>`:'<span style="font-size:10px;color:var(--text-dim)">待定</span>';
+  const matchDbId=idx+1;
+const predHTML=!isTBD?`<div class="match-pred-inline"><input class="pred-inline-input" placeholder="-" maxlength="2" id="schH_${matchDbId}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onclick="event.stopPropagation()"><span class="pred-inline-vs">:</span><input class="pred-inline-input" placeholder="-" maxlength="2" id="schA_${matchDbId}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onclick="event.stopPropagation()"><button class="pred-inline-btn" onclick="event.stopPropagation();submitPrediction(${matchDbId},'${m.home.replace(/'/g,"\\'")}','${m.away.replace(/'/g,"\\'")}','sch')" title="快速预测">猜</button></div>`:'<span style="font-size:10px;color:var(--text-dim)">待定</span>';
   return `<div class="match-card reveal"><div class="match-date"><strong>${m.date}</strong>${m.time} ET</div><div class="match-info"><div class="match-teams">${hName}<span class="match-vs">VS</span>${aName}</div><div class="match-venue">${m.venue}${m.group?' · '+m.group+'组':''} · <span style="font-size:10px;color:var(--text-dim)">${stageLabel}</span></div></div><div class="match-actions">${predHTML}</div></div>`;
 }
 function findTodayKey(){const now=getSimDate();const m=now.getMonth()+1,d=now.getDate();const test=m+'月'+d+'日';return ALL_MATCHES.find(m=>m.date===test)?test:null;}
 function toggleDay(dayId){document.getElementById(dayId).classList.toggle('open');const a=document.getElementById('arrow-'+dayId);if(a)a.classList.toggle('open');}
-function expandAll(){document.querySelectorAll('.day-matches').forEach(d=>d.classList.add('open'));document.querySelectorAll('.day-arrow').forEach(a=>a.classList.add('open'));}
-function collapseAll(){document.querySelectorAll('.day-matches').forEach(d=>d.classList.remove('open'));document.querySelectorAll('.day-arrow').forEach(a=>a.classList.remove('open'));}
-function scrollToToday(){collapseAll();const todayKey=findTodayKey();if(!todayKey){showToast('今天没有比赛，已显示首日赛程');expandAll();return;}const dayId='day-'+todayKey.replace(/[月日]/g,'-');const el=document.getElementById(dayId);if(el){el.classList.add('open');const a=document.getElementById('arrow-'+dayId);if(a)a.classList.add('open');el.scrollIntoView({behavior:'smooth',block:'center'});}}
+function expandAll(){document.querySelectorAll('.day-matches').forEach(d=>d.classList.add('open'));document.querySelectorAll('.day-arrow').forEach(a=>a.classList.add('open'));document.querySelectorAll('.schedule-day').forEach(s=>s.style.display='');}
+function collapseAll(){
+  document.querySelectorAll('.day-matches').forEach(d=>d.classList.remove('open'));
+  document.querySelectorAll('.day-arrow').forEach(a=>a.classList.remove('open'));
+  const todayKey=findTodayKey();
+  const firstKey=ALL_MATCHES[0]?.date;
+  const showKey=todayKey||firstKey;
+  document.querySelectorAll('.schedule-day').forEach(s=>{
+    const hdr=s.querySelector('.day-header-text');
+    if(!hdr)return;
+    const txt=hdr.textContent;
+    if(txt.includes(showKey)){
+      s.style.display='';
+      const dm=s.querySelector('.day-matches');
+      if(dm)dm.classList.add('open');
+      const arr=s.querySelector('.day-arrow');
+      if(arr)arr.classList.add('open');
+    }else{
+      s.style.display='none';
+    }
+  });
+}
+function scrollToToday(){const todayKey=findTodayKey();if(!todayKey){showToast('今天没有比赛');return;}const dayId='day-'+todayKey.replace(/[月日]/g,'-');collapseAll();const el=document.getElementById(dayId);if(el){el.parentElement.style.display='';const dm=el.parentElement.querySelector('.day-matches');if(dm)dm.classList.add('open');const a=document.getElementById('arrow-'+dayId);if(a)a.classList.add('open');el.parentElement.scrollIntoView({behavior:'smooth',block:'center'});}}
 function buildJumpMenu(){const sel=document.querySelector('.jump-select');if(!sel)return;const dates=[...new Set(ALL_MATCHES.map(m=>m.date))];const ga=sel.querySelector('optgroup[label="小组赛"]');const ka=sel.querySelector('optgroup[label="淘汰赛"]');dates.forEach(d=>{const ms=ALL_MATCHES.filter(m=>m.date===d);const isGrp=ms[0]&&ms[0].stage==='group';const opt=document.createElement('option');opt.value=d;opt.textContent=d+' ('+ms.length+'场)'; (isGrp?ga:ka).appendChild(opt);});}
-function jumpToDate(d){if(!d)return;const dayId='day-'+d.replace(/[月日]/g,'-');expandAll();setTimeout(()=>{const el=document.getElementById(dayId);if(el){el.classList.add('open');const a=document.getElementById('arrow-'+dayId);if(a)a.classList.add('open');el.scrollIntoView({behavior:'smooth',block:'start'});}},150);}
+function jumpToDate(d){if(!d)return;const dayId='day-'+d.replace(/[月日]/g,'-');collapseAll();setTimeout(()=>{const el=document.getElementById(dayId);if(el){el.parentElement.style.display='';const dm=el.parentElement.querySelector('.day-matches');if(dm)dm.classList.add('open');const a=document.getElementById('arrow-'+dayId);if(a)a.classList.add('open');el.parentElement.scrollIntoView({behavior:'smooth',block:'start'});}},150);}
+function renderThirdPlace(){
+  const tbody=document.getElementById('thirdPlaceTbody');
+  const thirds=GROUPS.map(g=>({team:[...g.teams].sort((a,b)=>a.name.localeCompare(b.name,'zh'))[2],group:g.name}));
+  thirds.sort((a,b)=>a.team.name.localeCompare(b.team.name,'zh'));
+  tbody.innerHTML=thirds.map((t,i)=>`<tr><td>${i+1}</td><td>${flagImg(t.team.cc,20)} ${t.team.name}</td><td>${t.group}组</td><td>0</td><td>0</td><td class="pts">0</td></tr>`).join('');
+}
 function toggleThirdPlace(){const b=document.getElementById('thirdPlaceBody');const a=document.getElementById('tpArrow');const o=b.style.display!=='none';b.style.display=o?'none':'block';if(a)a.textContent=o?'▼':'▲';}
 function toggleRules(){const b=document.getElementById('rulesBody');const a=document.getElementById('rulesArrow');const o=b.style.display!=='none';b.style.display=o?'none':'block';if(a)a.textContent=o?'▶':'▼';}
 
@@ -855,7 +940,7 @@ function openTeamPage(teamName){
     <a class="back" href="javascript:window.close()">← 关闭返回</a>
     <div class="header"><img class="flag" src="https://flagcdn.com/w160/${info.cc}.png" alt="" onerror="this.style.display='none'"><h1>${info.name}</h1><div class="en">${info.en}</div><div class="conf">${info.conf}</div></div>
     <div class="stats"><div class="stat"><div class="stat-val">#${info.rank}</div><div class="stat-lbl">FIFA 排名</div></div><div class="stat"><div class="stat-val">${info.apps}</div><div class="stat-lbl">参赛次数</div></div><div class="stat"><div class="stat-val" style="font-size:16px">${info.best}</div><div class="stat-lbl">历史最佳</div></div></div>
-    <h2>核心球员</h2><div class="players">${info.players.map(p=>`<div class="player"><div class="player-name">${p.n}</div><a class="player-link" href="https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=${encodeURIComponent(p.n)}" target="_blank" rel="noopener">Transfermarkt 资料 →</a></div>`).join('')}</div>
+    <h2>核心球员</h2><div class="players">${info.players.map((p,i)=>`<div class="player" onclick="window.opener.openPlayerCard('${info.name}',${i})" style="cursor:pointer" title="点击查看球员详情"><div class="player-name">${p.n}</div><div style="font-size:11px;color:#7d8899;margin-top:2px">${p.club||''} · #${p.num||'—'} · ${p.pos||''}</div></div>`).join('')}</div>
     <h2>赛程安排 (${teamMatches.length}场)</h2><table><thead><tr><th>日期</th><th>主队</th><th></th><th>客队</th><th>阶段</th><th>球场</th></tr></thead><tbody>${matchRows}</tbody></table>
     <div style="text-align:center;padding:20px;color:#7d8899;font-size:12px">数据来源: FIFA / Transfermarkt · 世界杯2026预测平台</div>
   </div></body></html>`);w.document.close();
@@ -863,6 +948,25 @@ function openTeamPage(teamName){
 
 /* ═══ TEAM INFO MODAL (keep for backward compat, now redirects to team page) ═══ */
 function openTeamModal(teamName){openTeamPage(teamName);}
+function openPlayerCard(teamName,playerIdx){
+  const info=TEAM_INFO[teamName];if(!info||!info.players[playerIdx])return;
+  const p=info.players[playerIdx];
+  const card=document.getElementById('playerCard');
+  card.innerHTML=`
+    <button class="player-card-close" onclick="closePlayerCard()">&times;</button>
+    <div class="player-card-flag">${flagImg(info.cc,48)}</div>
+    <div class="player-card-name">${p.n}</div>
+    <div class="player-card-club">${p.club||'—'}</div>
+    <div class="player-card-stats" style="margin-top:16px">
+      <div class="player-stat"><div class="player-stat-label">年龄</div><div class="player-stat-value">${p.age||'—'}岁</div></div>
+      <div class="player-stat"><div class="player-stat-label">位置</div><div class="player-stat-value">${p.pos||'—'}</div></div>
+      <div class="player-stat"><div class="player-stat-label">号码</div><div class="player-stat-value">#${p.num||'—'}</div></div>
+      <div class="player-stat"><div class="player-stat-label">身价</div><div class="player-stat-value">${p.val||'—'}</div></div>
+      <div class="player-stat" style="grid-column:1/-1"><div class="player-stat-label">国家队</div><div class="player-stat-value">${info.name} (${info.conf})</div></div>
+    </div>`;
+  document.getElementById('playerCardOverlay').classList.add('active');
+}
+function closePlayerCard(){document.getElementById('playerCardOverlay').classList.remove('active');}
 
 /* ═══ TOAST ═══ */
 function showToast(message,type=''){const c=document.getElementById('toastContainer');const t=document.createElement('div');t.className='toast '+type;t.textContent=message;c.appendChild(t);setTimeout(()=>{if(t.parentNode)t.remove();},3000);}
@@ -879,33 +983,45 @@ function setupRealtimeSubscriptions(){
 
 /* ═══ BRACKET ═══ */
 const BRACKET_ROUNDS=[{name:'32强',slots:16,label:'R32'},{name:'16强',slots:8,label:'R16'},{name:'8强',slots:4,label:'QF'},{name:'半决赛',slots:2,label:'SF'},{name:'决赛',slots:1,label:'FINAL'}];
-let bracketData={};
-function getPlaceholder(key,pos){
+let bracketData={},bracketVisible=true;
+function getPlaceholder(key,pos,slotIdx){
   const[lbl,idx]=key.split('-');const n=parseInt(idx)+1;
-  if(lbl==='R32')return pos==='home'?'小组第1/'+n:'对手待定';
+  if(lbl==='R32')return pos==='home'?'小组第1':'对手待定';
   if(lbl==='FINAL')return pos==='home'?'半决赛胜者1':'半决赛胜者2';
-  return (lbl==='R16'?'R32胜者':lbl==='QF'?'R16胜者':lbl==='SF'?'QF胜者':'')+' '+(pos==='home'?(n*2-1):(n*2));
+  const prevRd={R16:'R32',QF:'R16',SF:'QF',FINAL:'SF'}[lbl];
+  if(prevRd)return prevRd+' M'+(slotIdx*2+(pos==='home'?1:2))+' 胜者';
+  return '待定';
 }
 function renderBracket(){
   const container=document.getElementById('bracketContainer');
   let html='<div class="bracket-tree">';
   BRACKET_ROUNDS.forEach((round,rIdx)=>{
     const isFinal=round.label==='FINAL';
-    html+=`<div class="bracket-round ${isFinal?'bracket-final':''}"><div class="bracket-round-label">${round.name}</div>`;
+    html+=`<div class="bracket-col ${isFinal?'bracket-final':''}"><div class="bracket-col-title ${isFinal?'final-col':''}">${round.name}</div>`;
     for(let i=0;i<round.slots;i++){
       const key=round.label+'-'+i;const d=bracketData[key]||{};
-      html+=`<div class="bracket-match" style="margin:${isFinal?'6px 0':'1px 0'}">
-        <div class="bracket-slot">${flagImg(null,14)}<input class="team-input" placeholder="${getPlaceholder(key,'home')}" value="${d.home||''}" onchange="updateBracket('${key}','home',this.value)"> <input class="slot-score" placeholder="-" value="${d.hScore||''}" onchange="updateBracket('${key}','hScore',this.value)" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)"></div>
-        <div class="bracket-slot">${flagImg(null,14)}<input class="team-input" placeholder="${getPlaceholder(key,'away')}" value="${d.away||''}" onchange="updateBracket('${key}','away',this.value)"> <input class="slot-score" placeholder="-" value="${d.aScore||''}" onchange="updateBracket('${key}','aScore',this.value)" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)"></div>
-      </div>`;
+      html+=`<div class="bracket-node"><div class="bracket-node-inner">
+        <div class="team-row">${flagImg(null,12)}<input placeholder="${getPlaceholder(key,'home',i)}" value="${d.home||''}" onchange="updateBracket('${key}','home',this.value)"><input class="score-dot" placeholder="-" value="${d.hScore||''}" onchange="updateBracket('${key}','hScore',this.value)" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)"></div>
+        <div class="team-row">${flagImg(null,12)}<input placeholder="${getPlaceholder(key,'away',i)}" value="${d.away||''}" onchange="updateBracket('${key}','away',this.value)"><input class="score-dot" placeholder="-" value="${d.aScore||''}" onchange="updateBracket('${key}','aScore',this.value)" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)"></div>
+      </div></div>`;
     }
     html+='</div>';
-    if(rIdx<BRACKET_ROUNDS.length-1)html+='<div class="bracket-connector">→</div>';
+    if(rIdx<BRACKET_ROUNDS.length-1){
+      html+=`<div class="bracket-conn"><svg viewBox="0 0 40 100" preserveAspectRatio="none"><line x1="0" y1="50" x2="40" y2="50" stroke="rgba(255,255,255,0.15)" stroke-width="1"/></svg></div>`;
+    }
   });
   html+='</div>';
   const champ=document.getElementById('bracketChampion')?.textContent||'';
   html+=`<div class="bracket-champion" id="bracketChampion">${champ||'🏆'}</div>`;
   container.innerHTML=html;
+  if(!bracketVisible){document.getElementById('bracketWrap').style.display='none';}
+}
+function toggleBracket(){
+  bracketVisible=!bracketVisible;
+  const wrap=document.getElementById('bracketWrap');
+  const btn=document.getElementById('bracketToggleBtn');
+  wrap.style.display=bracketVisible?'block':'none';
+  btn.textContent=bracketVisible?'收起对阵图 ▲':'展开对阵图 ▼';
 }
 function updateBracket(key,field,value){
   if(!bracketData[key])bracketData[key]={};
@@ -937,7 +1053,7 @@ function observeReveals(){const els=document.querySelectorAll('.reveal:not(.visi
 function createParticles(){const c=document.getElementById('particles');for(let i=0;i<30;i++){const p=document.createElement('div');p.classList.add('particle');const s=Math.random()*4+2;p.style.width=s+'px';p.style.height=s+'px';p.style.left=Math.random()*100+'%';p.style.animationDuration=(Math.random()*12+8)+'s';p.style.animationDelay=(Math.random()*10)+'s';p.style.opacity=(Math.random()*0.3).toString();c.appendChild(p);}}
 function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
 function setupSmoothScroll(){document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth'});});});}
-function setupKeyboard(){document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAuthModal();closeTeamModal();const dd=document.getElementById('searchDropdown');if(dd)dd.classList.remove('open');}});}
+function setupKeyboard(){document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAuthModal();closeTeamModal();closePlayerCard();const dd=document.getElementById('searchDropdown');if(dd)dd.classList.remove('open');}});}
 
 /* ═══ SEARCH ═══ */
 let searchTimer=null;
@@ -945,7 +1061,7 @@ function buildSearchIndex(){
   const idx=[];
   Object.values(TEAM_INFO).forEach(t=>{
     idx.push({type:'team',icon:'🏴',name:t.name,sub:t.en+' · '+t.conf+' · 排名#'+t.rank,keywords:[t.name,t.en,t.conf,'FIFA'],act:'team',data:t.name});
-    t.players.forEach(p=>{idx.push({type:'player',icon:'👤',name:p.n,sub:t.name+' 球员',keywords:[p.n,t.name],act:'team',data:t.name});});
+    t.players.forEach((p,pi)=>{idx.push({type:'player',icon:'👤',name:p.n,sub:t.name+' · '+p.club+' · '+p.pos,keywords:[p.n,t.name,p.club,p.pos],act:'player',data:{team:t.name,idx:pi}});});
   });
   ALL_MATCHES.forEach((m,i)=>{
     const venue=m.venue,group=m.group||'',date=m.date;
@@ -966,6 +1082,7 @@ function executeSearchAction(item){
   document.getElementById('searchInput').value='';
   if(!item)return;
   if(item.act==='team'){openTeamPage(item.data);return;}
+  if(item.act==='player'){openPlayerCard(item.data.team,item.data.idx);return;}
   if(item.act==='match'){
     const dayId='day-'+item.data.replace(/[月日]/g,'-');expandAll();
     setTimeout(()=>{const el=document.getElementById(dayId);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},150);
@@ -994,13 +1111,14 @@ function doSearch(){
 /* ═══ INIT ═══ */
 function init(){
   getSearchIdx();
-  renderGroups();renderMatches();renderBracket();renderPredictions();renderLeaderboard();
+  renderGroups();renderThirdPlace();renderMatches();renderBracket();renderPredictions();renderLeaderboard();
   buildJumpMenu();
   setTimeout(()=>{const tk=findTodayKey();if(tk){const did='day-'+tk.replace(/[月日]/g,'-');const el=document.getElementById(did);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}},600);
   createParticles();observeReveals();setupFilters();setupSmoothScroll();setupKeyboard();setupRealtimeSubscriptions();
   checkSession().then(()=>{renderPredictions();renderLeaderboard();});
   updateCountdown();setInterval(updateCountdown,1000);
   document.body.classList.add('loaded');
+  setTimeout(()=>{const splash=document.getElementById('splash');if(splash)splash.classList.add('hide');},1200);
 }
 document.addEventListener('DOMContentLoaded',init);
 </script>
