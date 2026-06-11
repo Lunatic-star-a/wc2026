@@ -377,7 +377,7 @@ footer strong{color:var(--gold);}
   100%{transform:translateY(500px) scale(60)}
 }
 .splash-flash{position:absolute;inset:0;z-index:10;pointer-events:none;animation:splashFlash 2.2s ease forwards}
-@keyframes splashFlash{0%,86%{background:transparent}93%{background:rgba(10,14,23,0.92)}100%{background:var(--navy)}}
+@keyframes splashFlash{0%,86%{background:transparent}93%{background:rgba(10,14,23,0.92)}98%{background:var(--navy)}100%{opacity:0;background:transparent}}
 /* Particles */
 .particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
 .particle{position:absolute;border-radius:50%;background:var(--pitch);animation:float-up linear infinite;opacity:0;}
@@ -1150,7 +1150,7 @@ function closePlayerCard(){document.getElementById('playerCardOverlay').classLis
 function showToast(message,type=''){const c=document.getElementById('toastContainer');const t=document.createElement('div');t.className='toast '+type;t.textContent=message;c.appendChild(t);setTimeout(()=>{if(t.parentNode)t.remove();},3000);}
 
 /* ═══ COUNTDOWN ═══ */
-function updateCountdown(){const start=new Date('2026-06-11T15:00:00-04:00');const now=getSimDate();const diff=now-start;const el=document.getElementById('countdown');const cdLabel=document.querySelector('.cd-label');if(diff<0){el.innerHTML='<span>'+Math.ceil(-diff/86400000)+'</span> 天后开幕';return;}const days=Math.floor(diff/86400000)+1;if(cdLabel)cdLabel.textContent='世界杯已进行';el.innerHTML='<span>'+days+'</span> 天';}
+function updateCountdown(){const start=new Date('2026-06-11T15:00:00-04:00');const now=getSimDate();const diff=now-start;const el=document.getElementById('countdown');const cdLabel=document.querySelector('.cd-label');if(diff<0){const left=-diff;if(left<86400000){const hrs=Math.floor(left/3600000);const mins=Math.floor((left/60000)%60);el.innerHTML='<span>'+hrs+'</span> 时 <span>'+String(mins).padStart(2,'0')+'</span> 分后开幕';}else{el.innerHTML='<span>'+Math.ceil(left/86400000)+'</span> 天后开幕';}return;}const days=Math.floor(diff/86400000)+1;if(cdLabel)cdLabel.textContent='世界杯已进行';el.innerHTML='<span>'+days+'</span> 天';}
 
 /* ═══ REALTIME ═══ */
 function setupRealtimeSubscriptions(){
