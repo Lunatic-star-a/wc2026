@@ -358,26 +358,26 @@ footer strong{color:var(--gold);}
 @keyframes livePulse{0%,100%{box-shadow:0 0 0 0 rgba(231,76,60,0.4);}50%{box-shadow:0 0 0 8px rgba(231,76,60,0);}}
 @keyframes scoreBlink{0%,100%{opacity:1;}50%{opacity:0.5;}}
 @keyframes float-up{0%{transform:translateY(100vh) scale(0);opacity:0;}10%{opacity:0.5;}90%{opacity:0;}100%{transform:translateY(-10vh) scale(1.5);opacity:0;}}
-/* Splash */
-.splash{position:fixed;inset:0;z-index:9999;background:var(--navy);display:flex;align-items:center;justify-content:center;transition:opacity 0.3s ease;overflow:hidden;animation:splashFadeOut 0.3s ease 2.2s forwards}
-.splash.hide{opacity:0;visibility:hidden;pointer-events:none}
-.splash-ball{font-size:64px;position:relative;z-index:2;animation:splashBallAnim 2s ease forwards;display:block;text-align:center}
-@keyframes splashBallAnim{
-  0%{transform:translateY(0) scale(1)}
-  12%{transform:translateY(-70px) scale(1,0.87)}
-  25%{transform:translateY(0) scale(1.06,0.94)}
-  35%{transform:translateY(-35px) scale(1,0.9)}
-  48%{transform:translateY(0) scale(1.03,0.97)}
-  55%{transform:translateY(-15px) scale(1,0.95)}
-  62%{transform:translateY(0) scale(1)}
-  72%{transform:translateY(150px) scale(4) rotate(180deg)}
-  82%{transform:translateY(250px) scale(15) rotate(360deg)}
-  91%{transform:translateY(400px) scale(35)}
-  100%{transform:translateY(600px) scale(50)}
-}
-.splash-flash{position:absolute;inset:0;z-index:10;pointer-events:none;animation:splashFlash 2.15s ease forwards}
-@keyframes splashFlash{0%,84%{background:transparent}92%{background:rgba(10,14,23,0.95)}100%{background:transparent}}
-@keyframes splashFadeOut{to{opacity:0;visibility:hidden}}
+/* Splash — commented out */
+/* .splash{position:fixed;inset:0;z-index:9999;background:var(--navy);display:flex;align-items:center;justify-content:center;transition:opacity 0.3s ease;overflow:hidden;animation:splashFadeOut 0.3s ease 2.2s forwards} */
+/* .splash.hide{opacity:0;visibility:hidden;pointer-events:none} */
+/* .splash-ball{font-size:64px;position:relative;z-index:2;animation:splashBallAnim 2s ease forwards;display:block;text-align:center} */
+/* @keyframes splashBallAnim{ */
+/*   0%{transform:translateY(0) scale(1)} */
+/*   12%{transform:translateY(-70px) scale(1,0.87)} */
+/*   25%{transform:translateY(0) scale(1.06,0.94)} */
+/*   35%{transform:translateY(-35px) scale(1,0.9)} */
+/*   48%{transform:translateY(0) scale(1.03,0.97)} */
+/*   55%{transform:translateY(-15px) scale(1,0.95)} */
+/*   62%{transform:translateY(0) scale(1)} */
+/*   72%{transform:translateY(150px) scale(4) rotate(180deg)} */
+/*   82%{transform:translateY(250px) scale(15) rotate(360deg)} */
+/*   91%{transform:translateY(400px) scale(35)} */
+/*   100%{transform:translateY(600px) scale(50)} */
+/* } */
+/* .splash-flash{position:absolute;inset:0;z-index:10;pointer-events:none;animation:splashFlash 2.15s ease forwards} */
+/* @keyframes splashFlash{0%,84%{background:transparent}92%{background:rgba(10,14,23,0.95)}100%{background:transparent}} */
+/* @keyframes splashFadeOut{to{opacity:0;visibility:hidden}} */
 /* Particles */
 .particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
 .particle{position:absolute;border-radius:50%;background:var(--pitch);animation:float-up linear infinite;opacity:0;}
@@ -494,10 +494,12 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
 </style>
 </head>
 <body>
+<!-- ═══ 加载动画已注释 ═══
 <div class="splash" id="splash">
   <div class="splash-ball">⚽</div>
   <div class="splash-flash"></div>
 </div>
+-->
 <div class="particles" id="particles"></div>
 <nav>
   <div class="nav-inner">
@@ -927,6 +929,7 @@ function renderMatchCard(m,idx){
   else if(existing){predHTML=`<div class="match-pred-inline locked"><span class="pred-inline-score">${existing.home_score}</span><span class="pred-inline-vs">:</span><span class="pred-inline-score">${existing.away_score}</span><span class="pred-locked-badge">✓</span></div>`;}
   else{predHTML=`<div class="match-pred-inline"><input class="pred-inline-input" placeholder="-" maxlength="2" id="schH_${matchDbId}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onclick="event.stopPropagation()"><span class="pred-inline-vs">:</span><input class="pred-inline-input" placeholder="-" maxlength="2" id="schA_${matchDbId}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onclick="event.stopPropagation()"><button class="pred-inline-btn" onclick="event.stopPropagation();submitPrediction(${matchDbId},'${m.home.replace(/'/g,"\'")}','${m.away.replace(/'/g,"\'")}','sch')" title="快速预测">猜</button></div>`;}
   return `<div class="match-card reveal"><div class="match-date"><strong>${m.date}</strong>${m.time} 北京时间${statusBadge}</div><div class="match-info"><div class="match-teams">${hName}<span class="match-vs">VS</span>${aName}</div><div class="match-venue">${m.venue}${m.group?' · '+m.group+'组':''} · <span style="font-size:10px;color:var(--text-dim)">${stageLabel}</span></div></div><div class="match-actions">${predHTML}<button class="chat-card-btn" onclick="event.stopPropagation();openChatRoom(${matchDbId},'${m.home.replace(/'/g,"'")} vs ${m.away.replace(/'/g,"'")}')" title="进入聊天室">💬 聊</button></div></div>`;
+	}
 function findTodayKey(){const now=getSimDate();const m=now.getMonth()+1,d=now.getDate();const test=m+'月'+d+'日';return ALL_MATCHES.find(m=>m.date===test)?test:null;}
 function toggleDay(dayId){document.getElementById(dayId).classList.toggle('open');const a=document.getElementById('arrow-'+dayId);if(a)a.classList.toggle('open');}
 let allDatesExpanded=false;
@@ -1127,6 +1130,7 @@ function openTeamPage(teamName){
 
 /* ═══ TEAM INFO MODAL (keep for backward compat, now redirects to team page) ═══ */
 function openTeamModal(teamName){openTeamPage(teamName);}
+function closeTeamModal(e){if(e&&e.target!==document.getElementById('teamOverlay'))return;document.getElementById('teamOverlay').classList.remove('active');}
 function openPlayerCard(teamName,playerIdx){
   const info=TEAM_INFO[teamName];if(!info||!info.players[playerIdx])return;
   const p=info.players[playerIdx];
@@ -1404,7 +1408,7 @@ function init(){
   setTimeout(()=>collapseAll(),100);
   updateCountdown();setInterval(updateCountdown,1000);
   document.body.classList.add('loaded');
-  setTimeout(()=>{const splash=document.getElementById('splash');if(splash)splash.classList.add('hide');},2600);
+  // Splash animation disabled: setTimeout(()=>{const splash=document.getElementById('splash');if(splash)splash.classList.add('hide');},2600);
 }
 document.addEventListener('DOMContentLoaded',init);
 </script>
