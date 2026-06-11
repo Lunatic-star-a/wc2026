@@ -82,10 +82,12 @@ begin
 end;
 $$ language plpgsql security definer;
 
+drop trigger if exists trg_profiles_updated on public.profiles;
 create trigger trg_profiles_updated
   before update on public.profiles
   for each row execute function public.update_timestamp();
 
+drop trigger if exists trg_matches_updated on public.matches;
 create trigger trg_matches_updated
   before update on public.matches
   for each row execute function public.update_timestamp();
@@ -199,6 +201,7 @@ begin
 end;
 $$ language plpgsql security definer;
 
+drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();

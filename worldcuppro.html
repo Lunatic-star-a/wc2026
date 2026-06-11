@@ -264,6 +264,15 @@ footer{text-align:center;padding:60px 0;border-top:1px solid rgba(255,255,255,0.
 .chat-send{background:var(--pitch);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;cursor:pointer;font-family:var(--font-body);transition:background 0.2s}
 .chat-send:hover{background:#0fa84a}
 .chat-card-btn{background:transparent;border:1px solid rgba(255,255,255,0.1);color:var(--text-dim);font-size:10px;padding:3px 8px;border-radius:3px;cursor:pointer;transition:all 0.2s;font-family:var(--font-body);white-space:nowrap}.chat-card-btn:hover{background:rgba(100,149,237,0.2);border-color:rgba(100,149,237,0.4);color:#fff}
+/* Live Score Board */
+.livescore-section{padding:100px 0;position:relative}
+.livescore-board{background:var(--card);border:1px solid rgba(255,255,255,0.06);border-radius:12px;overflow:hidden;max-width:900px;margin:0 auto}
+.livescore-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:linear-gradient(135deg,rgba(13,140,60,0.2),rgba(13,140,60,0.05));border-bottom:1px solid rgba(255,255,255,0.06)}
+.livescore-title{font-family:var(--font-display);font-size:16px;color:#fff;letter-spacing:1px}
+.livescore-status{font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:6px}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--accent-red);animation:livePulse 1.5s ease infinite}
+@keyframes livePulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.livescore-embed{background:rgba(0,0,0,0.2)}
 footer strong{color:var(--gold);}
 /* Animations */
 @keyframes fadeInUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
@@ -569,33 +578,36 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
       <div class="leaderboard reveal" id="leaderboard"><h3>🏆 预测排行</h3><div id="lbList"></div></div>
     </div>
   </section>
+  <!-- ═══ 观赛指南暂不启用 ═══
   <section class="watch-section" id="watch">
     <div class="container">
       <div class="section-header reveal"><div class="section-tag">Live Scores & Watch</div><h2>观赛指南</h2></div>
-      <div class="watch-grid">
-        <div class="watch-card reveal">
-          <div class="watch-card-icon">📊</div>
-          <h4>Sofascore 实时比分</h4>
-          <p>查看世界杯2026全部比赛的实时比分、数据统计和赛事动态</p>
-          <a class="watch-card-link" href="https://www.sofascore.com/tournament/football/world/10172" target="_blank" rel="noopener">打开 Sofascore →</a>
+      ...
+    </div>
+  </section>
+  ═══ -->
+  <section class="livescore-section" id="livescore">
+    <div class="container">
+      <div class="section-header reveal"><div class="section-tag">Live Scores</div><h2>实时比分</h2></div>
+      <div class="livescore-board reveal">
+        <div class="livescore-header">
+          <span class="livescore-title">🏆 FIFA World Cup 2026</span>
+          <span class="livescore-status"><span class="live-dot"></span> 赛事数据</span>
         </div>
-        <div class="watch-card reveal">
-          <div class="watch-card-icon">📈</div>
-          <h4>Flashscore 实时比分</h4>
-          <p>另一个权威的实时比分和数据平台，覆盖全球赛事</p>
-          <a class="watch-card-link" href="https://www.flashscore.com/football/world/world-cup/" target="_blank" rel="noopener">打开 Flashscore →</a>
+        <div class="livescore-embed">
+          <iframe src="https://www.flashscore.com/football/world/world-cup/"
+                  style="width:100%;height:600px;border:none;border-radius:0 0 12px 12px"
+                  loading="lazy"
+                  sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+                  title="实时比分">
+          </iframe>
         </div>
-        <div class="watch-card reveal">
-          <div class="watch-card-icon">📺</div>
-          <h4>FIFA+ 官方平台</h4>
-          <p>FIFA 官方流媒体平台，提供部分比赛免费直播、集锦和幕后内容</p>
-          <a class="watch-card-link" href="https://www.fifa.com/en/watch" target="_blank" rel="noopener">前往 FIFA+ →</a>
-        </div>
-        <div class="watch-card reveal">
-          <div class="watch-card-icon">🇨🇳</div>
-          <h4>中国大陆地区转播</h4>
-          <p>央视CCTV-5、咪咕视频、抖音等平台将直播全部104场比赛</p>
-          <a class="watch-card-link" href="https://www.cctv.com" target="_blank" rel="noopener">CCTV官网 →</a>
+        <div class="livescore-fallback" style="display:none">
+          <p style="color:var(--text-dim);font-size:13px;text-align:center;padding:30px">
+            比分板加载中... 如无法显示，请
+            <a href="https://www.flashscore.com/football/world/world-cup/" target="_blank" rel="noopener" style="color:var(--gold)">点击这里</a>
+            在新窗口查看实时比分
+          </p>
         </div>
       </div>
     </div>
