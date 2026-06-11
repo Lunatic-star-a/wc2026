@@ -110,6 +110,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 .pred-inline-vs{font-size:10px;color:var(--text-dim)}
 .pred-inline-btn{font-size:10px;padding:3px 8px;border-radius:5px;border:1px solid var(--pitch);background:rgba(13,140,60,0.2);color:var(--pitch-bright);cursor:pointer;font-family:var(--font-mono);transition:all 0.2s;white-space:nowrap}
 .pred-inline-btn:hover{background:var(--pitch);color:#fff}
+.match-pred-inline.locked{display:flex;align-items:center;gap:4px}
+.pred-inline-score{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--gold);min-width:16px;text-align:center;background:rgba(212,168,67,0.08);padding:2px 6px;border-radius:4px}
+.pred-locked-badge{font-size:10px;color:var(--pitch);margin-left:2px}
 @keyframes predSuccess{0%{transform:scale(1)}50%{transform:scale(1.2);background:var(--gold);color:#000}100%{transform:scale(1);background:var(--pitch);color:#fff}}
 .pred-inline-btn.saved{animation:predSuccess 0.5s ease;background:var(--pitch);color:#fff;border-color:var(--pitch)}
 .pred-saved-flash{animation:goalFlash 0.6s ease 3}
@@ -288,7 +291,7 @@ footer strong{color:var(--gold);}
 @keyframes scoreBlink{0%,100%{opacity:1;}50%{opacity:0.5;}}
 @keyframes float-up{0%{transform:translateY(100vh) scale(0);opacity:0;}10%{opacity:0.5;}90%{opacity:0;}100%{transform:translateY(-10vh) scale(1.5);opacity:0;}}
 /* Splash */
-.splash{position:fixed;inset:0;z-index:9999;background:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.6s ease,visibility 0.6s ease;overflow:hidden}
+.splash{position:fixed;inset:0;z-index:9999;background:var(--navy);display:flex;align-items:center;justify-content:center;transition:opacity 0.6s ease,visibility 0.6s ease;overflow:hidden}
 .splash.hide{opacity:0;visibility:hidden;pointer-events:none}
 .splash-ball{font-size:64px;position:relative;z-index:2;animation:splashBallAnim 2.2s ease forwards;display:block;text-align:center}
 @keyframes splashBallAnim{
@@ -305,10 +308,8 @@ footer strong{color:var(--gold);}
   95%{transform:translateY(400px) scale(50)}
   100%{transform:translateY(500px) scale(60)}
 }
-.splash-flash{position:absolute;inset:0;background:#fff;opacity:0;animation:splashFlash 2.2s ease forwards;z-index:10;pointer-events:none}
-@keyframes splashFlash{0%,86%{opacity:0}92%{opacity:0.9}97%{opacity:1}100%{opacity:1;background:#000}}
-.splash-text{font-family:var(--font-display);font-size:28px;letter-spacing:4px;color:var(--gold);margin-top:28px;position:relative;z-index:1;animation:splashText 2.2s ease forwards;opacity:0}
-@keyframes splashText{0%,55%{opacity:0;transform:translateY(10px)}65%{opacity:0.6;transform:translateY(0)}78%{opacity:1}82%{opacity:0}100%{opacity:0}}
+.splash-flash{position:absolute;inset:0;z-index:10;pointer-events:none;animation:splashFlash 2.2s ease forwards}
+@keyframes splashFlash{0%,86%{background:transparent}93%{background:rgba(10,14,23,0.92)}100%{background:var(--navy)}}
 /* Particles */
 .particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
 .particle{position:absolute;border-radius:50%;background:var(--pitch);animation:float-up linear infinite;opacity:0;}
@@ -428,7 +429,6 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
 <div class="splash" id="splash">
   <div class="splash-ball">⚽</div>
   <div class="splash-flash"></div>
-  <div class="splash-text">FIFA WORLD CUP 2026</div>
 </div>
 <div class="particles" id="particles"></div>
 <nav>
@@ -814,6 +814,7 @@ async function loadUserData(){
     if(preds){userPredictions={};preds.forEach(p=>{userPredictions[p.match_id]={home_score:p.home_score,away_score:p.away_score};});}
     const{data:scores}=await sb.from('matches').select('id,home_score,away_score,status');
     if(scores)scores.forEach(s=>{if(s.home_score!==null)matchScores[s.id]={home_score:s.home_score,away_score:s.away_score,status:s.status};});
+    renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');renderPredictions();observeReveals();
   }catch(e){console.error('Load error:',e);}
 }
 
@@ -847,7 +848,15 @@ function renderMatchCard(m,idx){
   const hName=isTBD?`<span style="color:var(--text-dim);font-size:13px">${m.home}</span>`:`<a class="team-link" onclick="openTeamPage('${m.home}')">${hFlag} ${m.home}</a>`;
   const aName=isTBD?`<span style="color:var(--text-dim);font-size:13px">${m.away}</span>`:`<a class="team-link" onclick="openTeamPage('${m.away}')">${aFlag} ${m.away}</a>`;
   const matchDbId=idx+1;
-const predHTML=!isTBD?`<div class="match-pred-inline"><input class="pred-inline-input" placeholder="-" maxlength="2" id="schH_${matchDbId}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onclick="event.stopPropagation()"><span class="pred-inline-vs">:</span><input class="pred-inline-input" placeholder="-" maxlength="2" id="schA_${matchDbId}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onclick="event.stopPropagation()"><button class="pred-inline-btn" onclick="event.stopPropagation();submitPrediction(${matchDbId},'${m.home.replace(/'/g,"\\'")}','${m.away.replace(/'/g,"\\'")}','sch')" title="快速预测">猜</button></div>`:'<span style="font-size:10px;color:var(--text-dim)">待定</span>';
+const existing=userPredictions[matchDbId];
+	let predHTML;
+	if(isTBD){
+		predHTML='<span style="font-size:10px;color:var(--text-dim)">待定</span>';
+	}else if(existing){
+		predHTML=`<div class="match-pred-inline locked"><span class="pred-inline-score">${existing.home_score}</span><span class="pred-inline-vs">:</span><span class="pred-inline-score">${existing.away_score}</span><span class="pred-locked-badge">✓</span></div>`;
+	}else{
+		predHTML=`<div class="match-pred-inline"><input class="pred-inline-input" placeholder="-" maxlength="2" id="schH_${matchDbId}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onclick="event.stopPropagation()"><span class="pred-inline-vs">:</span><input class="pred-inline-input" placeholder="-" maxlength="2" id="schA_${matchDbId}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onclick="event.stopPropagation()"><button class="pred-inline-btn" onclick="event.stopPropagation();submitPrediction(${matchDbId},'${m.home.replace(/'/g,"\'")}','${m.away.replace(/'/g,"\'")}','sch')" title="快速预测">猜</button></div>`;
+		}
   return `<div class="match-card reveal"><div class="match-date"><strong>${m.date}</strong>${m.time} 北京时间</div><div class="match-info"><div class="match-teams">${hName}<span class="match-vs">VS</span>${aName}</div><div class="match-venue">${m.venue}${m.group?' · '+m.group+'组':''} · <span style="font-size:10px;color:var(--text-dim)">${stageLabel}</span></div></div><div class="match-actions">${predHTML}<button class="chat-card-btn" onclick="event.stopPropagation();openChatRoom(${matchDbId},'${m.home.replace(/'/g,"\'")} vs ${m.away.replace(/'/g,"\'")}')" title="进入聊天室">💬 聊</button></div></div>`;
 }
 function findTodayKey(){const now=getSimDate();const m=now.getMonth()+1,d=now.getDate();const test=m+'月'+d+'日';return ALL_MATCHES.find(m=>m.date===test)?test:null;}
@@ -891,7 +900,8 @@ function renderPredictions(){
   container.innerHTML=(todayMatches.length>0?`<div class="predict-today-label" style="grid-column:1/-1">📌 今日比赛预测</div>`:'')+showMatches.map(m=>{
     const matchDbId=ALL_MATCHES.indexOf(m)+1;const existing=userPredictions[matchDbId];
     const hInfo=TEAM_INFO[m.home],aInfo=TEAM_INFO[m.away];
-    return `<div class="predict-card reveal"><div class="predict-card-header"><span class="predict-stage">${m.group?m.group+'组':''} ${stageLabel(m.stage)}</span><span class="predict-date">${m.date} ${m.time} 北京时间</span></div><div class="predict-card-body"><div class="predict-team-col">${hInfo?flagImg(hInfo.cc,36):''}<div class="predict-team-name">${m.home}</div></div><div class="predict-score-area"><input class="predict-score-input" placeholder="-" maxlength="2" id="scoreH_${matchDbId}" value="${existing?.home_score??''}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)"></div><span class="predict-vs-dot">:</span><div class="predict-score-area"><input class="predict-score-input" placeholder="-" maxlength="2" id="scoreA_${matchDbId}" value="${existing?.away_score??''}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)"></div><div class="predict-team-col">${aInfo?flagImg(aInfo.cc,36):''}<div class="predict-team-name">${m.away}</div></div></div><button class="predict-submit ${existing?'saved':''}" id="predBtn_${matchDbId}" onclick="submitPrediction(${matchDbId},'${m.home.replace(/'/g,"\\'")}','${m.away.replace(/'/g,"\\'")}')">${existing?'✓ 已预测':'提交预测'}</button><div class="predict-result" id="predResult_${matchDbId}"></div></div>`;
+    const predDisabled=existing?'disabled':'';
+    return `<div class="predict-card reveal"><div class="predict-card-header"><span class="predict-stage">${m.group?m.group+'组':''} ${stageLabel(m.stage)}</span><span class="predict-date">${m.date} ${m.time} 北京时间</span></div><div class="predict-card-body"><div class="predict-team-col">${hInfo?flagImg(hInfo.cc,36):''}<div class="predict-team-name">${m.home}</div></div><div class="predict-score-area"><input class="predict-score-input" placeholder="-" maxlength="2" id="scoreH_${matchDbId}" value="${existing?.home_score??''}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" ${predDisabled}></div><span class="predict-vs-dot">:</span><div class="predict-score-area"><input class="predict-score-input" placeholder="-" maxlength="2" id="scoreA_${matchDbId}" value="${existing?.away_score??''}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" ${predDisabled}></div><div class="predict-team-col">${aInfo?flagImg(aInfo.cc,36):''}<div class="predict-team-name">${m.away}</div></div></div><button class="predict-submit ${existing?'saved':''}" id="predBtn_${matchDbId}" onclick="submitPrediction(${matchDbId},'${m.home.replace(/'/g,"\\'")}','${m.away.replace(/'/g,"\\'")}')" ${existing?'disabled':''}>${existing?'✓ 已预测':'提交预测'}</button><div class="predict-result" id="predResult_${matchDbId}"></div></div>`;
   }).join('');
 }
 
@@ -954,6 +964,7 @@ async function submitPrediction(matchDbId,home,away,src){
     const{error}=await sb.from('predictions').upsert({user_id:currentUser.id,match_id:matchDbId,home_score:hs,away_score:as},{onConflict:'user_id, match_id'});
     if(error)throw error;
     userPredictions[matchDbId]={home_score:hs,away_score:as};if(resultEl){resultEl.textContent='✓ 预测已提交: '+hs+':'+as;resultEl.style.color='var(--gold)';}if(btn){btn.textContent='✓ 已预测';btn.classList.add('saved');}
+    renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');renderPredictions();observeReveals();
     showToast('预测 '+home+' '+hs+':'+as+' '+away+' 已提交','success');
   }catch(err){console.error('Submit error:',err);showToast('提交失败: '+err.message,'error');if(resultEl){resultEl.textContent='提交失败: '+err.message;resultEl.style.color='#c0392b';}}
 }
