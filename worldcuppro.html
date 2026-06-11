@@ -214,7 +214,14 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 .player-list{display:flex;flex-wrap:wrap;gap:8px;}
 .player-link{display:inline-block;font-size:12px;padding:5px 14px;border-radius:100px;background:rgba(255,255,255,0.05);color:var(--text);border:1px solid rgba(255,255,255,0.08);text-decoration:none;transition:all 0.2s;}
 .player-link:hover{background:rgba(13,140,60,0.2);border-color:var(--pitch);color:var(--pitch-bright);}
-.team-modal-footer{padding:4px 28px 24px;text-align:center;}
+.player-card-detail{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:14px 16px;min-width:200px;flex:1}
+.player-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.player-card-name{font-weight:700;font-size:15px;color:#fff}
+.player-card-num{font-family:var(--font-mono);font-size:14px;color:var(--gold);background:rgba(212,168,67,0.1);padding:2px 10px;border-radius:100px}
+.player-card-info{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.player-info-item{display:flex;flex-direction:column;gap:1px}
+.player-info-label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px}
+.player-info-value{font-size:12px;color:var(--text)}
 .team-modal-link{display:inline-block;font-family:var(--font-mono);font-size:12px;letter-spacing:1px;color:var(--gold);text-decoration:none;text-transform:uppercase;padding:8px 20px;border:1px solid rgba(212,168,67,0.3);border-radius:100px;transition:all 0.25s;}
 .team-modal-link:hover{background:rgba(212,168,67,0.1);border-color:var(--gold);}
 .team-modal-close{position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.3);border:none;color:#fff;font-size:20px;width:32px;height:32px;border-radius:50%;cursor:pointer;transition:background 0.2s;display:flex;align-items:center;justify-content:center;}
@@ -236,6 +243,27 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 .toast.error{border-left:3px solid var(--accent-red);}
 /* Footer */
 footer{text-align:center;padding:60px 0;border-top:1px solid rgba(255,255,255,0.04);color:var(--text-dim);font-size:13px;position:relative;z-index:1;}
+/* Chat Room */
+.chat-overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity 0.3s,visibility 0.3s}
+.chat-overlay.active{opacity:1;visibility:visible}
+.chat-panel{background:var(--slate);border:1px solid rgba(255,255,255,0.08);border-radius:12px;width:90%;max-width:500px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden}
+.chat-header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(212,168,67,0.06)}
+.chat-title{font-family:var(--font-display);font-size:16px;color:var(--gold);letter-spacing:1px}
+.chat-close{background:none;border:none;color:var(--text-dim);font-size:24px;cursor:pointer;padding:0 4px;line-height:1}
+.chat-close:hover{color:#fff}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;max-height:50vh;min-height:200px}
+.chat-empty{text-align:center;color:var(--text-dim);font-size:12px;padding:40px 0}
+.chat-msg{display:flex;gap:8px;align-items:flex-start}
+.chat-msg-avatar{width:28px;height:28px;border-radius:50%;background:var(--pitch);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;color:#fff}
+.chat-msg-body{flex:1;min-width:0}
+.chat-msg-name{font-size:11px;color:var(--gold);font-weight:600;margin-bottom:2px}
+.chat-msg-text{font-size:13px;color:var(--text);line-height:1.4;word-break:break-word}
+.chat-input-row{display:flex;gap:8px;padding:12px 16px;border-top:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.2)}
+.chat-input{flex:1;background:var(--card);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;outline:none;font-family:var(--font-body)}
+.chat-input:focus{border-color:var(--pitch)}
+.chat-send{background:var(--pitch);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;cursor:pointer;font-family:var(--font-body);transition:background 0.2s}
+.chat-send:hover{background:#0fa84a}
+.chat-card-btn{background:transparent;border:1px solid rgba(255,255,255,0.1);color:var(--text-dim);font-size:10px;padding:3px 8px;border-radius:3px;cursor:pointer;transition:all 0.2s;font-family:var(--font-body);white-space:nowrap}.chat-card-btn:hover{background:rgba(100,149,237,0.2);border-color:rgba(100,149,237,0.4);color:#fff}
 footer strong{color:var(--gold);}
 /* Animations */
 @keyframes fadeInUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
@@ -519,6 +547,7 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
       <div class="schedule-jump reveal"><select class="jump-select" onchange="jumpToDate(this.value)"><option value="">📍 快速跳转到指定日期...</option><optgroup label="🏟 小组赛"></optgroup><optgroup label="🏆 淘汰赛"></optgroup></select></div><div class="match-list" id="matchList"></div>
     </div>
   </section>
+<!-- ═══ 对阵图预测暂不启用 ═══
   <section class="bracket-section" id="bracket" style="padding:100px 0;position:relative">
     <div class="container">
       <div class="section-header reveal"><div class="section-tag">Road to the Final</div><h2>淘汰赛对阵图</h2></div>
@@ -531,6 +560,7 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
       <div id="bracketMsg" style="text-align:center;padding:16px;color:var(--text-dim);font-size:12px">小组赛结束后将确定具体对阵。现在可以提前预测淘汰赛走势！</div>
     </div>
   </section>
+-->
   <section class="predict-section" id="predict">
     <div class="container">
       <div class="section-header reveal"><div class="section-tag">Play & Win</div><h2>比赛预测</h2></div>
@@ -541,8 +571,20 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   </section>
   <section class="watch-section" id="watch">
     <div class="container">
-      <div class="section-header reveal"><div class="section-tag">Never Miss a Match</div><h2>观赛指南</h2></div>
+      <div class="section-header reveal"><div class="section-tag">Live Scores & Watch</div><h2>观赛指南</h2></div>
       <div class="watch-grid">
+        <div class="watch-card reveal">
+          <div class="watch-card-icon">📊</div>
+          <h4>Sofascore 实时比分</h4>
+          <p>查看世界杯2026全部比赛的实时比分、数据统计和赛事动态</p>
+          <a class="watch-card-link" href="https://www.sofascore.com/tournament/football/world/10172" target="_blank" rel="noopener">打开 Sofascore →</a>
+        </div>
+        <div class="watch-card reveal">
+          <div class="watch-card-icon">📈</div>
+          <h4>Flashscore 实时比分</h4>
+          <p>另一个权威的实时比分和数据平台，覆盖全球赛事</p>
+          <a class="watch-card-link" href="https://www.flashscore.com/football/world/world-cup/" target="_blank" rel="noopener">打开 Flashscore →</a>
+        </div>
         <div class="watch-card reveal">
           <div class="watch-card-icon">📺</div>
           <h4>FIFA+ 官方平台</h4>
@@ -555,33 +597,11 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
           <p>央视CCTV-5、咪咕视频、抖音等平台将直播全部104场比赛</p>
           <a class="watch-card-link" href="https://www.cctv.com" target="_blank" rel="noopener">CCTV官网 →</a>
         </div>
-        <div class="watch-card reveal">
-          <div class="watch-card-icon">🌐</div>
-          <h4>国际转播商</h4>
-          <p>Fox/Telemundo(美国)、BBC/ITV(英国)、TF1(法国)、ARD/ZDF(德国)等</p>
-          <a class="watch-card-link" href="https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/where-to-watch" target="_blank" rel="noopener">查看全部转播商 →</a>
-        </div>
-        <div class="watch-card reveal">
-          <div class="watch-card-icon">📊</div>
-          <h4>实时比分挂件</h4>
-          <p>可在您的网站嵌入 Sofascore / Flashscore 等第三方实时比分挂件</p>
-          <a class="watch-card-link" href="https://www.sofascore.com/widgets" target="_blank" rel="noopener">获取挂件代码 →</a>
-        </div>
-        <div class="watch-card reveal">
-          <div class="watch-card-icon">🏟️</div>
-          <h4>FIFA 官方购票</h4>
-          <p>亲临现场！在 FIFA 官方渠道购买比赛门票</p>
-          <a class="watch-card-link" href="https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/tickets" target="_blank" rel="noopener">前往购票 →</a>
-        </div>
-        <div class="watch-card reveal">
-          <div class="watch-card-icon">💡</div>
-          <h4>如何在自己的网站嵌入直播？</h4>
-          <p style="font-size:12px;line-height:1.6">完整比赛直播受版权保护，需从官方转播商获取授权。个人网站推荐方案：① 嵌入第三方实时比分挂件(免费) ② 链接至FIFA+官方直播 ③ 使用社交媒体嵌入(X/YouTube) ④ 通过API获取赛事数据自建比分面板</p>
-        </div>
       </div>
     </div>
   </section>
   <footer><div class="container">Made for the love of <strong>Football</strong> &middot; FIFA World Cup 2026</div></footer>
+<!-- Chat Room Overlay --><div class="chat-overlay" id="chatOverlay"><div class="chat-panel" id="chatPanel"><div class="chat-header"><span class="chat-title" id="chatTitle">💬 聊天室</span><button class="chat-close" onclick="closeChatRoom()">&times;</button></div><div class="chat-messages" id="chatMessages"><div class="chat-empty">加载中...</div></div><div class="chat-input-row"><input class="chat-input" id="chatInput" placeholder="输入消息..." maxlength="200" onkeydown="if(event.key===`Enter`)sendChatMessage()"><button class="chat-send" onclick="sendChatMessage()">发送</button></div></div></div>
 </main>
 <script>
 const SUPABASE_URL='https://mnprhloxeqybmqcljpuq.supabase.co';
@@ -673,50 +693,50 @@ function flagImg(cc,size){if(!cc)return'⚽';const em=FLAG_FALLBACK[cc]||'⚽';c
 
 /* ════════════════════════════════════════════════════
    REAL 2026 MATCH SCHEDULE (Official FIFA data)
-   Times in ET (Eastern Time, UTC-4)
+   Times in Beijing Time (UTC+8, converted from ET)
    ════════════════════════════════════════════════════ */
 const VENUES=['阿兹特克体育场·墨西哥城','阿克伦体育场·瓜达拉哈拉','BMO球场·多伦多','SoFi体育场·洛杉矶',"利维体育场·旧金山湾区",'大都会人寿体育场·纽约/新泽西','吉列体育场·波士顿','BC广场·温哥华','NRG体育场·休斯敦','AT&T体育场·达拉斯','林肯金融球场·费城','BBVA体育场·蒙特雷','梅赛德斯-奔驰体育场·亚特兰大','流明球场·西雅图','硬石体育场·迈阿密','箭头体育场·堪萨斯城'];
 
-// Format: date, time(ET), home, away, venue, group
+// Format: date, time(北京时间), home, away, venue, group
 const RAW_MATCHES=[
   // === Matchday 1 ===
-  ['6.11','15:00','墨西哥','南非',0,'A'],['6.11','22:00','韩国','捷克',1,'A'],
-  ['6.12','15:00','加拿大','波黑',2,'B'],['6.12','21:00','美国','巴拉圭',3,'D'],
-  ['6.13','15:00','卡塔尔','瑞士',4,'B'],['6.13','18:00','巴西','摩洛哥',5,'C'],['6.13','21:00','海地','苏格兰',6,'C'],['6.13','24:00','澳大利亚','土耳其',7,'D'],
-  ['6.14','13:00','德国','库拉索',8,'E'],['6.14','16:00','荷兰','日本',9,'F'],['6.14','19:00','科特迪瓦','厄瓜多尔',10,'E'],['6.14','22:00','瑞典','突尼斯',11,'F'],
-  ['6.15','12:00','西班牙','佛得角',12,'H'],['6.15','15:00','比利时','埃及',13,'G'],['6.15','18:00','沙特','乌拉圭',14,'H'],['6.15','21:00','伊朗','新西兰',15,'G'],
-  ['6.16','15:00','法国','塞内加尔',5,'I'],['6.16','18:00','伊拉克','挪威',6,'I'],['6.16','21:00','阿根廷','阿尔及利亚',14,'J'],['6.16','24:00','奥地利','约旦',4,'J'],
-  ['6.17','13:00','葡萄牙','刚果(金)',8,'K'],['6.17','16:00','英格兰','克罗地亚',9,'L'],['6.17','19:00','加纳','巴拿马',2,'L'],['6.17','22:00','乌兹别克斯坦','哥伦比亚',0,'K'],
+  ['6.12','03:00','墨西哥','南非',0,'A'],['6.12','10:00','韩国','捷克',1,'A'],
+  ['6.13','03:00','加拿大','波黑',2,'B'],['6.13','09:00','美国','巴拉圭',3,'D'],
+  ['6.14','03:00','卡塔尔','瑞士',4,'B'],['6.14','06:00','巴西','摩洛哥',5,'C'],['6.14','09:00','海地','苏格兰',6,'C'],['6.14','12:00','澳大利亚','土耳其',7,'D'],
+  ['6.15','01:00','德国','库拉索',8,'E'],['6.15','04:00','荷兰','日本',9,'F'],['6.15','07:00','科特迪瓦','厄瓜多尔',10,'E'],['6.15','10:00','瑞典','突尼斯',11,'F'],
+  ['6.16','00:00','西班牙','佛得角',12,'H'],['6.16','03:00','比利时','埃及',13,'G'],['6.16','06:00','沙特','乌拉圭',14,'H'],['6.16','09:00','伊朗','新西兰',15,'G'],
+  ['6.17','03:00','法国','塞内加尔',5,'I'],['6.17','06:00','伊拉克','挪威',6,'I'],['6.17','09:00','阿根廷','阿尔及利亚',14,'J'],['6.17','12:00','奥地利','约旦',4,'J'],
+  ['6.18','01:00','葡萄牙','刚果(金)',8,'K'],['6.18','04:00','英格兰','克罗地亚',9,'L'],['6.18','07:00','加纳','巴拿马',2,'L'],['6.18','10:00','乌兹别克斯坦','哥伦比亚',0,'K'],
   // === Matchday 2 ===
-  ['6.18','12:00','捷克','南非',12,'A'],['6.18','15:00','瑞士','波黑',3,'B'],['6.18','18:00','加拿大','卡塔尔',7,'B'],['6.18','21:00','墨西哥','韩国',1,'A'],
-  ['6.19','15:00','美国','澳大利亚',13,'D'],['6.19','18:00','苏格兰','摩洛哥',6,'C'],['6.19','21:00','巴西','海地',10,'C'],['6.19','24:00','土耳其','巴拉圭',4,'D'],
-  ['6.20','13:00','荷兰','瑞典',8,'F'],['6.20','16:00','德国','科特迪瓦',2,'E'],['6.20','20:00','厄瓜多尔','库拉索',14,'E'],['6.20','24:00','突尼斯','日本',11,'F'],
-  ['6.21','12:00','西班牙','沙特',12,'H'],['6.21','15:00','比利时','伊朗',3,'G'],['6.21','18:00','乌拉圭','佛得角',15,'H'],['6.21','21:00','新西兰','埃及',7,'G'],
-  ['6.22','13:00','阿根廷','奥地利',9,'J'],['6.22','17:00','法国','伊拉克',10,'I'],['6.22','20:00','挪威','塞内加尔',5,'I'],['6.22','23:00','约旦','阿尔及利亚',4,'J'],
-  ['6.23','13:00','葡萄牙','乌兹别克斯坦',8,'K'],['6.23','16:00','英格兰','加纳',6,'L'],['6.23','19:00','巴拿马','克罗地亚',2,'L'],['6.23','22:00','哥伦比亚','刚果(金)',1,'K'],
+  ['6.19','00:00','捷克','南非',12,'A'],['6.19','03:00','瑞士','波黑',3,'B'],['6.19','06:00','加拿大','卡塔尔',7,'B'],['6.19','09:00','墨西哥','韩国',1,'A'],
+  ['6.20','03:00','美国','澳大利亚',13,'D'],['6.20','06:00','苏格兰','摩洛哥',6,'C'],['6.20','09:00','巴西','海地',10,'C'],['6.20','12:00','土耳其','巴拉圭',4,'D'],
+  ['6.21','01:00','荷兰','瑞典',8,'F'],['6.21','04:00','德国','科特迪瓦',2,'E'],['6.21','08:00','厄瓜多尔','库拉索',14,'E'],['6.21','12:00','突尼斯','日本',11,'F'],
+  ['6.22','00:00','西班牙','沙特',12,'H'],['6.22','03:00','比利时','伊朗',3,'G'],['6.22','06:00','乌拉圭','佛得角',15,'H'],['6.22','09:00','新西兰','埃及',7,'G'],
+  ['6.23','01:00','阿根廷','奥地利',9,'J'],['6.23','05:00','法国','伊拉克',10,'I'],['6.23','08:00','挪威','塞内加尔',5,'I'],['6.23','11:00','约旦','阿尔及利亚',4,'J'],
+  ['6.24','01:00','葡萄牙','乌兹别克斯坦',8,'K'],['6.24','04:00','英格兰','加纳',6,'L'],['6.24','07:00','巴拿马','克罗地亚',2,'L'],['6.24','10:00','哥伦比亚','刚果(金)',1,'K'],
   // === Matchday 3 (concurrent kickoffs) ===
-  ['6.24','15:00','瑞士','加拿大',7,'B'],['6.24','15:00','波黑','卡塔尔',13,'B'],['6.24','18:00','苏格兰','巴西',15,'C'],['6.24','18:00','摩洛哥','海地',12,'C'],['6.24','21:00','捷克','墨西哥',0,'A'],['6.24','21:00','南非','韩国',11,'A'],
-  ['6.25','16:00','库拉索','科特迪瓦',10,'E'],['6.25','16:00','厄瓜多尔','德国',5,'E'],['6.25','19:00','日本','瑞典',9,'F'],['6.25','19:00','突尼斯','荷兰',14,'F'],['6.25','22:00','土耳其','美国',3,'D'],['6.25','22:00','巴拉圭','澳大利亚',4,'D'],
-  ['6.26','15:00','挪威','法国',6,'I'],['6.26','15:00','塞内加尔','伊拉克',2,'I'],['6.26','20:00','佛得角','沙特',8,'H'],['6.26','20:00','乌拉圭','西班牙',1,'H'],['6.26','23:00','埃及','伊朗',13,'G'],['6.26','23:00','新西兰','比利时',7,'G'],
-  ['6.27','17:00','巴拿马','英格兰',10,'L'],['6.27','17:00','克罗地亚','加纳',6,'L'],['6.27','19:30','哥伦比亚','葡萄牙',15,'K'],['6.27','19:30','刚果(金)','乌兹别克斯坦',12,'K'],['6.27','22:00','阿尔及利亚','奥地利',14,'J'],['6.27','22:00','约旦','阿根廷',9,'J'],
+  ['6.25','03:00','瑞士','加拿大',7,'B'],['6.25','03:00','波黑','卡塔尔',13,'B'],['6.25','06:00','苏格兰','巴西',15,'C'],['6.25','06:00','摩洛哥','海地',12,'C'],['6.25','09:00','捷克','墨西哥',0,'A'],['6.25','09:00','南非','韩国',11,'A'],
+  ['6.26','04:00','库拉索','科特迪瓦',10,'E'],['6.26','04:00','厄瓜多尔','德国',5,'E'],['6.26','07:00','日本','瑞典',9,'F'],['6.26','07:00','突尼斯','荷兰',14,'F'],['6.26','10:00','土耳其','美国',3,'D'],['6.26','10:00','巴拉圭','澳大利亚',4,'D'],
+  ['6.27','03:00','挪威','法国',6,'I'],['6.27','03:00','塞内加尔','伊拉克',2,'I'],['6.27','08:00','佛得角','沙特',8,'H'],['6.27','08:00','乌拉圭','西班牙',1,'H'],['6.27','11:00','埃及','伊朗',13,'G'],['6.27','11:00','新西兰','比利时',7,'G'],
+  ['6.28','05:00','巴拿马','英格兰',10,'L'],['6.28','05:00','克罗地亚','加纳',6,'L'],['6.28','07:30','哥伦比亚','葡萄牙',15,'K'],['6.28','07:30','刚果(金)','乌兹别克斯坦',12,'K'],['6.28','10:00','阿尔及利亚','奥地利',14,'J'],['6.28','10:00','约旦','阿根廷',9,'J'],
   // === Knockout: Round of 32 (Jun 28 – Jul 3) ===
-  ['6.28','13:00','1A','2B',0,'r32'],['6.28','17:00','1C','2D',1,'r32'],['6.28','21:00','1E','2F',3,'r32'],
-  ['6.29','13:00','1B','2A',4,'r32'],['6.29','17:00','1D','2C',5,'r32'],['6.29','21:00','1F','2E',6,'r32'],
-  ['6.30','13:00','1G','2H',7,'r32'],['6.30','17:00','1I','2J',12,'r32'],['6.30','21:00','1K','2L',8,'r32'],
-  ['7.01','13:00','1H','2G',9,'r32'],['7.01','17:00','1J','2I',10,'r32'],['7.01','21:00','1L','2K',11,'r32'],
+  ['6.29','01:00','1A','2B',0,'r32'],['6.29','05:00','1C','2D',1,'r32'],['6.29','09:00','1E','2F',3,'r32'],
+  ['6.30','01:00','1B','2A',4,'r32'],['6.30','05:00','1D','2C',5,'r32'],['6.30','09:00','1F','2E',6,'r32'],
+  ['7.1','01:00','1G','2H',7,'r32'],['7.1','05:00','1I','2J',12,'r32'],['7.1','09:00','1K','2L',8,'r32'],
+  ['7.2','01:00','1H','2G',9,'r32'],['7.2','05:00','1J','2I',10,'r32'],['7.2','09:00','1L','2K',11,'r32'],
   // Best 3rd place qualifiers
-  ['6.28','13:00','2A','C3',13,'r32'],['6.29','17:00','2D','E3',2,'r32'],['6.30','17:00','2G','I3',14,'r32'],['7.01','17:00','2K','B3',15,'r32'],
+  ['6.29','01:00','2A','C3',13,'r32'],['6.30','05:00','2D','E3',2,'r32'],['7.1','05:00','2G','I3',14,'r32'],['7.2','05:00','2K','B3',15,'r32'],
   // === Round of 16 (Jul 4–7) ===
-  ['7.04','17:00','W44','W46',10,'r16'],['7.04','21:00','W41','W42',5,'r16'],['7.05','17:00','W43','W45',8,'r16'],['7.05','21:00','W47','W48',9,'r16'],
-  ['7.06','17:00','W51','W49',3,'r16'],['7.06','21:00','W50','W53',1,'r16'],['7.07','17:00','W52','W55',7,'r16'],['7.07','21:00','W54','W56',12,'r16'],
+  ['7.5','05:00','W44','W46',10,'r16'],['7.5','09:00','W41','W42',5,'r16'],['7.6','05:00','W43','W45',8,'r16'],['7.6','09:00','W47','W48',9,'r16'],
+  ['7.7','05:00','W51','W49',3,'r16'],['7.7','09:00','W50','W53',1,'r16'],['7.8','05:00','W52','W55',7,'r16'],['7.8','09:00','W54','W56',12,'r16'],
   // === Quarter-finals (Jul 9–11) ===
-  ['7.09','17:00','W57','W58',6,'qf'],['7.10','18:00','W59','W60',3,'qf'],['7.10','21:00','W61','W62',15,'qf'],['7.11','21:00','W63','W64',4,'qf'],
+  ['7.10','05:00','W57','W58',6,'qf'],['7.11','06:00','W59','W60',3,'qf'],['7.11','09:00','W61','W62',15,'qf'],['7.12','09:00','W63','W64',4,'qf'],
   // === Semi-finals (Jul 14–15) ===
-  ['7.14','21:00','WQF1','WQF2',9,'sf'],['7.15','21:00','WQF3','WQF4',12,'sf'],
+  ['7.15','09:00','WQF1','WQF2',9,'sf'],['7.16','09:00','WQF3','WQF4',12,'sf'],
   // === Third place (Jul 18) ===
-  ['7.18','17:00','LSF1','LSF2',15,'3rd'],
+  ['7.19','05:00','LSF1','LSF2',15,'3rd'],
   // === Final (Jul 19) ===
-  ['7.19','15:00','WSF1','WSF2',5,'final']
+  ['7.20','03:00','WSF1','WSF2',5,'final']
 ];
 
 const KO_PLACEHOLDER={W44:'W44胜者',W46:'W46胜者',W41:'W41胜者',W42:'W42胜者',W43:'W43胜者',W45:'W45胜者',W47:'W47胜者',W48:'W48胜者',W51:'W51胜者',W49:'W49胜者',W50:'W50胜者',W53:'W53胜者',W52:'W52胜者',W55:'W55胜者',W54:'W54胜者',W56:'W56胜者',W57:'W57胜者',W58:'W58胜者',W59:'W59胜者',W60:'W60胜者',W61:'W61胜者',W62:'W62胜者',W63:'W63胜者',W64:'W64胜者',WQF1:'1/4决赛胜者1',WQF2:'1/4决赛胜者2',WQF3:'1/4决赛胜者3',WQF4:'1/4决赛胜者4',LSF1:'半决赛负者1',LSF2:'半决赛负者2',WSF1:'半决赛胜者1',WSF2:'半决赛胜者2','1A':'A组第一','2A':'A组第二','1B':'B组第一','2B':'B组第二','1C':'C组第一','2C':'C组第二','1D':'D组第一','2D':'D组第二','1E':'E组第一','2E':'E组第二','1F':'F组第一','2F':'F组第二','1G':'G组第一','2G':'G组第二','1H':'H组第一','2H':'H组第二','1I':'I组第一','2I':'I组第二','1J':'J组第一','2J':'J组第二','1K':'K组第一','2K':'K组第二','1L':'L组第一','2L':'L组第二',C3:'C组第三*',E3:'E组第三*',I3:'I组第三*',B3:'B组第三*'};
@@ -778,17 +798,17 @@ async function handleAuthSubmit(e){
   try{
     const email=`${username}@wc26.local`;let result;
     if(authMode==='register'){
-      result=await sb.auth.signUp({email,password,options:{data:{username}}});
-      if(result.error){errEl.textContent=result.error.message.includes('already')?'该用户名已被注册，请换一个用户名':result.error.message;return;}
-      const{data:loginData,error:loginErr}=await sb.auth.signInWithPassword({email,password});
-      if(loginErr){errEl.textContent='注册成功但登录失败，请尝试重新登录';return;}
-      result={data:loginData};
+      result=await sb.auth.signUp({email,password,options:{data:{username},emailRedirectTo:location.href}});
+      if(result.error){console.error('Signup error:',result.error);if(result.error.message.includes('already')){errEl.textContent='该用户名已被注册，请换一个用户名';}else if(result.error.message.includes('rate')){errEl.textContent='请求太频繁，请稍后再试';}else{errEl.textContent='注册失败: '+result.error.message;}return;}
+      if(result.data?.user?.identities?.length===0){errEl.textContent='该用户名已被注册，请换一个用户名';return;}
+      if(!result.data.session){errEl.textContent='注册成功！请查看邮箱确认链接，或尝试直接登录';closeAuthModal();showToast('注册成功！如无法登录请联系管理员','success');return;}
+      result={data:result.data};
     }else{
       result=await sb.auth.signInWithPassword({email,password});
       if(result.error){errEl.textContent='用户名或密码错误，请检查后重试';return;}
     }
     currentUser={id:result.data.user.id,username:result.data.user.user_metadata?.username||username};onLoginSuccess();
-  }catch(err){errEl.textContent='网络连接失败，请检查网络后重试';console.error(err);}
+  }catch(err){console.error('Auth error:',err);errEl.textContent='网络连接失败: '+err.message+'. 请检查网络后重试';}
 }
 function onLoginSuccess(){closeAuthModal();updateNavUI();showToast('欢迎回来，'+currentUser.username+'！','success');loadUserData();renderPredictions();}
 async function handleLogout(){if(SUPABASE_READY)await sb.auth.signOut();currentUser=null;userPredictions={};updateNavUI();renderPredictions();showToast('已退出登录');}
@@ -797,7 +817,7 @@ function updateNavUI(){
   if(currentUser){bl.style.display='none';bout.style.display='inline-block';ne.style.display='inline';ne.textContent=currentUser.username;}
   else{bl.style.display='inline-block';bout.style.display='none';ne.style.display='none';}
 }
-async function checkSession(){if(!SUPABASE_READY)return;try{const{data}=await sb.auth.getSession();if(data?.session?.user){currentUser={id:data.session.user.id,username:data.session.user.user_metadata?.username||'User'};updateNavUI();loadUserData();}}catch(e){}}
+async function checkSession(){if(!SUPABASE_READY)return;try{const{data}=await sb.auth.getSession();if(data?.session?.user){currentUser={id:data.session.user.id,username:data.session.user.user_metadata?.username||'User'};updateNavUI();loadUserData();renderPredictions();renderLeaderboard();}}catch(e){console.warn('Session check failed:',e.message);}}
 async function loadUserData(){
   if(!currentUser||!SUPABASE_READY)return;
   try{
@@ -839,7 +859,7 @@ function renderMatchCard(m,idx){
   const aName=isTBD?`<span style="color:var(--text-dim);font-size:13px">${m.away}</span>`:`<a class="team-link" onclick="openTeamPage('${m.away}')">${aFlag} ${m.away}</a>`;
   const matchDbId=idx+1;
 const predHTML=!isTBD?`<div class="match-pred-inline"><input class="pred-inline-input" placeholder="-" maxlength="2" id="schH_${matchDbId}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onclick="event.stopPropagation()"><span class="pred-inline-vs">:</span><input class="pred-inline-input" placeholder="-" maxlength="2" id="schA_${matchDbId}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onclick="event.stopPropagation()"><button class="pred-inline-btn" onclick="event.stopPropagation();submitPrediction(${matchDbId},'${m.home.replace(/'/g,"\\'")}','${m.away.replace(/'/g,"\\'")}','sch')" title="快速预测">猜</button></div>`:'<span style="font-size:10px;color:var(--text-dim)">待定</span>';
-  return `<div class="match-card reveal"><div class="match-date"><strong>${m.date}</strong>${m.time} ET</div><div class="match-info"><div class="match-teams">${hName}<span class="match-vs">VS</span>${aName}</div><div class="match-venue">${m.venue}${m.group?' · '+m.group+'组':''} · <span style="font-size:10px;color:var(--text-dim)">${stageLabel}</span></div></div><div class="match-actions">${predHTML}</div></div>`;
+  return `<div class="match-card reveal"><div class="match-date"><strong>${m.date}</strong>${m.time} 北京时间</div><div class="match-info"><div class="match-teams">${hName}<span class="match-vs">VS</span>${aName}</div><div class="match-venue">${m.venue}${m.group?' · '+m.group+'组':''} · <span style="font-size:10px;color:var(--text-dim)">${stageLabel}</span></div></div><div class="match-actions">${predHTML}<button class="chat-card-btn" onclick="event.stopPropagation();openChatRoom(${matchDbId},'${m.home.replace(/'/g,"\'")} vs ${m.away.replace(/'/g,"\'")}')" title="进入聊天室">💬 聊</button></div></div>`;
 }
 function findTodayKey(){const now=getSimDate();const m=now.getMonth()+1,d=now.getDate();const test=m+'月'+d+'日';return ALL_MATCHES.find(m=>m.date===test)?test:null;}
 function toggleDay(dayId){document.getElementById(dayId).classList.toggle('open');const a=document.getElementById('arrow-'+dayId);if(a)a.classList.toggle('open');}
@@ -882,7 +902,7 @@ function renderPredictions(){
   container.innerHTML=(todayMatches.length>0?`<div class="predict-today-label" style="grid-column:1/-1">📌 今日比赛预测</div>`:'')+showMatches.map(m=>{
     const matchDbId=ALL_MATCHES.indexOf(m)+1;const existing=userPredictions[matchDbId];
     const hInfo=TEAM_INFO[m.home],aInfo=TEAM_INFO[m.away];
-    return `<div class="predict-card reveal"><div class="predict-card-header"><span class="predict-stage">${m.group?m.group+'组':''} ${stageLabel(m.stage)}</span><span class="predict-date">${m.date} ${m.time} ET</span></div><div class="predict-card-body"><div class="predict-team-col">${hInfo?flagImg(hInfo.cc,36):''}<div class="predict-team-name">${m.home}</div></div><div class="predict-score-area"><input class="predict-score-input" placeholder="-" maxlength="2" id="scoreH_${matchDbId}" value="${existing?.home_score??''}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)"></div><span class="predict-vs-dot">:</span><div class="predict-score-area"><input class="predict-score-input" placeholder="-" maxlength="2" id="scoreA_${matchDbId}" value="${existing?.away_score??''}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)"></div><div class="predict-team-col">${aInfo?flagImg(aInfo.cc,36):''}<div class="predict-team-name">${m.away}</div></div></div><button class="predict-submit ${existing?'saved':''}" id="predBtn_${matchDbId}" onclick="submitPrediction(${matchDbId},'${m.home.replace(/'/g,"\\'")}','${m.away.replace(/'/g,"\\'")}')">${existing?'✓ 已预测':'提交预测'}</button><div class="predict-result" id="predResult_${matchDbId}"></div></div>`;
+    return `<div class="predict-card reveal"><div class="predict-card-header"><span class="predict-stage">${m.group?m.group+'组':''} ${stageLabel(m.stage)}</span><span class="predict-date">${m.date} ${m.time} 北京时间</span></div><div class="predict-card-body"><div class="predict-team-col">${hInfo?flagImg(hInfo.cc,36):''}<div class="predict-team-name">${m.home}</div></div><div class="predict-score-area"><input class="predict-score-input" placeholder="-" maxlength="2" id="scoreH_${matchDbId}" value="${existing?.home_score??''}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)"></div><span class="predict-vs-dot">:</span><div class="predict-score-area"><input class="predict-score-input" placeholder="-" maxlength="2" id="scoreA_${matchDbId}" value="${existing?.away_score??''}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)"></div><div class="predict-team-col">${aInfo?flagImg(aInfo.cc,36):''}<div class="predict-team-name">${m.away}</div></div></div><button class="predict-submit ${existing?'saved':''}" id="predBtn_${matchDbId}" onclick="submitPrediction(${matchDbId},'${m.home.replace(/'/g,"\\'")}','${m.away.replace(/'/g,"\\'")}')">${existing?'✓ 已预测':'提交预测'}</button><div class="predict-result" id="predResult_${matchDbId}"></div></div>`;
   }).join('');
 }
 
@@ -961,7 +981,7 @@ function openTeamPage(teamName){
   const matchRows=teamMatches.map(m=>{
     const opp=m.home===teamName?m.away:m.home;const isHome=m.home===teamName;
     const sLabel=stageNames[m.stage]||m.stage;
-    return`<tr><td>${m.date} ${m.time}</td><td>${isHome?'<b>'+teamName+'</b>':opp}</td><td>VS</td><td>${isHome?opp:'<b>'+teamName+'</b>'}</td><td>${sLabel}</td><td>${m.venue}</td></tr>`;
+    return`<tr><td>${m.date} ${m.time} 北京时间</td><td>${isHome?'<b>'+teamName+'</b>':opp}</td><td>VS</td><td>${isHome?opp:'<b>'+teamName+'</b>'}</td><td>${sLabel}</td><td>${m.venue}</td></tr>`;
   }).join('')||'<tr><td colspan="6" style="text-align:center;color:#888">暂无赛程数据</td></tr>';
   w.document.write(`<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>${info.name} - 世界杯2026球队详情</title><style>
     *{margin:0;padding:0;box-sizing:border-box}
@@ -993,7 +1013,7 @@ function openTeamPage(teamName){
     <a class="back" href="javascript:window.close()">← 关闭返回</a>
     <div class="header"><img class="flag" src="https://flagcdn.com/w160/${info.cc}.png" alt="" onerror="this.style.display='none'"><h1>${info.name}</h1><div class="en">${info.en}</div><div class="conf">${info.conf}</div></div>
     <div class="stats"><div class="stat"><div class="stat-val">#${info.rank}</div><div class="stat-lbl">FIFA 排名</div></div><div class="stat"><div class="stat-val">${info.apps}</div><div class="stat-lbl">参赛次数</div></div><div class="stat"><div class="stat-val" style="font-size:16px">${info.best}</div><div class="stat-lbl">历史最佳</div></div></div>
-    <h2>核心球员</h2><div class="players">${info.players.map((p,i)=>`<div class="player" onclick="window.opener.openPlayerCard('${info.name}',${i})" style="cursor:pointer" title="点击查看球员详情"><div class="player-name">${p.n}</div><div style="font-size:11px;color:#7d8899;margin-top:2px">${p.club||''} · #${p.num||'—'} · ${p.pos||''}</div></div>`).join('')}</div>
+    <h2>核心球员</h2><div class="players">${info.players.map((p,i)=>{const posCN={GK:'门将',CB:'中后卫',RB:'右后卫',LB:'左后卫',CDM:'防守型中场',CM:'中前卫',AM:'攻击型中场',LW:'左边锋',RW:'右边锋',ST:'中锋',FW:'前锋','—':'—'};return`<div class="player-card-detail"><div class="player-card-header"><span class="player-card-name">${p.n}</span><span class="player-card-num">#${p.num||'—'}</span></div><div class="player-card-info"><div class="player-info-item"><span class="player-info-label">位置</span><span class="player-info-value">${posCN[p.pos]||p.pos||'—'}</span></div><div class="player-info-item"><span class="player-info-label">俱乐部</span><span class="player-info-value">${p.club||'—'}</span></div><div class="player-info-item"><span class="player-info-label">年龄</span><span class="player-info-value">${p.age||'—'}岁</span></div><div class="player-info-item"><span class="player-info-label">身价</span><span class="player-info-value" style="color:var(--gold)">${p.val||'—'}</span></div></div></div>`}).join('')}</div>
     <h2>赛程安排 (${teamMatches.length}场)</h2><table><thead><tr><th>日期</th><th>主队</th><th></th><th>客队</th><th>阶段</th><th>球场</th></tr></thead><tbody>${matchRows}</tbody></table>
     <div style="text-align:center;padding:20px;color:#7d8899;font-size:12px">数据来源: FIFA / Transfermarkt · 世界杯2026预测平台</div>
   </div></body></html>`);w.document.close();
@@ -1063,6 +1083,7 @@ function getBracketPlaceholder(homeOrAway,nodeId){
 }
 function renderBracket(){
   const container=document.getElementById('bracketContainer');
+  if(!container)return;
   function renderHalf(half,halfKey){
     const rounds=[{label:'R32',title:'32强',slots:half.r32},{label:'R16',title:'16强',slots:half.r16},{label:'QF',title:'8强',slots:half.qf},{label:'SF',title:'半决赛',slots:half.sf}];
     let h='<div class="bracket-half"><div class="bracket-half-label">'+half.name+'</div>';
@@ -1191,6 +1212,51 @@ function doSearch(){
     dd.innerHTML=results.map((r,i)=>`<div class="search-result" onmousedown="event.preventDefault()" onclick="executeSearchAction(window.__searchResults[${i}])"><span class="search-result-icon">${r.icon}</span><div class="search-result-text">${hl(r.name)}<div class="search-result-sub">${hl(r.sub)}</div></div></div>`).join('');
     dd.classList.add('open');
   },250);
+}
+
+/* ═══ CHAT ROOM ═══ */
+let currentChatMatchId=null,chatChannel=null;
+function openChatRoom(matchDbId,matchTitle){
+  if(!currentUser){openAuthModal('login');return;}
+  currentChatMatchId=matchDbId;
+  document.getElementById('chatTitle').textContent='💬 '+matchTitle;
+  document.getElementById('chatMessages').innerHTML='<div class="chat-empty">加载中...</div>';
+  document.getElementById('chatInput').value='';
+  document.getElementById('chatOverlay').classList.add('active');
+  loadChatMessages();
+  subscribeChat();
+}
+function closeChatRoom(){
+  document.getElementById('chatOverlay').classList.remove('active');
+  currentChatMatchId=null;
+  if(chatChannel){sb.removeChannel(chatChannel);chatChannel=null;}
+}
+async function loadChatMessages(){
+  if(!SUPABASE_READY||!currentChatMatchId)return;
+  try{
+    const{data,error}=await sb.from('chat_messages').select('*').eq('match_id',currentChatMatchId).order('created_at',{ascending:true}).limit(100);
+    if(error)throw error;
+    const msgs=document.getElementById('chatMessages');
+    if(!data||data.length===0){msgs.innerHTML='<div class="chat-empty">暂无消息，来发第一条吧！</div>';return;}
+    msgs.innerHTML=data.map(m=>`<div class="chat-msg"><div class="chat-msg-avatar">${(m.username||'?')[0]}</div><div class="chat-msg-body"><div class="chat-msg-name">${m.username||'匿名'}</div><div class="chat-msg-text">${m.message.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div></div></div>`).join('');
+    msgs.scrollTop=msgs.scrollHeight;
+  }catch(e){console.error('Chat load error:',e);}
+}
+async function sendChatMessage(){
+  if(!currentUser||!currentChatMatchId)return;
+  const input=document.getElementById('chatInput');
+  const msg=input.value.trim();
+  if(!msg)return;
+  input.value='';
+  if(!SUPABASE_READY){showToast('聊天功能需要联网','error');return;}
+  try{
+    const{error}=await sb.from('chat_messages').insert({match_id:currentChatMatchId,user_id:currentUser.id,username:currentUser.username,message:msg});
+    if(error)throw error;
+  }catch(e){console.error('Chat send error:',e);showToast('发送失败: '+e.message,'error');}
+}
+function subscribeChat(){
+  if(!SUPABASE_READY||!currentChatMatchId)return;
+  chatChannel=sb.channel('chat-'+currentChatMatchId).on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_messages',filter:'match_id=eq.'+currentChatMatchId},()=>{loadChatMessages();}).subscribe();
 }
 
 /* ═══ INIT ═══ */
