@@ -133,6 +133,22 @@ begin
 end;
 $$ language plpgsql;
 
+-- ── Auto-settlement trigger: when match finishes, calculate points ──
+create or replace function public.auto_settle()
+returns trigger as $$
+begin
+  if new.status = 'finished' and (old.status is null or old.status <> 'finished') then
+    perform public.calculate_prediction_points(new.id);
+  end if;
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists trg_auto_settle on public.matches;
+create trigger trg_auto_settle
+  after update on public.matches
+  for each row execute function public.auto_settle();
+
 -- ── Leaderboard View ──
 create or replace view public.leaderboard as
 select

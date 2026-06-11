@@ -113,6 +113,74 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 .match-pred-inline.locked{display:flex;align-items:center;gap:4px}
 .pred-inline-score{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--gold);min-width:16px;text-align:center;background:rgba(212,168,67,0.08);padding:2px 6px;border-radius:4px}
 .pred-locked-badge{font-size:10px;color:var(--pitch);margin-left:2px}
+.match-live-badge{font-size:10px;color:var(--accent-red);margin-left:6px;animation:livePulse 1.5s ease infinite;display:inline-flex;align-items:center;gap:3px}
+.live-dot-sm{width:6px;height:6px;border-radius:50%;background:var(--accent-red);display:inline-block}
+.match-finished-badge{font-size:10px;color:var(--text-dim);margin-left:6px}
+.match-result-score{font-family:var(--font-mono);font-size:16px;font-weight:700;color:#fff;letter-spacing:3px;background:rgba(255,255,255,0.06);padding:3px 10px;border-radius:6px}
+/* Mobile polish */
+@media(max-width:768px){
+  .hero h1{font-size:40px}
+  .hero-subtitle{font-size:13px;line-height:1.5}
+  .hero-stats{gap:12px;flex-wrap:wrap}
+  .hero-stat{padding:8px 14px;min-width:70px}
+  .hero-stat-num{font-size:22px}
+  .hero-stat-label{font-size:10px}
+  .countdown-bar{padding:12px 18px}
+  .countdown-bar .cd-time{font-size:22px}
+  .cd-label{font-size:11px}
+  .section-header h2{font-size:24px}
+  .section-tag{font-size:10px}
+  .nav-logo{font-size:14px}
+  .nav-links{gap:12px}
+  .nav-links a{font-size:12px}
+  .expand-btn{font-size:11px;padding:6px 14px}
+  .filter-btn{font-size:10px;padding:6px 10px}
+  .match-card{grid-template-columns:1fr;gap:6px;padding:10px}
+  .match-card .match-date{text-align:center;font-size:11px}
+  .match-teams{font-size:15px;justify-content:center}
+  .match-venue{text-align:center;font-size:10px}
+  .match-actions{justify-content:center}
+  .pred-inline-input{width:22px;height:22px;font-size:11px}
+  .pred-inline-btn{font-size:9px;padding:3px 7px}
+  .chat-card-btn{font-size:9px;padding:3px 7px}
+  .group-header{font-size:18px;padding:12px 14px}
+  .group-table th,.group-table td{padding:6px 8px;font-size:11px}
+  .day-header{padding:10px 12px}
+  .day-header-text{font-size:15px}
+  .jump-select{font-size:12px;padding:9px 32px 9px 12px;max-width:280px}
+  .livescore-board{max-width:100%}
+  .livescore-row{padding:8px 10px}
+  .livescore-row-stage{font-size:9px;min-width:60px}
+  .livescore-row-teams span{font-size:11px}
+  .livescore-row-score{font-size:14px}
+  .predict-card-body{gap:6px}
+  .predict-score-input{width:36px;height:36px;font-size:14px}
+  .predict-team-name{font-size:11px}
+  .toast-container{right:8px;top:70px;left:8px}
+  .toast{font-size:12px;padding:10px 16px;max-width:100%}
+  footer{padding:32px 16px;font-size:11px}
+}
+@media(max-width:480px){
+  .container{padding:0 8px}
+  .hero h1{font-size:32px}
+  .hero-subtitle{font-size:12px;padding:0 4px}
+  .hero-stats{gap:8px}
+  .hero-stat-num{font-size:18px}
+  .countdown-bar .cd-time{font-size:18px}
+  .section-header h2{font-size:20px}
+  .match-teams{font-size:13px}
+  .match-vs{font-size:10px}
+  .match-card .match-date{font-size:10px}
+  .pred-inline-input{width:20px;height:20px;font-size:10px}
+  .group-header{font-size:16px}
+  .day-header-text{font-size:13px}
+  .schedule-filters{gap:3px}
+  .filter-btn{font-size:9px;padding:4px 8px}
+  .bracket-round{min-width:80px}
+  .bracket-match-inner{padding:3px}
+  .bracket-team-row input[type=text]{font-size:8px;min-width:35px}
+  .bracket-score-input{width:14px;height:14px;font-size:7px}
+}
 @keyframes predSuccess{0%{transform:scale(1)}50%{transform:scale(1.2);background:var(--gold);color:#000}100%{transform:scale(1);background:var(--pitch);color:#fff}}
 .pred-inline-btn.saved{animation:predSuccess 0.5s ease;background:var(--pitch);color:#fff;border-color:var(--pitch)}
 .pred-saved-flash{animation:goalFlash 0.6s ease 3}
@@ -814,7 +882,7 @@ async function loadUserData(){
     if(preds){userPredictions={};preds.forEach(p=>{userPredictions[p.match_id]={home_score:p.home_score,away_score:p.away_score};});}
     const{data:scores}=await sb.from('matches').select('id,home_score,away_score,status');
     if(scores)scores.forEach(s=>{if(s.home_score!==null)matchScores[s.id]={home_score:s.home_score,away_score:s.away_score,status:s.status};});
-    renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');renderPredictions();observeReveals();
+    renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');renderGroupsWithStandings();renderLiveScores();renderPredictions();observeReveals();
   }catch(e){console.error('Load error:',e);}
 }
 
@@ -846,19 +914,18 @@ function renderMatchCard(m,idx){
   const hFlag=hInfo?flagImg(hInfo.cc,28):'';
   const aFlag=aInfo?flagImg(aInfo.cc,28):'';
   const hName=isTBD?`<span style="color:var(--text-dim);font-size:13px">${m.home}</span>`:`<a class="team-link" onclick="openTeamPage('${m.home}')">${hFlag} ${m.home}</a>`;
-  const aName=isTBD?`<span style="color:var(--text-dim);font-size:13px">${m.away}</span>`:`<a class="team-link" onclick="openTeamPage('${m.away}')">${aFlag} ${m.away}</a>`;
-  const matchDbId=idx+1;
-const existing=userPredictions[matchDbId];
-	let predHTML;
-	if(isTBD){
-		predHTML='<span style="font-size:10px;color:var(--text-dim)">待定</span>';
-	}else if(existing){
-		predHTML=`<div class="match-pred-inline locked"><span class="pred-inline-score">${existing.home_score}</span><span class="pred-inline-vs">:</span><span class="pred-inline-score">${existing.away_score}</span><span class="pred-locked-badge">✓</span></div>`;
-	}else{
-		predHTML=`<div class="match-pred-inline"><input class="pred-inline-input" placeholder="-" maxlength="2" id="schH_${matchDbId}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onclick="event.stopPropagation()"><span class="pred-inline-vs">:</span><input class="pred-inline-input" placeholder="-" maxlength="2" id="schA_${matchDbId}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onclick="event.stopPropagation()"><button class="pred-inline-btn" onclick="event.stopPropagation();submitPrediction(${matchDbId},'${m.home.replace(/'/g,"\'")}','${m.away.replace(/'/g,"\'")}','sch')" title="快速预测">猜</button></div>`;
-		}
-  return `<div class="match-card reveal"><div class="match-date"><strong>${m.date}</strong>${m.time} 北京时间</div><div class="match-info"><div class="match-teams">${hName}<span class="match-vs">VS</span>${aName}</div><div class="match-venue">${m.venue}${m.group?' · '+m.group+'组':''} · <span style="font-size:10px;color:var(--text-dim)">${stageLabel}</span></div></div><div class="match-actions">${predHTML}<button class="chat-card-btn" onclick="event.stopPropagation();openChatRoom(${matchDbId},'${m.home.replace(/'/g,"\'")} vs ${m.away.replace(/'/g,"\'")}')" title="进入聊天室">💬 聊</button></div></div>`;
-}
+  const aName=isTBD?`<span style="color:var(--text-dim);font-size:13px">${m.away}</span>`:`<a class="team-link" onclick="openTeamPage('${m.away}')">${aFlag} ${m.aw  const matchDbId=idx+1;
+  const ms=matchScores[matchDbId];
+  const hasResult=ms&&ms.home_score!=null&&ms.away_score!=null;
+  const existing=userPredictions[matchDbId];
+  let predHTML,statusBadge='';
+  if(ms&&ms.status==='live')statusBadge='<span class="match-live-badge"><span class="live-dot-sm"></span> 直播中</span>';
+  else if(ms&&ms.status==='finished')statusBadge='<span class="match-finished-badge">已结束</span>';
+  if(isTBD){predHTML='<span style="font-size:10px;color:var(--text-dim)">待定</span>';}
+  else if(hasResult){predHTML=`<div class="match-pred-inline locked"><span class="match-result-score">${ms.home_score} : ${ms.away_score}</span></div>`;}
+  else if(existing){predHTML=`<div class="match-pred-inline locked"><span class="pred-inline-score">${existing.home_score}</span><span class="pred-inline-vs">:</span><span class="pred-inline-score">${existing.away_score}</span><span class="pred-locked-badge">✓</span></div>`;}
+  else{predHTML=`<div class="match-pred-inline"><input class="pred-inline-input" placeholder="-" maxlength="2" id="schH_${matchDbId}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onclick="event.stopPropagation()"><span class="pred-inline-vs">:</span><input class="pred-inline-input" placeholder="-" maxlength="2" id="schA_${matchDbId}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onclick="event.stopPropagation()"><button class="pred-inline-btn" onclick="event.stopPropagation();submitPrediction(${matchDbId},'${m.home.replace(/'/g,"\'")}','${m.away.replace(/'/g,"\'")}','sch')" title="快速预测">猜</button></div>`;}
+  return `<div class="match-card reveal"><div class="match-date"><strong>${m.date}</strong>${m.time} 北京时间${statusBadge}</div><div class="match-info"><div class="match-teams">${hName}<span class="match-vs">VS</span>${aName}</div><div class="match-venue">${m.venue}${m.group?' · '+m.group+'组':''} · <span style="font-size:10px;color:var(--text-dim)">${stageLabel}</span></div></div><div class="match-actions">${predHTML}<button class="chat-card-btn" onclick="event.stopPropagation();openChatRoom(${matchDbId},'${m.home.replace(/'/g,"'")} vs ${m.away.replace(/'/g,"'")}')" title="进入聊天室">💬 聊</button></div></div>`;
 function findTodayKey(){const now=getSimDate();const m=now.getMonth()+1,d=now.getDate();const test=m+'月'+d+'日';return ALL_MATCHES.find(m=>m.date===test)?test:null;}
 function toggleDay(dayId){document.getElementById(dayId).classList.toggle('open');const a=document.getElementById('arrow-'+dayId);if(a)a.classList.toggle('open');}
 let allDatesExpanded=false;
@@ -877,6 +944,32 @@ function renderThirdPlace(){
   tbody.innerHTML=thirds.map((t,i)=>`<tr><td>${i+1}</td><td>${flagImg(t.team.cc,20)} ${t.team.name}</td><td>${t.group}组</td><td>0</td><td>0</td><td class="pts">0</td></tr>`).join('');
 }
 function toggleThirdPlace(){const b=document.getElementById('thirdPlaceBody');const a=document.getElementById('tpArrow');const o=b.style.display!=='none';b.style.display=o?'none':'block';if(a)a.textContent=o?'▼':'▲';}
+/* ═══ GROUP STANDINGS (live calculation from match results) ═══ */
+function calculateGroupStandings(){
+  const standings={};
+  GROUPS.forEach(g=>{standings[g.name]={};g.teams.forEach(t=>{standings[g.name][t.name]={team:t,P:0,W:0,D:0,L:0,GF:0,GA:0,GD:0,PTS:0};});});
+  ALL_MATCHES.forEach((m,idx)=>{
+    if(m.stage!=='group')return;
+    const g=m.group;if(!g||!standings[g])return;
+    const dbId=idx+1;const ms=matchScores[dbId];
+    if(!ms||ms.home_score==null||ms.away_score==null)return;
+    const h=standings[g][m.home],a=standings[g][m.away];
+    if(!h||!a)return;
+    h.P++;a.P++;h.GF+=ms.home_score;a.GF+=ms.away_score;h.GA+=ms.away_score;a.GA+=ms.home_score;h.GD=h.GF-h.GA;a.GD=a.GF-a.GA;
+    if(ms.home_score>ms.away_score){h.W++;h.PTS+=3;a.L++;}
+    else if(ms.home_score<ms.away_score){a.W++;a.PTS+=3;h.L++;}
+    else{h.D++;a.D++;h.PTS++;a.PTS++;}
+  });
+  return standings;
+}
+function renderGroupsWithStandings(){
+  const standings=calculateGroupStandings();
+  document.getElementById('groupsGrid').innerHTML=GROUPS.map(g=>{
+    const st=standings[g.name];
+    const sorted=Object.values(st).sort((a,b)=>b.PTS-a.PTS||b.GD-a.GD||b.GF-a.GF||a.team.name.localeCompare(b.team.name,'zh'));
+    return`<div class="group-card reveal"><div class="group-header" onclick="if(window.innerWidth<=768){this.parentElement.classList.toggle('collapsed');const b=this.querySelector('.group-card-toggle');if(b)b.textContent=this.parentElement.classList.contains('collapsed')?'\u25b6':'\u25bc'}">${g.name} 组<button class="group-card-toggle" onclick="event.stopPropagation();this.closest('.group-card').classList.toggle('collapsed');this.textContent=this.closest('.group-card').classList.contains('collapsed')?'\u25b6':'\u25bc'">\u25bc</button></div><table class="group-table"><thead><tr><th>球队</th><th>P</th><th>GD</th><th>PTS</th></tr></thead><tbody>${sorted.map(s=>`<tr><td>${flagImg(s.team.cc,24)} <a class="team-link" onclick="openTeamPage('${s.team.name}')" title="点击查看球队详情">${s.team.name}</a></td><td>${s.P}</td><td>${s.GD>0?'+':''}${s.GD}</td><td class="pts">${s.PTS}</td></tr>`).join('')}</tbody></table></div>`;
+  }).join('');
+}
 function toggleRules(){const b=document.getElementById('rulesBody');const a=document.getElementById('rulesArrow');const o=b.style.display!=='none';b.style.display=o?'none':'block';if(a)a.textContent=o?'▶':'▼';}
 
 /* ═══ FILTERS ═══ */
@@ -890,7 +983,7 @@ function renderPredictions(){
   const hintHTML='<div style="text-align:center;padding:40px;color:var(--text-dim);grid-column:1/-1">请先<a href="#" onclick="openAuthModal();return false" style="color:var(--gold)">登录</a>以参与预测</div>';
   if(!currentUser){container.innerHTML=hintHTML;return;}
   container.innerHTML='';
-  const upcoming=ALL_MATCHES.filter(m=>!m.home.includes('胜者')&&!m.home.includes('第一')&&!m.home.includes('第二')&&!m.home.includes('第三'));
+  const upcoming=ALL_MATCHES.filter(m=>{const dbId=ALL_MATCHES.indexOf(m)+1;const ms=matchScores[dbId];return !m.home.includes('胜者')&&!m.home.includes('第一')&&!m.home.includes('第二')&&!m.home.includes('第三')&&!(ms&&(ms.status==='live'||ms.status==='finished'));});
   const todayKey=findTodayKey();
   const todayMatches=upcoming.filter(m=>m.date===todayKey);
   const otherMatches=upcoming.filter(m=>m.date!==todayKey).slice(0,6-Math.min(todayMatches.length,6));
@@ -1057,12 +1150,19 @@ function closePlayerCard(){document.getElementById('playerCardOverlay').classLis
 function showToast(message,type=''){const c=document.getElementById('toastContainer');const t=document.createElement('div');t.className='toast '+type;t.textContent=message;c.appendChild(t);setTimeout(()=>{if(t.parentNode)t.remove();},3000);}
 
 /* ═══ COUNTDOWN ═══ */
-function updateCountdown(){const target=new Date('2026-06-11T15:00:00-04:00');const now=getSimDate();const diff=target-now;const el=document.getElementById('countdown');if(diff<=0){el.textContent='🎉 世界杯已开幕！';return;}const days=Math.floor(diff/(86400000));const hours=Math.floor((diff/3600000)%24);const mins=Math.floor((diff/60000)%60);const secs=Math.floor((diff/1000)%60);el.innerHTML='<span>'+days+'</span> 天 <span>'+String(hours).padStart(2,'0')+'</span> 时 <span>'+String(mins).padStart(2,'0')+'</span> 分 <span>'+String(secs).padStart(2,'0')+'</span> 秒';}
+function updateCountdown(){const start=new Date('2026-06-11T15:00:00-04:00');const now=getSimDate();const diff=now-start;const el=document.getElementById('countdown');const cdLabel=document.querySelector('.cd-label');if(diff<0){el.innerHTML='<span>'+Math.ceil(-diff/86400000)+'</span> 天后开幕';return;}const days=Math.floor(diff/86400000)+1;if(cdLabel)cdLabel.textContent='世界杯已进行';el.innerHTML='<span>'+days+'</span> 天';}
 
 /* ═══ REALTIME ═══ */
 function setupRealtimeSubscriptions(){
   if(!SUPABASE_READY)return;
-  sb.channel('match-updates').on('postgres_changes',{event:'UPDATE',schema:'public',table:'matches'},(payload)=>{renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');observeReveals();if(payload.new.status==='finished')renderLeaderboard();}).subscribe();
+  sb.channel('match-updates').on('postgres_changes',{event:'UPDATE',schema:'public',table:'matches'},(payload)=>{
+    if(payload.new.home_score!=null){matchScores[payload.new.id]={home_score:payload.new.home_score,away_score:payload.new.away_score,status:payload.new.status};}
+    renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');
+    renderGroupsWithStandings();
+    renderLiveScores();
+    renderLeaderboard();
+    observeReveals();
+  }).subscribe();
   sb.channel('leaderboard-updates').on('postgres_changes',{event:'UPDATE',schema:'public',table:'profiles'},()=>{renderLeaderboard();}).subscribe();
 }
 
@@ -1295,7 +1395,7 @@ async function renderLiveScores(){
 /* ═══ INIT ═══ */
 function init(){
   getSearchIdx();
-  renderGroups();renderThirdPlace();renderMatches();collapseAll();renderBracket();renderPredictions();renderLeaderboard();renderLiveScores();
+  renderGroupsWithStandings();renderThirdPlace();renderMatches();collapseAll();renderBracket();renderPredictions();renderLeaderboard();renderLiveScores();
   buildJumpMenu();
   createParticles();observeReveals();setupFilters();setupSmoothScroll();setupKeyboard();setupRealtimeSubscriptions();
   checkSession().then(()=>{renderPredictions();renderLeaderboard();});
