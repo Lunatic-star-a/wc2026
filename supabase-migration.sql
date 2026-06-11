@@ -131,7 +131,7 @@ begin
     where id = pred.user_id;
   end loop;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql;
 
 -- ── Leaderboard View ──
 create or replace view public.leaderboard as
