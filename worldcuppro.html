@@ -908,6 +908,7 @@ function renderMatches(filter='all'){
     return `<div class="schedule-day reveal"><div class="day-header" onclick="toggleDay('${dayId}')"><span class="day-header-text">📅 ${date} ${isToday?'<span style="color:var(--gold);font-size:12px;">(今天)</span>':''}</span><span class="day-header-meta">${entries.length}场比赛</span><span class="day-arrow" id="arrow-${dayId}">▼</span></div><div class="day-matches ${isToday?'open':''}" id="${dayId}">${entries.map(e=>renderMatchCard(e.m,e.idx)).join('')}</div></div>`;
   }).join('');
   if(filtered.length===0)list.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim)">暂无比赛数据</div>';
+  if(!allDatesExpanded&&filter==='all')showOnlyToday(true);
 }
 function renderMatchCard(m,idx){
   const stageLabel={group:'小组赛',r32:'1/16决赛',r16:'1/8决赛',qf:'1/4决赛',sf:'半决赛','3rd':'季军赛',final:'🏆决赛'}[m.stage]||m.stage;
@@ -978,7 +979,7 @@ function toggleRules(){const b=document.getElementById('rulesBody');const a=docu
 
 /* ═══ FILTERS ═══ */
 function setupFilters(){
-  document.querySelectorAll('.filter-btn').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderMatches(btn.dataset.filter);observeReveals();});});
+  document.querySelectorAll('.filter-btn').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');allDatesExpanded=btn.dataset.filter!=='all';renderMatches(btn.dataset.filter);observeReveals();});});
 }
 
 /* ═══ RENDER: Predictions (today's matches) ═══ */
