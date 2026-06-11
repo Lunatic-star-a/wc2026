@@ -284,37 +284,25 @@ footer strong{color:var(--gold);}
 /* Splash */
 .splash{position:fixed;inset:0;z-index:9999;background:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.6s ease,visibility 0.6s ease;overflow:hidden}
 .splash.hide{opacity:0;visibility:hidden;pointer-events:none}
-.splash-grass{position:absolute;bottom:0;left:0;right:0;height:35%;background:linear-gradient(to top,#0a5c2a 0%,#0d8c3c 20%,#0fa84a 50%,transparent 100%)}
-.splash-scene{position:relative;z-index:1}
-.splash-shadow{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);width:50px;height:12px;background:rgba(0,0,0,0.4);border-radius:50%;animation:splashShadow 2.8s ease forwards}
-@keyframes splashShadow{0%{width:50px;opacity:0.4}12%{width:70px;opacity:0.5}25%{width:50px;opacity:0.4}37%{width:65px;opacity:0.45}50%{width:50px;opacity:0.35}62%{width:55px;opacity:0.3}74%{width:30px;opacity:0.15}80%{width:10px;opacity:0.05}100%{width:100px;opacity:0}}
-.splash-ball{font-size:64px;position:relative;z-index:2;animation:splashBallAnim 2.8s ease forwards;display:block;text-align:center}
+.splash-ball{font-size:64px;position:relative;z-index:2;animation:splashBallAnim 2.2s ease forwards;display:block;text-align:center}
 @keyframes splashBallAnim{
   0%{transform:translateY(0) scale(1)}
-  10%{transform:translateY(-60px) scale(1,0.9)}
-  22%{transform:translateY(0) scale(1.05,0.95)}
-  34%{transform:translateY(-40px) scale(1,0.92)}
-  45%{transform:translateY(0) scale(1.03,0.97)}
-  55%{transform:translateY(-20px) scale(1,0.95)}
-  65%{transform:translateY(0) scale(1)}
-  75%{transform:translateY(-10px) scale(1.02) rotate(15deg)}
-  82%{transform:translateY(20px) scale(1.3) rotate(30deg)}
-  90%{transform:translateY(-100px) scale(3) rotate(90deg)}
-  96%{transform:translateY(-200px) scale(15) rotate(360deg)}
-  100%{transform:translateY(-300px) scale(30) rotate(720deg)}
+  12%{transform:translateY(-80px) scale(1,0.85)}
+  25%{transform:translateY(0) scale(1.08,0.92)}
+  35%{transform:translateY(-45px) scale(1,0.88)}
+  48%{transform:translateY(0) scale(1.04,0.96)}
+  55%{transform:translateY(-20px) scale(1,0.92)}
+  62%{transform:translateY(0) scale(1)}
+  70%{transform:translateY(120px) scale(3) rotate(180deg)}
+  80%{transform:translateY(200px) scale(12) rotate(360deg)}
+  90%{transform:translateY(300px) scale(30)}
+  95%{transform:translateY(400px) scale(50)}
+  100%{transform:translateY(500px) scale(60)}
 }
-.splash-foot{position:absolute;font-size:48px;bottom:-10px;left:50%;transform:translateX(-50%) translateY(20px) rotate(-30deg);opacity:0;animation:splashFootKick 2.8s ease forwards;z-index:3}
-@keyframes splashFootKick{
-  0%,70%{opacity:0;transform:translateX(-50%) translateY(20px) rotate(-30deg)}
-  75%{opacity:1;transform:translateX(-50%) translateY(-10px) rotate(-10deg)}
-  80%{opacity:1;transform:translateX(-50%) translateY(-30px) rotate(10deg)}
-  85%{opacity:0;transform:translateX(-50%) translateY(-50px) rotate(30deg)}
-  100%{opacity:0;transform:translateX(-50%) translateY(-60px) rotate(45deg)}
-}
-.splash-flash{position:absolute;inset:0;background:#fff;opacity:0;animation:splashFlash 2.8s ease forwards;z-index:10;pointer-events:none}
-@keyframes splashFlash{0%,88%{opacity:0}93%{opacity:0.9}97%{opacity:1}100%{opacity:1;background:#000}}
-.splash-text{font-family:var(--font-display);font-size:28px;letter-spacing:4px;color:var(--gold);margin-top:28px;position:relative;z-index:1;animation:splashText 2.8s ease forwards;opacity:0}
-@keyframes splashText{0%,60%{opacity:0;transform:translateY(10px)}70%{opacity:0.6;transform:translateY(0)}85%{opacity:1}95%{opacity:0}100%{opacity:0}}
+.splash-flash{position:absolute;inset:0;background:#fff;opacity:0;animation:splashFlash 2.2s ease forwards;z-index:10;pointer-events:none}
+@keyframes splashFlash{0%,86%{opacity:0}92%{opacity:0.9}97%{opacity:1}100%{opacity:1;background:#000}}
+.splash-text{font-family:var(--font-display);font-size:28px;letter-spacing:4px;color:var(--gold);margin-top:28px;position:relative;z-index:1;animation:splashText 2.2s ease forwards;opacity:0}
+@keyframes splashText{0%,55%{opacity:0;transform:translateY(10px)}65%{opacity:0.6;transform:translateY(0)}78%{opacity:1}82%{opacity:0}100%{opacity:0}}
 /* Particles */
 .particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
 .particle{position:absolute;border-radius:50%;background:var(--pitch);animation:float-up linear infinite;opacity:0;}
@@ -432,12 +420,7 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
 </head>
 <body>
 <div class="splash" id="splash">
-  <div class="splash-grass"></div>
-  <div class="splash-scene">
-    <div class="splash-shadow"></div>
-    <div class="splash-ball">⚽</div>
-    <div class="splash-foot">🦶</div>
-  </div>
+  <div class="splash-ball">⚽</div>
   <div class="splash-flash"></div>
   <div class="splash-text">FIFA WORLD CUP 2026</div>
 </div>
@@ -1282,7 +1265,7 @@ function init(){
   setTimeout(()=>collapseAll(),100);
   updateCountdown();setInterval(updateCountdown,1000);
   document.body.classList.add('loaded');
-  setTimeout(()=>{const splash=document.getElementById('splash');if(splash)splash.classList.add('hide');},3200);
+  setTimeout(()=>{const splash=document.getElementById('splash');if(splash)splash.classList.add('hide');},2600);
 }
 document.addEventListener('DOMContentLoaded',init);
 </script>
