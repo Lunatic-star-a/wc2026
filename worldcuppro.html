@@ -914,7 +914,8 @@ function renderMatchCard(m,idx){
   const hFlag=hInfo?flagImg(hInfo.cc,28):'';
   const aFlag=aInfo?flagImg(aInfo.cc,28):'';
   const hName=isTBD?`<span style="color:var(--text-dim);font-size:13px">${m.home}</span>`:`<a class="team-link" onclick="openTeamPage('${m.home}')">${hFlag} ${m.home}</a>`;
-  const aName=isTBD?`<span style="color:var(--text-dim);font-size:13px">${m.away}</span>`:`<a class="team-link" onclick="openTeamPage('${m.away}')">${aFlag} ${m.aw  const matchDbId=idx+1;
+  const aName=isTBD?`<span style="color:var(--text-dim);font-size:13px">${m.away}</span>`:`<a class="team-link" onclick="openTeamPage('${m.away}')">${aFlag} ${m.away}</a>`;
+  const matchDbId=idx+1;
   const ms=matchScores[matchDbId];
   const hasResult=ms&&ms.home_score!=null&&ms.away_score!=null;
   const existing=userPredictions[matchDbId];
