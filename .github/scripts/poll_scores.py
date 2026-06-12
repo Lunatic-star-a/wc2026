@@ -47,7 +47,10 @@ CODE_TO_CN = {
 STATUS_MAP = {
     'STATUS_FULL_TIME': 'finished', 'STATUS_FINAL': 'finished',
     'STATUS_IN_PROGRESS': 'live', 'STATUS_HALF_TIME': 'halftime',
+    'STATUS_SECOND_HALF': 'live', 'STATUS_FIRST_HALF': 'live',
+    'STATUS_END_OF_PERIOD': 'halftime',
     'STATUS_SCHEDULED': 'upcoming', 'STATUS_POSTPONED': 'upcoming',
+    'STATUS_DELAYED': 'live', 'STATUS_RAIN_DELAY': 'live',
 }
 
 def fetch_json(url):
