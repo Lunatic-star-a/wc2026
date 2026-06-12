@@ -213,9 +213,9 @@ insert into public.matches (id, match_date, match_time, home_team, away_team, st
 on conflict (id) do update set
   home_score = excluded.home_score,
   away_score = excluded.away_score,
-  status = excluded.status,
-  match_minute = coalesce(excluded.match_minute, public.matches.match_minute),
-  injury_time = coalesce(excluded.injury_time, public.matches.injury_time);
+  status = case when public.matches.status in ('live','halftime','finished') then public.matches.status else excluded.status end,
+  match_minute = coalesce(public.matches.match_minute, excluded.match_minute),
+  injury_time = coalesce(public.matches.injury_time, excluded.injury_time);
 
 insert into public.matches (id, match_date, match_time, home_team, away_team, stage, group_name, venue) values
 (3,'2026-06-13','03:00','加拿大','波黑','group','B','BMO球场·多伦多'),
