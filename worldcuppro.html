@@ -990,9 +990,20 @@ function buildJumpMenu(){const sel=document.querySelector('.jump-select');if(!se
 function jumpToDate(d){if(!d)return;const dayId='day-'+d.replace(/[月日]/g,'-');showOnlyToday(false);allDatesExpanded=false;const btn=document.getElementById('toggleAllBtn');if(btn)btn.textContent='展开全部';setTimeout(()=>{const el=document.getElementById(dayId);if(el){el.parentElement.style.display='';const dm=el.parentElement.querySelector('.day-matches');if(dm)dm.classList.add('open');const a=document.getElementById('arrow-'+dayId);if(a)a.classList.add('open');el.parentElement.scrollIntoView({behavior:'smooth',block:'center'});}},150);}
 function renderThirdPlace(){
   const tbody=document.getElementById('thirdPlaceTbody');
-  const thirds=GROUPS.map(g=>({team:[...g.teams].sort((a,b)=>a.name.localeCompare(b.name,'zh'))[2],group:g.name}));
-  thirds.sort((a,b)=>a.team.name.localeCompare(b.team.name,'zh'));
-  tbody.innerHTML=thirds.map((t,i)=>`<tr><td>${i+1}</td><td>${flagImg(t.team.cc,20)} ${t.team.name}</td><td>${t.group}组</td><td>0</td><td>0</td><td class="pts">0</td></tr>`).join('');
+  const standings=calculateGroupStandings();
+  const thirds=[];
+  GROUPS.forEach(g=>{
+    const st=standings[g.name];
+    if(!st)return;
+    const sorted=Object.values(st).sort((a,b)=>b.PTS-a.PTS||b.GD-a.GD||b.GF-a.GF||a.team.name.localeCompare(b.team.name,'zh'));
+    if(sorted.length>=3){const t=sorted[2];thirds.push({team:t.team,group:g.name,P:t.P,GD:t.GD,PTS:t.PTS});}
+  });
+  thirds.sort((a,b)=>b.PTS-a.PTS||b.GD-a.GD||b.GF-a.GF||a.team.name.localeCompare(b.team.name,'zh'));
+  if(thirds.length===0){
+    GROUPS.forEach(g=>{const t=[...g.teams].sort((a,b)=>a.name.localeCompare(b.name,'zh'))[2];if(t)thirds.push({team:t,group:g.name,P:0,GD:0,PTS:0});});
+    thirds.sort((a,b)=>a.team.name.localeCompare(b.team.name,'zh'));
+  }
+  tbody.innerHTML=thirds.map((t,i)=>`<tr><td>${i+1}</td><td>${flagImg(t.team.cc,20)} ${t.team.name}</td><td>${t.group}组</td><td>${t.P}</td><td>${t.GD>0?'+':''}${t.GD}</td><td class="pts">${t.PTS}</td></tr>`).join('');
 }
 function toggleThirdPlace(){const b=document.getElementById('thirdPlaceBody');const a=document.getElementById('tpArrow');const o=b.style.display!=='none';b.style.display=o?'none':'block';if(a)a.textContent=o?'▼':'▲';}
 /* ═══ GROUP STANDINGS (live calculation from match results) ═══ */
@@ -1463,8 +1474,7 @@ function init(){
   createParticles();observeReveals();setupFilters();setupSmoothScroll();setupKeyboard();setupRealtimeSubscriptions();
   seedMatchesIfNeeded();
   Promise.all([loadMatchScores(),checkSession()]).then(function(){
-    renderGroupsWithStandings();renderThirdPlace();renderLiveScores();
-    renderPredictions();renderLeaderboard();
+    renderPredictions();renderLeaderboard();observeReveals();
   }).catch(function(){});
   setInterval(loadMatchScores,20000);
   setTimeout(()=>collapseAll(),100);
