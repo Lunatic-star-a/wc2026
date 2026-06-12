@@ -209,7 +209,7 @@ create trigger on_auth_user_created
 -- ── Seed 104 Matches (北京时间 UTC+8) ──
 insert into public.matches (id, match_date, match_time, home_team, away_team, stage, group_name, venue, home_score, away_score, status, match_minute, injury_time) values
 (1,'2026-06-12','03:00','墨西哥','南非','group','A','阿兹特克体育场·墨西哥城',2,0,'finished',null,0),
-(2,'2026-06-12','10:00','韩国','捷克','group','A','阿克伦体育场·瓜达拉哈拉',0,0,'live',0,0)
+(2,'2026-06-12','10:00','韩国','捷克','group','A','阿克伦体育场·瓜达拉哈拉',2,1,'finished',90,7)
 on conflict (id) do update set
   home_score = excluded.home_score,
   away_score = excluded.away_score,
