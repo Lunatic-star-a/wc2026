@@ -207,9 +207,17 @@ create trigger on_auth_user_created
   for each row execute function public.handle_new_user();
 
 -- ── Seed 104 Matches (北京时间 UTC+8) ──
+insert into public.matches (id, match_date, match_time, home_team, away_team, stage, group_name, venue, home_score, away_score, status, match_minute, injury_time) values
+(1,'2026-06-12','03:00','墨西哥','南非','group','A','阿兹特克体育场·墨西哥城',2,0,'finished',null,0),
+(2,'2026-06-12','10:00','韩国','捷克','group','A','阿克伦体育场·瓜达拉哈拉',0,0,'live',0,0)
+on conflict (id) do update set
+  home_score = excluded.home_score,
+  away_score = excluded.away_score,
+  status = excluded.status,
+  match_minute = coalesce(excluded.match_minute, public.matches.match_minute),
+  injury_time = coalesce(excluded.injury_time, public.matches.injury_time);
+
 insert into public.matches (id, match_date, match_time, home_team, away_team, stage, group_name, venue) values
-(1,'2026-06-12','03:00','墨西哥','南非','group','A','阿兹特克体育场·墨西哥城'),
-(2,'2026-06-12','10:00','韩国','捷克','group','A','阿克伦体育场·瓜达拉哈拉'),
 (3,'2026-06-13','03:00','加拿大','波黑','group','B','BMO球场·多伦多'),
 (4,'2026-06-13','09:00','美国','巴拉圭','group','D','SoFi体育场·洛杉矶'),
 (5,'2026-06-14','03:00','卡塔尔','瑞士','group','B','BMO球场·多伦多'),
