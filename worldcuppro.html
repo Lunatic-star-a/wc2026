@@ -446,50 +446,190 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   .bracket-connector{min-width:12px}
   .bracket-connector svg{width:12px}
 }
-/* Responsive */
+/* ═══ RESPONSIVE ═══ */
 .group-card-toggle{display:none}
+/* ── Mobile Landscape / Tablet (≤768px) ── */
 @media(max-width:768px){
-.group-card-toggle{display:inline-block;float:right;background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:16px;padding:0 4px}
-.group-card.collapsed .group-table{display:none}
-.nav-links{display:none;}
-.hamburger{display:flex;}
-.search-wrap{position:static}
-.search-input{width:120px;font-size:12px}
-.search-input:focus{width:160px}
-.search-dropdown{left:-80px;right:-10px;width:auto}
-.hero h1{font-size:48px;}
-.hero-stats{gap:20px;}
-.hero-visual{display:none;}
-.match-card{grid-template-columns:70px 1fr auto;gap:8px;padding:10px 12px;}
-.match-actions{min-width:60px}
-.pred-inline-input{width:20px;height:20px;font-size:10px}
-.pred-inline-btn{font-size:9px;padding:2px 6px}
-.match-teams{font-size:16px;}
-.match-date{font-size:11px;}
-.predict-cards{grid-template-columns:1fr;}
-.countdown-bar .cd-time{font-size:24px;}
-.groups-grid{grid-template-columns:1fr;}
-.group-table th,.group-table td{padding:6px 8px;font-size:12px;}
-.auth-modal{padding:28px 20px;}
-.team-modal-body{grid-template-columns:1fr 1fr;gap:8px;padding:12px 16px;}
-.team-stat-card{padding:10px 12px;}
-.team-stat-value{font-size:22px;}
-.watch-grid{grid-template-columns:1fr;}
-.day-header-text{font-size:16px;}
-.schedule-filters{gap:4px;}
-.filter-btn{font-size:10px;padding:6px 10px;}
+  .container{padding:0 16px}
+  /* Nav */
+  .nav-inner{padding:0 16px;height:52px}
+  .nav-logo{font-size:20px}
+  .nav-links{display:none}
+  .hamburger{display:flex}
+  .search-wrap{position:static}
+  .search-input{width:100px;font-size:11px;padding:6px 10px 6px 28px}
+  .search-input:focus{width:140px}
+  .search-dropdown{left:-100px;right:-10px;width:auto}
+  .search-icon{left:8px;font-size:12px}
+  .nav-user-btn{font-size:10px;padding:5px 12px}
+  .nav-username{font-size:11px}
+  /* Hero */
+  .hero{min-height:auto;padding:90px 0 50px}
+  .hero h1{font-size:44px}
+  .hero-subtitle{font-size:13px;line-height:1.5;margin-bottom:24px}
+  .hero-stats{gap:16px;flex-wrap:wrap}
+  .hero-stat{padding:8px 14px;min-width:70px;background:rgba(255,255,255,0.02);border-radius:var(--radius-sm)}
+  .hero-stat-num{font-size:24px}
+  .hero-stat-label{font-size:9px}
+  .hero-visual{display:none}
+  .hero-badge{font-size:10px;padding:4px 12px;margin-bottom:20px}
+  .countdown-bar{padding:12px 16px;margin-top:24px}
+  .countdown-bar .cd-time{font-size:22px}
+  .countdown-bar .cd-time span{min-width:36px}
+  /* Sections */
+  .section-header{margin-bottom:32px}
+  .section-header h2{font-size:28px}
+  .section-tag{font-size:10px}
+  .groups-section,.schedule-section,.predict-section,.livescore-section{padding:60px 0}
+  /* Groups */
+  .groups-grid{grid-template-columns:1fr;gap:10px}
+  .group-header{font-size:18px;padding:14px 16px}
+  .group-table th,.group-table td{padding:7px 10px;font-size:12px}
+  .group-card-toggle{display:block;float:right;background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:16px;padding:0 4px}
+  .group-card.collapsed .group-table{display:none}
+  /* Third place table */
+  #thirdPlaceBody table{font-size:11px}
+  #thirdPlaceBody th,#thirdPlaceBody td{padding:6px 8px}
+  /* Schedule */
+  .match-card{grid-template-columns:1fr;gap:8px;padding:12px 14px}
+  .match-card .match-date{text-align:left;font-size:11px}
+  .match-teams{font-size:15px;justify-content:flex-start}
+  .match-venue{text-align:left;font-size:10px}
+  .match-actions{flex-direction:row;justify-content:flex-start;flex-wrap:wrap;gap:6px}
+  .pred-inline-input{width:22px;height:22px;font-size:11px}
+  .pred-inline-btn{font-size:9px;padding:3px 7px}
+  .chat-card-btn{font-size:9px;padding:3px 7px}
+  .day-header{padding:12px 14px}
+  .day-header-text{font-size:16px}
+  .day-header-meta{font-size:11px}
+  .schedule-filters{gap:4px}
+  .filter-btn{font-size:10px;padding:6px 10px}
+  .expand-btn{font-size:10px;padding:6px 12px}
+  .jump-select{font-size:12px;padding:9px 32px 9px 12px;max-width:280px}
+  /* Predict */
+  .predict-cards{grid-template-columns:1fr;gap:12px}
+  .predict-card{padding:18px 16px}
+  .predict-card-body{gap:8px}
+  .predict-score-input{width:36px;height:36px;font-size:15px}
+  .predict-team-name{font-size:12px}
+  .predict-intro{font-size:13px;margin-bottom:32px}
+  .predict-today-label{font-size:20px}
+  .predict-submit{font-size:11px;padding:10px}
+  /* Leaderboard */
+  .leaderboard{margin-top:40px}
+  .leaderboard h3{font-size:24px}
+  .lb-row{padding:10px 14px;gap:10px}
+  .lb-rank{font-size:18px;width:28px}
+  .lb-name{font-size:13px}
+  .lb-meta{font-size:10px}
+  .lb-points{font-size:13px}
+  /* Live scores */
+  .livescore-board{max-width:100%}
+  .livescore-row{padding:8px 12px;flex-wrap:wrap;gap:6px}
+  .livescore-row-stage{font-size:9px;min-width:auto}
+  .livescore-row-teams span{font-size:11px}
+  .livescore-row-score{font-size:14px;padding:2px 8px}
+  /* Auth modal */
+  .auth-modal{padding:28px 20px}
+  .auth-modal h2{font-size:26px}
+  /* Team modal */
+  .team-modal{width:100%}
+  .team-modal-body{grid-template-columns:1fr 1fr;gap:8px;padding:12px 16px}
+  .team-modal-name{font-size:32px}
+  .team-stat-card{padding:10px 12px}
+  .team-stat-value{font-size:22px}
+  /* Chat */
+  .chat-panel{width:100%;max-width:360px}
+  /* Toast */
+  .toast-container{right:8px;top:65px;left:8px}
+  .toast{font-size:12px;padding:10px 16px;max-width:100%}
+  /* Footer */
+  footer{padding:32px 16px;font-size:11px}
 }
+/* ── Mobile Portrait (≤480px) ── */
 @media(max-width:480px){
-.container{padding:0 12px;}
-.search-input{width:100px}
-.search-input:focus{width:130px}
-.match-card{grid-template-columns:1fr;text-align:center;}
-.match-date{text-align:center;}
-.match-info{text-align:center;}
-.team-modal-body{grid-template-columns:1fr;}
-.day-header{flex-wrap:wrap;gap:6px;}
-.day-header-text{font-size:14px;}
-.filter-btn{font-size:9px;padding:5px 8px;}
+  .container{padding:0 10px}
+  .nav-inner{padding:0 10px;height:48px}
+  .nav-logo{font-size:18px}
+  .search-input{width:80px;font-size:10px}
+  .search-input:focus{width:110px}
+  .nav-user-btn{font-size:9px;padding:4px 10px}
+  /* Hero */
+  .hero{padding:80px 0 40px}
+  .hero h1{font-size:32px}
+  .hero-subtitle{font-size:12px;padding:0}
+  .hero-stats{gap:8px}
+  .hero-stat{padding:6px 12px;min-width:60px}
+  .hero-stat-num{font-size:18px}
+  .hero-stat-label{font-size:8px}
+  .hero-badge{font-size:9px;padding:3px 10px;letter-spacing:2px}
+  .countdown-bar{padding:10px 14px}
+  .countdown-bar .cd-time{font-size:18px}
+  .countdown-bar .cd-time span{min-width:32px}
+  .countdown-bar .cd-label{font-size:9px}
+  /* Sections */
+  .section-header h2{font-size:22px}
+  .section-tag{font-size:9px}
+  .groups-section,.schedule-section,.predict-section,.livescore-section{padding:48px 0}
+  /* Groups */
+  .group-header{font-size:15px;padding:10px 12px}
+  .group-table th,.group-table td{padding:5px 6px;font-size:10px}
+  .team-link{font-size:11px}
+  .pts{font-size:11px}
+  /* Schedule */
+  .match-card{padding:10px;gap:6px}
+  .match-teams{font-size:13px}
+  .match-vs{font-size:10px}
+  .match-card .match-date{font-size:10px}
+  .match-venue{font-size:9px}
+  .pred-inline-input{width:20px;height:20px;font-size:10px}
+  .pred-inline-btn{font-size:8px;padding:2px 5px}
+  .chat-card-btn{font-size:8px;padding:2px 5px}
+  .day-header{padding:10px 12px}
+  .day-header-text{font-size:14px}
+  .day-header-meta{font-size:10px}
+  .schedule-filters{gap:2px;margin-bottom:16px}
+  .filter-btn{font-size:9px;padding:5px 8px}
+  .expand-btn{font-size:9px;padding:5px 10px}
+  .jump-select{font-size:11px;max-width:230px}
+  /* Predict */
+  .predict-card{padding:14px 12px}
+  .predict-card-body{gap:4px}
+  .predict-score-input{width:32px;height:32px;font-size:13px}
+  .predict-team-name{font-size:10px}
+  .predict-team-icon{width:28px;height:28px;font-size:14px}
+  .predict-vs-dot{font-size:14px}
+  .predict-submit{font-size:10px;padding:8px}
+  /* Leaderboard */
+  .leaderboard h3{font-size:20px}
+  .lb-row{padding:8px 12px;gap:8px}
+  .lb-rank{font-size:16px;width:24px}
+  .lb-name{font-size:12px}
+  /* Live scores */
+  .livescore-row{padding:6px 8px;flex-direction:column;gap:4px;align-items:flex-start}
+  .livescore-row-stage{text-align:left;font-size:9px}
+  .livescore-row-teams{justify-content:flex-start}
+  .livescore-row-teams span{font-size:10px}
+  .livescore-row-score{font-size:13px;padding:1px 6px}
+  /* Auth */
+  .auth-modal{padding:24px 16px}
+  .auth-modal h2{font-size:24px}
+  .auth-field input{padding:10px 14px;font-size:14px}
+  .auth-submit{padding:12px;font-size:11px}
+  /* Team modal */
+  .team-modal-body{grid-template-columns:1fr}
+  .team-modal-name{font-size:26px}
+  .team-modal-flag{font-size:48px}
+  /* Chat */
+  .chat-panel{width:100vw;max-width:100vw}
+  /* Bracket */
+  .bracket-round{min-width:80px}
+  .bracket-match-inner{padding:3px}
+  .bracket-team-row input[type=text]{font-size:8px;min-width:35px}
+  .bracket-score-input{width:14px;height:14px;font-size:7px}
+  /* Toast */
+  .toast-container{top:60px}
+  .toast{font-size:11px;padding:8px 14px}
 }
 </style>
 </head>
@@ -869,7 +1009,7 @@ async function handleAuthSubmit(e){
     currentUser={id:result.data.user.id,username:result.data.user.user_metadata?.username||username};onLoginSuccess();
   }catch(err){console.error('Auth error:',err);errEl.textContent='网络连接失败: '+err.message+'. 请检查网络后重试';}
 }
-async function onLoginSuccess(){closeAuthModal();updateNavUI();showToast('欢迎回来，'+currentUser.username+'！','success');await loadUserPredictions();renderPredictions();}
+async function onLoginSuccess(){closeAuthModal();updateNavUI();showToast('欢迎回来，'+currentUser.username+'！','success');await loadUserPredictions();renderPredictions();renderLeaderboard();observeReveals();}
 async function handleLogout(){if(SUPABASE_READY)await sb.auth.signOut();currentUser=null;userPredictions={};updateNavUI();renderPredictions();showToast('已退出登录');}
 function updateNavUI(){
   const bl=document.getElementById('btnLogin'),bout=document.getElementById('btnLogout'),ne=document.getElementById('navUsername');
@@ -1116,11 +1256,16 @@ async function submitPrediction(matchDbId,home,away,src){
     if(!matchOk){showToast('比赛数据同步失败，请重试','error');if(resultEl){resultEl.textContent='比赛数据同步失败，请重试';resultEl.style.color='#c0392b';}return;}
     const profOk=await ensureProfile();
     if(!profOk){showToast('用户数据同步失败，请重试','error');return;}
+    // Update local state first for instant UI
+    userPredictions[matchDbId]={home_score:hs,away_score:as};if(resultEl){resultEl.textContent='✓ 预测已提交: '+hs+':'+as;resultEl.style.color='var(--gold)';}if(btn){btn.textContent='✓ 已预测';btn.classList.add('saved');}
+    // Render immediately with local state
+    renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');renderPredictions();renderLeaderboard();observeReveals();
+    // Sync to DB in background
     const{error}=await sb.from('predictions').upsert({user_id:currentUser.id,match_id:matchDbId,home_score:hs,away_score:as},{onConflict:'user_id, match_id'});
     if(error)throw error;
-    userPredictions[matchDbId]={home_score:hs,away_score:as};if(resultEl){resultEl.textContent='✓ 预测已提交: '+hs+':'+as;resultEl.style.color='var(--gold)';}if(btn){btn.textContent='✓ 已预测';btn.classList.add('saved');}
+    // Update count and refresh leaderboard from DB
     try{const{count}=await sb.from('predictions').select('id',{count:'exact',head:true}).eq('user_id',currentUser.id);await sb.from('profiles').update({predictions_count:count||0}).eq('id',currentUser.id);}catch(e){}
-    renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');renderPredictions();renderLeaderboard();observeReveals();
+    renderLeaderboard();
     showToast('预测 '+home+' '+hs+':'+as+' '+away+' 已提交','success');
   }catch(err){console.error('Submit error:',err);showToast('提交失败: '+err.message,'error');if(resultEl){resultEl.textContent='提交失败: '+err.message;resultEl.style.color='#c0392b';}}
 }
@@ -1130,7 +1275,7 @@ async function renderLeaderboard(){
   const list=document.getElementById('lbList');
   if(!SUPABASE_READY){list.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim)">联网后可查看排行榜</div>';return;}
   try{
-    const{data,error}=await sb.from('leaderboard').select('*').limit(8);
+    const{data,error}=await sb.from('leaderboard').select('*');
     if(error)throw error;
     if(!data||data.length===0){list.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim)">还没有预测数据，快来参与吧！</div>';return;}
     list.innerHTML=data.map((p,i)=>{var rc='';if(i===0)rc='gold';else if(i===1)rc='silver';else if(i===2)rc='bronze';return'<div class=\"lb-row reveal\"><span class=\"lb-rank '+rc+'\">'+(p.rank||i+1)+'</span><span class=\"lb-name\">'+(p.username||'')+'</span><span class=\"lb-meta\">'+(p.predictions_count||0)+'次预测</span><span class=\"lb-points\">'+(p.points||0)+' pts</span></div>';}).join('');
