@@ -1278,7 +1278,7 @@ async function renderLeaderboard(){
     const{data,error}=await sb.from('leaderboard').select('*');
     if(error)throw error;
     if(!data||data.length===0){list.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim)">还没有预测数据，快来参与吧！</div>';return;}
-    list.innerHTML=data.map((p,i)=>{var rc='';if(i===0)rc='gold';else if(i===1)rc='silver';else if(i===2)rc='bronze';return'<div class=\"lb-row reveal\"><span class=\"lb-rank '+rc+'\">'+(p.rank||i+1)+'</span><span class=\"lb-name\">'+(p.username||'')+'</span><span class=\"lb-meta\">'+(p.predictions_count||0)+'次预测</span><span class=\"lb-points\">'+(p.points||0)+' pts</span></div>';}).join('');
+    list.innerHTML=data.map((p,i)=>{var rc='';if(i===0)rc='gold';else if(i===1)rc='silver';else if(i===2)rc='bronze';return'<div class=\"lb-row reveal visible\"><span class=\"lb-rank '+rc+'\">'+(p.rank||i+1)+'</span><span class=\"lb-name\">'+(p.username||'')+'</span><span class=\"lb-meta\">'+(p.predictions_count||0)+'次预测</span><span class=\"lb-points\">'+(p.points||0)+' pts</span></div>';}).join('');
   }catch(err){console.error('Leaderboard error:',err);list.innerHTML='<div style=\"text-align:center;padding:40px;color:var(--text-dim)\">排行榜加载失败</div>';}
 }
 
