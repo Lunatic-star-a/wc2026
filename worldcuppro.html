@@ -37,7 +37,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 .hero{min-height:100vh;display:flex;align-items:center;padding:120px 0 80px;position:relative;}
 .hero-content{max-width:700px;}
 .hero-badge{display:inline-block;font-family:var(--font-mono);font-size:12px;letter-spacing:3px;color:var(--gold);border:1px solid rgba(212,168,67,0.3);padding:6px 16px;border-radius:100px;margin-bottom:28px;text-transform:uppercase;animation:fadeInUp 0.8s ease;}
-.hero h1{font-family:var(--font-display);font-size:clamp(64px,10vw,120px);line-height:0.9;letter-spacing:-2px;text-transform:uppercase;color:#fff;margin-bottom:12px;animation:fadeInUp 0.8s ease 0.1s both;}
+.hero h1{font-family:var(--font-display);font-size:clamp(64px,10vw,120px);line-height:1.05;letter-spacing:2px;text-transform:uppercase;color:#fff;margin-bottom:12px;animation:fadeInUp 0.8s ease 0.1s both;}
 .hero h1 .accent{color:transparent;-webkit-text-stroke:2px var(--gold);}
 .hero-subtitle{font-size:18px;color:var(--text-dim);margin-bottom:40px;max-width:500px;animation:fadeInUp 0.8s ease 0.2s both;}
 .hero-stats{display:flex;gap:48px;animation:fadeInUp 0.8s ease 0.3s both;}
@@ -279,13 +279,12 @@ footer{text-align:center;padding:60px 0;border-top:1px solid rgba(255,255,255,0.
 .live-dot{width:8px;height:8px;border-radius:50%;background:var(--accent-red);animation:livePulse 1.5s ease infinite}
 @keyframes livePulse{0%,100%{opacity:1}50%{opacity:0.3}}
 .livescore-embed{background:rgba(0,0,0,0.2);padding:8px;max-height:500px;overflow-y:auto}
-.livescore-row{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,0.03);gap:12px}
+.livescore-row{display:flex;flex-direction:column;align-items:center;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.03);gap:8px}
 .livescore-row:hover{background:rgba(255,255,255,0.02)}
-.livescore-row-stage{font-size:10px;color:var(--text-dim);white-space:nowrap;min-width:80px}
-.livescore-row-teams{display:flex;align-items:center;gap:10px;flex:1;justify-content:center}
-.livescore-row-teams span{font-size:13px;color:var(--text)}
-.livescore-row-score{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--gold);padding:2px 12px;background:rgba(212,168,67,0.1);border-radius:6px;letter-spacing:2px}
-@media(max-width:480px){.livescore-row{flex-direction:column;gap:4px;padding:8px 10px}.livescore-row-stage{text-align:center;min-width:auto}.livescore-row-teams span{font-size:11px}.livescore-row-score{font-size:14px;padding:2px 8px}}
+.livescore-row-stage{font-size:10px;color:var(--text-dim);text-align:center}
+.livescore-row-teams{display:flex;align-items:center;gap:14px;justify-content:center}
+.livescore-row-teams span{font-size:15px;color:var(--text);font-weight:500}
+.livescore-row-score{font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--gold);padding:4px 18px;background:rgba(212,168,67,0.1);border-radius:8px;letter-spacing:3px}
 footer strong{color:var(--gold);}
 /* Animations */
 @keyframes fadeInUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
@@ -462,10 +461,10 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   .lb-points{font-size:13px}
   /* Live scores */
   .livescore-board{max-width:100%}
-  .livescore-row{padding:8px 12px;flex-wrap:wrap;gap:6px}
-  .livescore-row-stage{font-size:9px;min-width:auto}
-  .livescore-row-teams span{font-size:11px}
-  .livescore-row-score{font-size:14px;padding:2px 8px}
+  .livescore-row{padding:10px 12px;gap:6px}
+  .livescore-row-stage{font-size:9px}
+  .livescore-row-teams span{font-size:12px}
+  .livescore-row-score{font-size:18px;padding:3px 14px}
   /* Auth modal */
   .auth-modal{padding:28px 20px}
   .auth-modal h2{font-size:26px}
@@ -545,11 +544,9 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   .lb-rank{font-size:16px;width:24px}
   .lb-name{font-size:12px}
   /* Live scores */
-  .livescore-row{padding:6px 8px;flex-direction:column;gap:4px;align-items:flex-start}
-  .livescore-row-stage{text-align:left;font-size:9px}
-  .livescore-row-teams{justify-content:flex-start}
-  .livescore-row-teams span{font-size:10px}
-  .livescore-row-score{font-size:13px;padding:1px 6px}
+  .livescore-row{padding:10px 8px;gap:6px}
+  .livescore-row-teams span{font-size:11px}
+  .livescore-row-score{font-size:16px;padding:3px 12px}
   /* Auth */
   .auth-modal{padding:24px 16px}
   .auth-modal h2{font-size:24px}
