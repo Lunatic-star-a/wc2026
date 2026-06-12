@@ -899,10 +899,8 @@ function _scoresHash(){var a=[];for(var i=1;i<=104;i++){var m=matchScores[i];if(
 async function loadMatchScores(){
   if(!SUPABASE_READY)return;
   try{
-    var flatHash='';
     const{data:scores}=await sb.from('matches').select('id,home_score,away_score,status,match_minute,injury_time,match_date,match_time');
-    if(scores){
-      scores.forEach(s=>{if(s.home_score!==null){var old=matchScores[s.id];var id=s.id-1;var mo=ALL_MATCHES[id]||null;var st=resolveStatus(s,mo);if(old&&(old.status==='live'||old.status==='finished'||old.status==='halftime')&&st==='upcoming')st=old.status;matchScores[s.id]={home_score:s.home_score,away_score:s.away_score,status:st,match_minute:s.match_minute||(old?old.match_minute:0),injury_time:s.injury_time||(old?old.injury_time:0)};flatHash+=s.id+':'+s.home_score+'-'+s.away_score+':'+st+'|';}});
+    if(scores){scores.forEach(s=>{if(s.home_score!==null){var old=matchScores[s.id];var id=s.id-1;var mo=ALL_MATCHES[id]||null;var st=resolveStatus(s,mo);if(old&&(old.status==='live'||old.status==='finished'||old.status==='halftime')&&st==='upcoming')st=old.status;matchScores[s.id]={home_score:s.home_score,away_score:s.away_score,status:st,match_minute:s.match_minute||(old?old.match_minute:0),injury_time:s.injury_time||(old?old.injury_time:0)};}});
       var h=_scoresHash();
       if(h!==_lastScoresHash){renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');renderGroupsWithStandings();renderThirdPlace();renderLiveScores();observeReveals();_lastScoresHash=h;}
     }
@@ -1462,14 +1460,15 @@ function init(){
   renderGroupsWithStandings();renderThirdPlace();renderMatches();collapseAll();renderBracket();renderPredictions();renderLeaderboard();renderLiveScores();
   buildJumpMenu();
   createParticles();observeReveals();setupFilters();setupSmoothScroll();setupKeyboard();setupRealtimeSubscriptions();
-  checkSession().then(()=>{renderPredictions();renderLeaderboard();});
   seedMatchesIfNeeded();
-  loadMatchScores().then(()=>{renderGroupsWithStandings();renderThirdPlace();renderLiveScores();}).catch(()=>{});
+  Promise.all([loadMatchScores(),checkSession()]).then(function(){
+    renderGroupsWithStandings();renderThirdPlace();renderLiveScores();
+    renderPredictions();renderLeaderboard();
+  }).catch(function(){});
   setInterval(loadMatchScores,20000);
   setTimeout(()=>collapseAll(),100);
   updateCountdown();setInterval(updateCountdown,1000);
   document.body.classList.add('loaded');
-  // Splash animation disabled: setTimeout(()=>{const splash=document.getElementById('splash');if(splash)splash.classList.add('hide');},2600);
 }
 document.addEventListener('DOMContentLoaded',init);
 </script>
