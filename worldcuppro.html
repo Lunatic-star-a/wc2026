@@ -869,14 +869,14 @@ async function handleAuthSubmit(e){
     currentUser={id:result.data.user.id,username:result.data.user.user_metadata?.username||username};onLoginSuccess();
   }catch(err){console.error('Auth error:',err);errEl.textContent='网络连接失败: '+err.message+'. 请检查网络后重试';}
 }
-function onLoginSuccess(){closeAuthModal();updateNavUI();showToast('欢迎回来，'+currentUser.username+'！','success');loadUserData();renderPredictions();}
+async function onLoginSuccess(){closeAuthModal();updateNavUI();showToast('欢迎回来，'+currentUser.username+'！','success');await loadUserPredictions();renderPredictions();}
 async function handleLogout(){if(SUPABASE_READY)await sb.auth.signOut();currentUser=null;userPredictions={};updateNavUI();renderPredictions();showToast('已退出登录');}
 function updateNavUI(){
   const bl=document.getElementById('btnLogin'),bout=document.getElementById('btnLogout'),ne=document.getElementById('navUsername');
   if(currentUser){bl.style.display='none';bout.style.display='inline-block';ne.style.display='inline';ne.textContent=currentUser.username;}
   else{bl.style.display='inline-block';bout.style.display='none';ne.style.display='none';}
 }
-async function checkSession(){if(!SUPABASE_READY)return;try{const{data}=await sb.auth.getSession();if(data?.session?.user){currentUser={id:data.session.user.id,username:data.session.user.user_metadata?.username||'User'};updateNavUI();loadUserPredictions();renderPredictions();renderLeaderboard();}}catch(e){console.warn('Session check failed:',e.message);}}
+async function checkSession(){if(!SUPABASE_READY)return;try{const{data}=await sb.auth.getSession();if(data?.session?.user){currentUser={id:data.session.user.id,username:data.session.user.user_metadata?.username||'User'};updateNavUI();await loadUserPredictions();}}catch(e){console.warn('Session check failed:',e.message);}}
 function resolveStatus(s,matchObj){
   if(s.status==='live'||s.status==='halftime'||s.status==='finished')return s.status;
   if(s.home_score==null)return s.status;
@@ -1108,7 +1108,8 @@ async function submitPrediction(matchDbId,home,away,src){
     const{error}=await sb.from('predictions').upsert({user_id:currentUser.id,match_id:matchDbId,home_score:hs,away_score:as},{onConflict:'user_id, match_id'});
     if(error)throw error;
     userPredictions[matchDbId]={home_score:hs,away_score:as};if(resultEl){resultEl.textContent='✓ 预测已提交: '+hs+':'+as;resultEl.style.color='var(--gold)';}if(btn){btn.textContent='✓ 已预测';btn.classList.add('saved');}
-    renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');renderPredictions();observeReveals();
+    try{const{count}=await sb.from('predictions').select('id',{count:'exact',head:true}).eq('user_id',currentUser.id);await sb.from('profiles').update({predictions_count:count||0}).eq('id',currentUser.id);}catch(e){}
+    renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');renderPredictions();renderLeaderboard();observeReveals();
     showToast('预测 '+home+' '+hs+':'+as+' '+away+' 已提交','success');
   }catch(err){console.error('Submit error:',err);showToast('提交失败: '+err.message,'error');if(resultEl){resultEl.textContent='提交失败: '+err.message;resultEl.style.color='#c0392b';}}
 }
