@@ -230,6 +230,30 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 .team-modal-link:hover{background:rgba(212,168,67,0.1);border-color:var(--gold);}
 .team-modal-close{position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.3);border:none;color:#fff;font-size:20px;width:32px;height:32px;border-radius:50%;cursor:pointer;transition:background 0.2s;display:flex;align-items:center;justify-content:center;}
 .team-modal-close:hover{background:rgba(0,0,0,0.6);}
+/* Team modal cards */
+.tpc{background:linear-gradient(135deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:12px 14px;transition:border-color 0.2s}
+.tpc:hover{border-color:rgba(212,168,67,0.2)}
+.tpt{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.tpn{font-family:var(--font-mono);font-size:20px;font-weight:700;color:var(--gold);min-width:30px;text-align:center}
+.tpna{font-weight:600;font-size:13px;color:#fff}
+.tppo{font-size:10px;color:var(--text-dim)}
+.tpi{display:flex;flex-wrap:wrap;gap:5px 8px;font-size:10px}
+.tptag{display:inline-block;padding:2px 8px;border-radius:100px;font-size:10px}
+.tptag.tpclub{background:rgba(255,255,255,0.06);color:var(--text)}
+.tptag.tpage{background:rgba(255,255,255,0.03);color:var(--text-dim)}
+.tptag.tpval{background:rgba(212,168,67,0.12);color:var(--gold)}
+.tmi{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:10px 14px}
+.tmd{font-size:10px;color:var(--text-dim);margin-bottom:4px}
+.tmt{display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:3px}
+.tmte{flex:1;text-align:center;color:var(--text)}
+.tmhl{font-weight:700;color:#fff}
+.tmvs{font-size:9px;color:var(--text-dim);flex-shrink:0}
+.tmm{display:flex;gap:8px;font-size:9px;color:var(--text-dim);justify-content:center}
+@media(max-width:480px){
+  .tpcg{grid-template-columns:1fr!important}
+  .team-modal{padding:0;border-radius:0;width:100vw!important;max-width:100vw!important;height:100vh;max-height:100vh!important;margin:0}
+  .team-modal>div{padding-left:12px!important;padding-right:12px!important}
+}
 /* Watch Module */
 .watch-section{padding:100px 0;position:relative;}
 .watch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;}
@@ -1216,64 +1240,27 @@ async function renderLeaderboard(){
   }catch(err){console.error('Leaderboard error:',err);list.innerHTML='<div style=\"text-align:center;padding:40px;color:var(--text-dim)\">排行榜加载失败</div>';}
 }
 
-/* ═══ TEAM PAGE (opens in new tab) ═══ */
+/* ═══ TEAM PAGE (renders in modal overlay — no popups) ═══ */
+var TEAM_PLAYER_CN={"Santiago Giménez":"圣地亚哥·希门尼斯","Edson Álvarez":"埃德森·阿尔瓦雷斯","Percy Tau":"佩西·塔乌","Ronwen Williams":"朗文·威廉姆斯","Son Heung-min":"孙兴慜","Kim Min-jae":"金玟哉","Patrik Schick":"帕特里克·希克","Tomáš Souček":"托马斯·绍切克","Alphonso Davies":"阿方索·戴维斯","Jonathan David":"乔纳森·戴维","Edin Džeko":"埃丁·哲科","Miralem Pjanić":"米拉莱姆·皮亚尼奇","Akram Afif":"阿克拉姆·阿菲夫","Almoez Ali":"阿尔莫埃兹·阿里","Granit Xhaka":"格拉尼特·扎卡","Manuel Akanji":"曼努埃尔·阿坎吉","Vinícius Júnior":"维尼修斯","Rodrygo":"罗德里戈","Achraf Hakimi":"阿什拉夫·哈基米","Brahim Díaz":"卜拉欣·迪亚斯","Frantzdy Pierrot":"弗朗茨迪·皮埃罗","Duckens Nazon":"杜肯斯·纳宗","Andy Robertson":"安迪·罗伯逊","Scott McTominay":"斯科特·麦克托米奈","Christian Pulisic":"克里斯蒂安·普利西奇","Giovanni Reyna":"乔瓦尼·雷纳","Miguel Almirón":"米格尔·阿尔米隆","Julio Enciso":"胡利奥·恩西索","Mathew Ryan":"马修·瑞安","Harry Souttar":"哈里·苏塔","Hakan Çalhanoğlu":"哈坎·恰尔汗奥卢","Arda Güler":"阿尔达·居莱尔","Jamal Musiala":"贾马尔·穆西亚拉","Florian Wirtz":"弗洛里安·维尔茨","Leandro Bacuna":"莱安德罗·巴库纳","Juninho Bacuna":"儒尼尼奥·巴库纳","Franck Kessié":"弗兰克·凯西","Simon Adingra":"西蒙·阿丁格拉","Moisés Caicedo":"莫伊塞斯·凯塞多","Piero Hincapié":"皮耶罗·因卡皮耶","Virgil van Dijk":"维吉尔·范迪克","Frenkie de Jong":"弗伦基·德容","Kaoru Mitoma":"三笘薰","Takefusa Kubo":"久保建英","Alexander Isak":"亚历山大·伊萨克","Dejan Kulusevski":"德扬·库卢塞夫斯基","Ellyes Skhiri":"埃利斯·斯希里","Hannibal Mejbri":"汉尼拔·梅布里","Kevin De Bruyne":"凯文·德布劳内","Jérémy Doku":"杰雷米·多库","Mohamed Salah":"穆罕默德·萨拉赫","Omar Marmoush":"奥马尔·马尔穆什","Mehdi Taremi":"迈赫迪·塔雷米","Sardar Azmoun":"萨达尔·阿兹蒙","Chris Wood":"克里斯·伍德","Sarpreet Singh":"萨普里特·辛格","Lamine Yamal":"拉明·亚马尔","Pedri":"佩德里","Ryan Mendes":"瑞安·门德斯","Jovane Cabral":"若瓦内·卡布拉尔","Salem Al-Dawsari":"萨勒姆·多萨里","Firas Al-Buraikan":"菲拉斯·布赖坎","Federico Valverde":"费德里科·巴尔韦德","Darwin Núñez":"达尔文·努涅斯","Kylian Mbappé":"基利安·姆巴佩","Aurélien Tchouaméni":"奥雷利安·楚阿梅尼","Sadio Mané":"萨迪奥·马内","Kalidou Koulibaly":"卡利杜·库利巴利","Aymen Hussein":"艾曼·侯赛因","Ali Jasim":"阿里·贾西姆","Erling Haaland":"埃尔林·哈兰德","Martin Ødegaard":"马丁·厄德高","Lionel Messi":"利昂内尔·梅西","Julián Álvarez":"胡利安·阿尔瓦雷斯","Riyad Mahrez":"里亚德·马赫雷斯","Ismaël Bennacer":"伊斯梅尔·本纳赛尔","David Alaba":"大卫·阿拉巴","Marcel Sabitzer":"马塞尔·萨比策","Musa Al-Taamari":"穆萨·塔马里","Yazan Al-Naimat":"亚赞·奈马特","Cristiano Ronaldo":"克里斯蒂亚诺·罗纳尔多","Bruno Fernandes":"布鲁诺·费尔南德斯","Yoane Wissa":"约安·维萨","Chancel Mbemba":"尚塞尔·姆本巴","Eldor Shomurodov":"埃尔多尔·绍穆罗多夫","Jaloliddin Masharipov":"贾洛利丁·马沙里波夫","Luis Díaz":"路易斯·迪亚斯","James Rodríguez":"哈梅斯·罗德里格斯","Jude Bellingham":"裘德·贝林厄姆","Harry Kane":"哈里·凯恩","Luka Modrić":"卢卡·莫德里奇","Joško Gvardiol":"约什科·格瓦迪奥尔","Mohammed Kudus":"穆罕默德·库杜斯","Thomas Partey":"托马斯·帕尔特伊","Ismael Díaz":"伊斯梅尔·迪亚斯","José Fajardo":"何塞·法哈多"};
+var TEAM_CLUB_CN={"Inter Miami":"迈阿密国际","Atlético Madrid":"马德里竞技","West Ham":"西汉姆联","AC Milan":"AC米兰","Al Ahly":"开罗国民","Mamelodi Sundowns":"马梅洛迪日落","Tottenham":"托特纳姆热刺","Bayern Munich":"拜仁慕尼黑","Bayer Leverkusen":"勒沃库森","Al Sadd":"萨德","Al Duhail":"杜海勒","Al Sharjah":"沙迦","Fenerbahçe":"费内巴切","Lille":"里尔","PSG":"巴黎圣日耳曼","Real Madrid":"皇家马德里","Barcelona":"巴塞罗那","Liverpool":"利物浦","Man City":"曼城","Arsenal":"阿森纳","Chelsea":"切尔西","Man United":"曼联","Newcastle":"纽卡斯尔联","Brighton":"布莱顿","B. Dortmund":"多特蒙德","Inter Milan":"国际米兰","Napoli":"那不勒斯","Roma":"罗马","Al Nassr":"利雅得胜利","Al Hilal":"利雅得新月","Al Ahli":"吉达国民","Al Shorta":"巴格达警察","Como":"科莫","Real Sociedad":"皇家社会","Frankfurt":"法兰克福","Burnley":"伯恩利","Maccabi Haifa":"海法马卡比","Kayserispor":"开塞利体育","AZ Alkmaar":"阿尔克马尔","Leicester City":"莱斯特城","FC Groningen":"格罗宁根","Birmingham City":"伯明翰城","Union Berlin":"柏林联合","Nottm Forest":"诺丁汉森林","Sporting CP":"葡萄牙体育","Fatih Karagümrük":"卡拉古姆鲁克","Shabab Al Ahli":"迪拜青年国民","Montpellier":"蒙彼利埃","Brentford":"布伦特福德","Marseille":"马赛","Esteghlal":"德黑兰独立","Rayo Vallecano":"巴列卡诺","Universidad Católica":"天主教大学","Independiente":"独立队"};
 function openTeamPage(teamName){
-  const info=TEAM_INFO[teamName];if(!info)return;
-  const w=window.open('','teamDetail','width=900,height=800,scrollbars=yes');
-  const stageNames={group:'小组赛',r32:'1/16决赛',r16:'1/8决赛',qf:'1/4决赛',sf:'半决赛','3rd':'季军赛',final:'决赛'};
-  const posCN={GK:'门将',CB:'中后卫',RB:'右后卫',LB:'左后卫',CDM:'防守型中场',CM:'中前卫',AM:'攻击型中场',LW:'左边锋',RW:'右边锋',ST:'中锋',FW:'前锋'};
-  const teamMatches=ALL_MATCHES.filter(m=>m.home===teamName||m.away===teamName);
-  const matchCards=teamMatches.map(m=>{
-    const opp=m.home===teamName?m.away:m.home;const isHome=m.home===teamName;
-    const sLabel=stageNames[m.stage]||m.stage;
-    return'<div class="mci"><div class="mcd">'+m.date+' '+m.time+' 北京时间</div><div class="mct"><span class="mcte'+(isHome?' mchi':'')+'">'+(isHome?teamName:opp)+'</span><span class="mcvs">VS</span><span class="mcte'+(!isHome?' mchi':'')+'">'+(!isHome?teamName:opp)+'</span></div><div class="mcm"><span>'+sLabel+'</span><span>'+m.venue+'</span></div></div>';
-  }).join('')||'<div style="text-align:center;padding:20px;color:#888">暂无赛程数据</div>';
-  w.document.write('<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+info.name+' - 世界杯2026球队详情</title><style>'
-    +'*{margin:0;padding:0;box-sizing:border-box}'
-    +'body{font-family:"Segoe UI",system-ui,sans-serif;background:#0a0e17;color:#e8edf2;line-height:1.6}'
-    +'.page{max-width:720px;margin:0 auto;padding:24px 16px}'
-    +'.header{text-align:center;padding:32px 16px 24px;background:linear-gradient(135deg,rgba(13,140,60,0.15),rgba(13,140,60,0.02));border-radius:16px;margin-bottom:24px}'
-    +'.flag{width:64px;border-radius:4px;box-shadow:0 4px 20px rgba(0,0,0,0.4);margin-bottom:12px}'
-    +'h1{font-size:clamp(28px,6vw,40px);letter-spacing:2px;margin-bottom:4px;color:#fff}'
-    +'.en{color:#7d8899;font-size:14px;margin-bottom:6px}'
-    +'.conf{display:inline-block;background:rgba(13,140,60,0.25);color:#0fa84a;padding:3px 14px;border-radius:100px;font-size:11px;letter-spacing:1px}'
-    +'.stats{display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap}'
-    +'.stat{flex:1;min-width:90px;background:#151d2b;border:1px solid rgba(255,255,255,0.05);border-radius:10px;padding:16px 12px;text-align:center}'
-    +'.stat-val{font-size:clamp(18px,3vw,24px);font-weight:700;color:#d4a843}'
-    +'.stat-lbl{font-size:10px;color:#7d8899;text-transform:uppercase;letter-spacing:1px;margin-top:3px}'
-    +'h2{font-size:20px;color:#d4a843;margin-bottom:14px;letter-spacing:1px}'
-    +'.back{display:inline-flex;align-items:center;gap:4px;margin-bottom:20px;color:#d4a843;font-size:13px;cursor:pointer;padding:6px 14px;border:1px solid rgba(212,168,67,0.25);border-radius:100px;text-decoration:none;transition:all .2s}'
-    +'.back:hover{background:rgba(212,168,67,0.1);border-color:#d4a843}'
-    +'.pc{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px}'
-    +'.pcc{background:linear-gradient(135deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:14px}'
-    +'.pct{display:flex;align-items:center;gap:10px;margin-bottom:8px}'
-    +'.pcn{font-family:"JetBrains Mono",monospace;font-size:22px;font-weight:700;color:#d4a843;min-width:32px;text-align:center}'
-    +'.pcna{font-weight:600;font-size:14px;color:#fff}'
-    +'.pcpo{font-size:11px;color:#7d8899}'
-    +'.pci{display:flex;flex-wrap:wrap;gap:6px 10px;font-size:11px}'
-    +'.ptag{display:inline-block;padding:2px 8px;border-radius:100px;font-size:10px}'
-    +'.ptpos{background:rgba(13,140,60,0.2);color:#0fa84a}'
-    +'.ptclub{background:rgba(255,255,255,0.05);color:#e8edf2}'
-    +'.ptage{background:rgba(255,255,255,0.03);color:#7d8899}'
-    +'.ptval{background:rgba(212,168,67,0.12);color:#d4a843}'
-    +'.mc2{display:flex;flex-direction:column;gap:8px;margin-bottom:28px}'
-    +'.mci{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:10px;padding:12px 14px}'
-    +'.mcd{font-size:11px;color:#7d8899;margin-bottom:6px}'
-    +'.mct{display:flex;align-items:center;gap:10px;font-size:14px;margin-bottom:4px}'
-    +'.mcte{flex:1;text-align:center;color:#e8edf2}'
-    +'.mchi{font-weight:700;color:#fff}'
-    +'.mcvs{font-size:10px;color:#7d8899;flex-shrink:0}'
-    +'.mcm{display:flex;gap:10px;font-size:10px;color:#7d8899;justify-content:center}'
-    +'footer{text-align:center;padding:20px;color:#7d8899;font-size:11px}'
-    +'@media(max-width:480px){.page{padding:16px 10px}.pc{grid-template-columns:1fr;gap:8px}.stats{gap:6px}.stat{padding:12px 8px}}'
-    +'</style></head><body><div class="page">'
-    +'<a class="back" onclick="try{window.close()}catch(e){};if(!window.closed)history.back()">← 关闭返回</a>'
-    +'<div class="header"><img class="flag" src="https://flagcdn.com/w160/'+info.cc+'.png" alt=""><h1>'+info.name+'</h1><div class="en">'+info.en+'</div><div class="conf">'+info.conf+'</div></div>'
-    +'<div class="stats"><div class="stat"><div class="stat-val">#'+info.rank+'</div><div class="stat-lbl">FIFA 排名</div></div><div class="stat"><div class="stat-val">'+info.apps+'</div><div class="stat-lbl">参赛次数</div></div><div class="stat"><div class="stat-val" style="font-size:14px">'+info.best+'</div><div class="stat-lbl">历史最佳</div></div></div>'
-    +'<h2>核心球员</h2><div class="pc">'+info.players.map(p=>{return'<div class="pcc"><div class="pct"><div class="pcn">'+(p.num||'—')+'</div><div><div class="pcna">'+p.n+'</div><div class="pcpo">'+p.pos+'</div></div></div><div class="pci"><span class="ptag ptpos">'+(posCN[p.pos]||p.pos||'—')+'</span><span class="ptag ptclub">'+(p.club||'—')+'</span><span class="ptag ptage">'+(p.age||'—')+'岁</span><span class="ptag ptval">'+(p.val||'—')+'</span></div></div>';}).join('')+'</div>'
-    +'<h2>赛程安排 ('+teamMatches.length+'场)</h2><div class="mc2">'+matchCards+'</div>'
-    +'<footer>数据来源: FIFA / Transfermarkt · 世界杯2026预测平台</footer>'
-    +'</div></body></html>');w.document.close();
+  var info=TEAM_INFO[teamName];if(!info)return;
+  var posCN={GK:'门将',CB:'中后卫',RB:'右后卫',LB:'左后卫',CDM:'防守型中场',CM:'中前卫',AM:'攻击型中场',LW:'左边锋',RW:'右边锋',ST:'中锋',FW:'前锋'};
+  var stageNames={group:'小组赛',r32:'1/16决赛',r16:'1/8决赛',qf:'1/4决赛',sf:'半决赛','3rd':'季军赛',final:'决赛'};
+  var teamMatches=ALL_MATCHES.filter(function(m){return m.home===teamName||m.away===teamName;});
+  var matchCards=teamMatches.map(function(m){var opp=m.home===teamName?m.away:m.home;var isH=m.home===teamName;var sl=stageNames[m.stage]||m.stage;return'<div class="tmi"><div class="tmd">'+m.date+' '+m.time+' 北京时间</div><div class="tmt"><span class="tmte'+(isH?' tmhl':'')+'">'+(isH?teamName:opp)+'</span><span class="tmvs">VS</span><span class="tmte'+(!isH?' tmhl':'')+'">'+(!isH?teamName:opp)+'</span></div><div class="tmm"><span>'+sl+'</span><span>'+m.venue+'</span></div></div>';}).join('')||'<div style="text-align:center;padding:20px;color:var(--text-dim)">暂无赛程数据</div>';
+  var playerCards=info.players.map(function(p){var cn=TEAM_PLAYER_CN[p.n]||'';var cc=TEAM_CLUB_CN[p.club]||'';return'<div class="tpc"><div class="tpt"><div class="tpn">'+(p.num||'—')+'</div><div><div class="tpna">'+p.n+(cn?' <span style="color:var(--text-dim);font-size:11px;font-weight:400">'+cn+'</span>':'')+'</div><div class="tppo">'+posCN[p.pos]+'</div></div></div><div class="tpi"><span class="tptag tpclub">'+(cc||p.club||'—')+'</span><span class="tptag tpage">'+(p.age||'—')+'岁</span><span class="tptag tpval">'+(p.val||'—')+'</span></div></div>';}).join('');
+  document.getElementById('teamModal').innerHTML='<button class="team-modal-close" onclick="closeTeamModal()" style="z-index:10">&times;</button>'
+    +'<div class="team-modal-header" style="padding:24px 20px 20px;text-align:center;background:linear-gradient(135deg,rgba(13,140,60,0.2),rgba(13,140,60,0.05));position:relative">'+flagImg(info.cc,56)+'<div style="font-family:var(--font-display);font-size:clamp(26px,6vw,36px);letter-spacing:2px;color:#fff;margin-top:6px">'+info.name+'</div><div style="color:var(--text-dim);font-size:13px">'+info.en+'</div><div style="display:inline-block;margin-top:6px;padding:3px 12px;border-radius:100px;font-family:var(--font-mono);font-size:10px;letter-spacing:1px;background:rgba(13,140,60,0.25);color:var(--pitch-bright)">'+info.conf+'</div></div>'
+    +'<div style="padding:16px 20px;max-height:55vh;overflow-y:auto;-webkit-overflow-scrolling:touch">'
+    +'<div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap"><div style="flex:1;min-width:70px;background:var(--card);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:14px 10px;text-align:center"><div style="font-family:var(--font-display);font-size:22px;color:var(--gold)">#'+info.rank+'</div><div style="font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-top:2px">FIFA排名</div></div><div style="flex:1;min-width:70px;background:var(--card);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:14px 10px;text-align:center"><div style="font-family:var(--font-display);font-size:22px;color:var(--gold)">'+info.apps+'</div><div style="font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-top:2px">参赛次数</div></div><div style="flex:1;min-width:90px;background:var(--card);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:14px 10px;text-align:center"><div style="font-size:12px;color:var(--gold);font-weight:600">'+info.best+'</div><div style="font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-top:2px">历史最佳</div></div></div>'
+    +'<h3 style="font-family:var(--font-display);font-size:16px;letter-spacing:1px;color:var(--gold);margin:0 0 8px">核心球员</h3>'
+    +'<div class="tpcg" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px">'+playerCards+'</div>'
+    +'<h3 style="font-family:var(--font-display);font-size:16px;letter-spacing:1px;color:var(--gold);margin:0 0 8px">赛程安排 ('+teamMatches.length+'场)</h3>'
+    +'<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">'+matchCards+'</div>'
+    +'<div style="text-align:center;padding:10px;color:var(--text-dim);font-size:10px">数据来源: FIFA / Transfermarkt</div>'
+    +'</div>';
+  document.getElementById('teamOverlay').classList.add('active');
 }
 /* ═══ TEAM INFO MODAL (keep for backward compat, now redirects to team page) ═══ */
 function openTeamModal(teamName){openTeamPage(teamName);}
