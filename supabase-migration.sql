@@ -152,13 +152,13 @@ create trigger trg_auto_settle
 -- ── Leaderboard View ──
 create or replace view public.leaderboard as
 select
-  row_number() over (order by total_points desc, predictions_count desc) as rank,
+  row_number() over (order by total_points desc, username asc) as rank,
   id as user_id,
   username,
   total_points as points,
   predictions_count
 from public.profiles
-order by total_points desc, predictions_count desc;
+order by total_points desc, username asc;
 
 -- ── Row Level Security (RLS) ──
 alter table public.profiles enable row level security;
@@ -318,3 +318,26 @@ on conflict (id) do update set
   stage = excluded.stage,
   group_name = excluded.group_name,
   venue = excluded.venue;
+
+-- ── Realtime: ensure tables are in the publication ──
+-- (If realtime is already enabled in Dashboard, these are no-ops)
+do $$
+begin
+  alter publication supabase_realtime add table public.matches;
+exception when duplicate_object then null;
+end $$;
+do $$
+begin
+  alter publication supabase_realtime add table public.profiles;
+exception when duplicate_object then null;
+end $$;
+do $$
+begin
+  alter publication supabase_realtime add table public.predictions;
+exception when duplicate_object then null;
+end $$;
+do $$
+begin
+  alter publication supabase_realtime add table public.chat_messages;
+exception when duplicate_object then null;
+end $$;

@@ -876,17 +876,24 @@ function updateNavUI(){
   if(currentUser){bl.style.display='none';bout.style.display='inline-block';ne.style.display='inline';ne.textContent=currentUser.username;}
   else{bl.style.display='inline-block';bout.style.display='none';ne.style.display='none';}
 }
-async function checkSession(){if(!SUPABASE_READY)return;try{const{data}=await sb.auth.getSession();if(data?.session?.user){currentUser={id:data.session.user.id,username:data.session.user.user_metadata?.username||'User'};updateNavUI();loadUserData();renderPredictions();renderLeaderboard();}}catch(e){console.warn('Session check failed:',e.message);}}
-async function loadUserData(){
+async function checkSession(){if(!SUPABASE_READY)return;try{const{data}=await sb.auth.getSession();if(data?.session?.user){currentUser={id:data.session.user.id,username:data.session.user.user_metadata?.username||'User'};updateNavUI();loadUserPredictions();renderPredictions();renderLeaderboard();}}catch(e){console.warn('Session check failed:',e.message);}}
+async function loadMatchScores(){
+  if(!SUPABASE_READY)return;
+  try{
+    const{data:scores}=await sb.from('matches').select('id,home_score,away_score,status');
+    if(scores)scores.forEach(s=>{if(s.home_score!==null)matchScores[s.id]={home_score:s.home_score,away_score:s.away_score,status:s.status};});
+    renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');renderGroupsWithStandings();renderLiveScores();observeReveals();
+  }catch(e){console.error('Load scores error:',e);}
+}
+async function loadUserPredictions(){
   if(!currentUser||!SUPABASE_READY)return;
   try{
     const{data:preds}=await sb.from('predictions').select('match_id,home_score,away_score').eq('user_id',currentUser.id);
     if(preds){userPredictions={};preds.forEach(p=>{userPredictions[p.match_id]={home_score:p.home_score,away_score:p.away_score};});}
-    const{data:scores}=await sb.from('matches').select('id,home_score,away_score,status');
-    if(scores)scores.forEach(s=>{if(s.home_score!==null)matchScores[s.id]={home_score:s.home_score,away_score:s.away_score,status:s.status};});
-    renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');renderGroupsWithStandings();renderLiveScores();renderPredictions();observeReveals();
-  }catch(e){console.error('Load error:',e);}
+    renderPredictions();
+  }catch(e){console.error('Load predictions error:',e);}
 }
+async function loadUserData(){loadMatchScores();loadUserPredictions();}
 
 /* ═══ RENDER: Groups ═══ */
 function renderGroups(){
@@ -1078,7 +1085,9 @@ async function renderLeaderboard(){
     const{data,error}=await sb.from('leaderboard').select('*').limit(50);
     if(error)throw error;
     if(!data||data.length===0){list.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim)">还没有预测数据，快来参与吧！</div>';return;}
-    list.innerHTML=data.map((p,i)=>{let rc='';if(i===0)rc='gold';else if(i===1)rc='silver';else if(i===2)rc='bronze';return`<div class="lb-row reveal"><span class="lb-rank ${rc}">${p.rank}</span><span class="lb-name">${p.username}</span><span class="lb-meta">${p.predictions_count}次预测</span><span class="lb-points">${p.points} pts</span></div>`;}).join('');
+    // Sort: points desc, then username alphabetically (Chinese collation)
+    const sorted=[...data].sort((a,b)=>b.points-a.points||(a.username||'').localeCompare(b.username||'','zh'));
+    list.innerHTML=sorted.map((p,i)=>{let rc='';if(i===0)rc='gold';else if(i===1)rc='silver';else if(i===2)rc='bronze';return`<div class="lb-row reveal"><span class="lb-rank ${rc}">${i+1}</span><span class="lb-name">${p.username}</span><span class="lb-meta">${p.predictions_count}次预测</span><span class="lb-points">${p.points} pts</span></div>`;}).join('');
   }catch(err){console.error('Leaderboard error:',err);list.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim)">排行榜加载失败</div>';}
 }
 
@@ -1161,15 +1170,16 @@ function updateCountdown(){const start=new Date('2026-06-11T15:00:00-04:00');con
 /* ═══ REALTIME ═══ */
 function setupRealtimeSubscriptions(){
   if(!SUPABASE_READY)return;
-  sb.channel('match-updates').on('postgres_changes',{event:'UPDATE',schema:'public',table:'matches'},(payload)=>{
-    if(payload.new.home_score!=null){matchScores[payload.new.id]={home_score:payload.new.home_score,away_score:payload.new.away_score,status:payload.new.status};}
+  const onMatchChange=(payload)=>{
+    if(payload.new&&payload.new.home_score!=null){matchScores[payload.new.id]={home_score:payload.new.home_score,away_score:payload.new.away_score,status:payload.new.status};}
     renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');
     renderGroupsWithStandings();
     renderLiveScores();
     renderLeaderboard();
     observeReveals();
-  }).subscribe();
-  sb.channel('leaderboard-updates').on('postgres_changes',{event:'UPDATE',schema:'public',table:'profiles'},()=>{renderLeaderboard();}).subscribe();
+  };
+  sb.channel('match-updates').on('postgres_changes',{event:'UPDATE',schema:'public',table:'matches'},onMatchChange).on('postgres_changes',{event:'INSERT',schema:'public',table:'matches'},onMatchChange).subscribe();
+  sb.channel('leaderboard-updates').on('postgres_changes',{event:'UPDATE',schema:'public',table:'profiles'},()=>{renderLeaderboard();}).on('postgres_changes',{event:'INSERT',schema:'public',table:'profiles'},()=>{renderLeaderboard();}).subscribe();
 }
 
 /* ═══ BRACKET ═══ */
@@ -1406,6 +1416,7 @@ function init(){
   createParticles();observeReveals();setupFilters();setupSmoothScroll();setupKeyboard();setupRealtimeSubscriptions();
   checkSession().then(()=>{renderPredictions();renderLeaderboard();});
   seedMatchesIfNeeded();
+  loadMatchScores();setInterval(loadMatchScores,30000);
   setTimeout(()=>collapseAll(),100);
   updateCountdown();setInterval(updateCountdown,1000);
   document.body.classList.add('loaded');
