@@ -117,70 +117,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 .live-dot-sm{width:6px;height:6px;border-radius:50%;background:var(--accent-red);display:inline-block}
 .match-finished-badge{font-size:10px;color:var(--text-dim);margin-left:6px}
 .match-result-score{font-family:var(--font-mono);font-size:13px;font-weight:700;color:#fff;letter-spacing:1px;background:rgba(255,255,255,0.06);padding:2px 6px;border-radius:5px}
-/* Mobile polish */
-@media(max-width:768px){
-  .hero h1{font-size:40px}
-  .hero-subtitle{font-size:13px;line-height:1.5}
-  .hero-stats{gap:12px;flex-wrap:wrap}
-  .hero-stat{padding:8px 14px;min-width:70px}
-  .hero-stat-num{font-size:22px}
-  .hero-stat-label{font-size:10px}
-  .countdown-bar{padding:12px 18px}
-  .countdown-bar .cd-time{font-size:22px}
-  .cd-label{font-size:11px}
-  .section-header h2{font-size:24px}
-  .section-tag{font-size:10px}
-  .nav-logo{font-size:14px}
-  .nav-links{gap:12px}
-  .nav-links a{font-size:12px}
-  .expand-btn{font-size:11px;padding:6px 14px}
-  .filter-btn{font-size:10px;padding:6px 10px}
-  .match-card{grid-template-columns:1fr;gap:6px;padding:10px}
-  .match-card .match-date{text-align:center;font-size:11px}
-  .match-teams{font-size:15px;justify-content:center}
-  .match-venue{text-align:center;font-size:10px}
-  .match-actions{justify-content:center}
-  .pred-inline-input{width:22px;height:22px;font-size:11px}
-  .pred-inline-btn{font-size:9px;padding:3px 7px}
-  .chat-card-btn{font-size:9px;padding:3px 7px}
-  .group-header{font-size:18px;padding:12px 14px}
-  .group-table th,.group-table td{padding:6px 8px;font-size:11px}
-  .day-header{padding:10px 12px}
-  .day-header-text{font-size:15px}
-  .jump-select{font-size:12px;padding:9px 32px 9px 12px;max-width:280px}
-  .livescore-board{max-width:100%}
-  .livescore-row{padding:8px 10px}
-  .livescore-row-stage{font-size:9px;min-width:60px}
-  .livescore-row-teams span{font-size:11px}
-  .livescore-row-score{font-size:14px}
-  .predict-card-body{gap:6px}
-  .predict-score-input{width:36px;height:36px;font-size:14px}
-  .predict-team-name{font-size:11px}
-  .toast-container{right:8px;top:70px;left:8px}
-  .toast{font-size:12px;padding:10px 16px;max-width:100%}
-  footer{padding:32px 16px;font-size:11px}
-}
-@media(max-width:480px){
-  .container{padding:0 8px}
-  .hero h1{font-size:32px}
-  .hero-subtitle{font-size:12px;padding:0 4px}
-  .hero-stats{gap:8px}
-  .hero-stat-num{font-size:18px}
-  .countdown-bar .cd-time{font-size:18px}
-  .section-header h2{font-size:20px}
-  .match-teams{font-size:13px}
-  .match-vs{font-size:10px}
-  .match-card .match-date{font-size:10px}
-  .pred-inline-input{width:20px;height:20px;font-size:10px}
-  .group-header{font-size:16px}
-  .day-header-text{font-size:13px}
-  .schedule-filters{gap:3px}
-  .filter-btn{font-size:9px;padding:4px 8px}
-  .bracket-round{min-width:80px}
-  .bracket-match-inner{padding:3px}
-  .bracket-team-row input[type=text]{font-size:8px;min-width:35px}
-  .bracket-score-input{width:14px;height:14px;font-size:7px}
-}
 @keyframes predSuccess{0%{transform:scale(1)}50%{transform:scale(1.2);background:var(--gold);color:#000}100%{transform:scale(1);background:var(--pitch);color:#fff}}
 .pred-inline-btn.saved{animation:predSuccess 0.5s ease;background:var(--pitch);color:#fff;border-color:var(--pitch)}
 .pred-saved-flash{animation:goalFlash 0.6s ease 3}
@@ -484,7 +420,8 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   /* Groups */
   .groups-grid{grid-template-columns:1fr;gap:10px}
   .group-header{font-size:18px;padding:14px 16px}
-  .group-table th,.group-table td{padding:7px 10px;font-size:12px}
+  .group-table th,.group-table td{padding:8px 10px;font-size:12px}
+  .group-table th{font-size:10px;letter-spacing:1px}
   .group-card-toggle{display:block;float:right;background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:16px;padding:0 4px}
   .group-card.collapsed .group-table{display:none}
   /* Third place table */
@@ -574,7 +511,8 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   .groups-section,.schedule-section,.predict-section,.livescore-section{padding:48px 0}
   /* Groups */
   .group-header{font-size:15px;padding:10px 12px}
-  .group-table th,.group-table td{padding:5px 6px;font-size:10px}
+  .group-table th,.group-table td{padding:6px 8px;font-size:11px}
+  .group-table th{font-size:9px}
   .team-link{font-size:11px}
   .pts{font-size:11px}
   /* Schedule */
@@ -649,7 +587,6 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
       <li><a href="#groups">小组赛</a></li>
       <li><a href="#schedule">赛程</a></li>
       <li><a href="#predict">预测</a></li>
-      <li><a href="#watch">观赛</a></li>
     </ul>
     <div class="nav-right">
       <div class="search-wrap">
@@ -667,7 +604,6 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
     <a href="#groups" onclick="toggleMobileMenu()">小组赛</a>
     <a href="#schedule" onclick="toggleMobileMenu()">赛程</a>
     <a href="#predict" onclick="toggleMobileMenu()">预测</a>
-    <a href="#watch" onclick="toggleMobileMenu()">观赛</a>
   </div>
 </nav>
 <div class="modal-overlay" id="authOverlay" onclick="closeAuthModal(event)">
