@@ -1475,6 +1475,8 @@ function init(){
   seedMatchesIfNeeded();
   Promise.all([loadMatchScores(),checkSession()]).then(function(){
     renderPredictions();renderLeaderboard();observeReveals();
+    // Force all reveals visible after async rendering completes
+    setTimeout(function(){document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('visible');});},800);
   }).catch(function(){});
   setInterval(loadMatchScores,20000);
   setTimeout(()=>collapseAll(),100);
