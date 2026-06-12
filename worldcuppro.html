@@ -459,7 +459,7 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   .search-wrap{position:static}
   .search-input{width:100px;font-size:11px;padding:6px 10px 6px 28px}
   .search-input:focus{width:140px}
-  .search-dropdown{left:-100px;right:-10px;width:auto}
+  .search-dropdown{left:0;right:0;width:100%;max-width:280px;position:fixed;top:48px}
   .search-icon{left:8px;font-size:12px}
   .nav-user-btn{font-size:10px;padding:5px 12px}
   .nav-username{font-size:11px}
@@ -553,6 +553,7 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   .nav-logo{font-size:18px}
   .search-input{width:80px;font-size:10px}
   .search-input:focus{width:110px}
+  .search-dropdown{max-width:220px;top:46px}
   .nav-user-btn{font-size:9px;padding:4px 10px}
   /* Hero */
   .hero{padding:80px 0 40px}
