@@ -1268,7 +1268,7 @@ function openTeamPage(teamName){
     +'@media(max-width:480px){.page{padding:16px 10px}.pc{grid-template-columns:1fr;gap:8px}.stats{gap:6px}.stat{padding:12px 8px}}'
     +'</style></head><body><div class="page">'
     +'<a class="back" onclick="try{window.close()}catch(e){};if(!window.closed)history.back()">← 关闭返回</a>'
-    +'<div class="header"><img class="flag" src="https://flagcdn.com/w160/'+info.cc+'.png" alt="" onerror="this.style.display='none'"><h1>'+info.name+'</h1><div class="en">'+info.en+'</div><div class="conf">'+info.conf+'</div></div>'
+    +'<div class="header"><img class="flag" src="https://flagcdn.com/w160/'+info.cc+'.png" alt=""><h1>'+info.name+'</h1><div class="en">'+info.en+'</div><div class="conf">'+info.conf+'</div></div>'
     +'<div class="stats"><div class="stat"><div class="stat-val">#'+info.rank+'</div><div class="stat-lbl">FIFA 排名</div></div><div class="stat"><div class="stat-val">'+info.apps+'</div><div class="stat-lbl">参赛次数</div></div><div class="stat"><div class="stat-val" style="font-size:14px">'+info.best+'</div><div class="stat-lbl">历史最佳</div></div></div>'
     +'<h2>核心球员</h2><div class="pc">'+info.players.map(p=>{return'<div class="pcc"><div class="pct"><div class="pcn">'+(p.num||'—')+'</div><div><div class="pcna">'+p.n+'</div><div class="pcpo">'+p.pos+'</div></div></div><div class="pci"><span class="ptag ptpos">'+(posCN[p.pos]||p.pos||'—')+'</span><span class="ptag ptclub">'+(p.club||'—')+'</span><span class="ptag ptage">'+(p.age||'—')+'岁</span><span class="ptag ptval">'+(p.val||'—')+'</span></div></div>';}).join('')+'</div>'
     +'<h2>赛程安排 ('+teamMatches.length+'场)</h2><div class="mc2">'+matchCards+'</div>'
