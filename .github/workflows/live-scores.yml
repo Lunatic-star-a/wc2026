@@ -1,0 +1,28 @@
+name: Live Score Poller
+
+on:
+  schedule:
+    # 比赛期间每分钟运行一次 (UTC时间)
+    # 06-11 至 07-19，每天 01:00-04:00 UTC (上午9点-中午12点北京时间小组赛)
+    # 全天覆盖以便捕获所有时段比赛
+    - cron: '* * * * *'
+  workflow_dispatch:  # 允许手动触发
+    inputs:
+      match_id:
+        description: '手动更新指定比赛'
+        required: false
+        default: ''
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Poll live scores
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          python3 .github/scripts/poll_scores.py

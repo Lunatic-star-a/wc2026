@@ -1448,6 +1448,19 @@ function init(){
   seedMatchesIfNeeded();
   loadMatchScores().then(()=>{renderGroupsWithStandings();renderThirdPlace();renderLiveScores();}).catch(()=>{});
   setInterval(loadMatchScores,30000);
+  // Auto-tick match minute locally for live matches
+  setInterval(()=>{
+    let changed=false;
+    for(const id in matchScores){
+      const ms=matchScores[id];
+      if(ms.status!=='live')continue;
+      const m=ms.match_minute||0;
+      if(m<45){ms.match_minute=m+1;changed=true;}
+      else if(m>=45&&m<90){ms.match_minute=m+1;changed=true;}
+      else if(m>=90){ms.injury_time=(ms.injury_time||0)+1;changed=true;}
+    }
+    if(changed){renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');renderLiveScores();}
+  },60000);
   setTimeout(()=>collapseAll(),100);
   updateCountdown();setInterval(updateCountdown,1000);
   document.body.classList.add('loaded');
