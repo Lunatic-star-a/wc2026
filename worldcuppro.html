@@ -880,8 +880,10 @@ async function checkSession(){if(!SUPABASE_READY)return;try{const{data}=await sb
 async function loadMatchScores(){
   if(!SUPABASE_READY)return;
   try{
-    const{data:scores}=await sb.from('matches').select('id,home_score,away_score,status');
-    if(scores)scores.forEach(s=>{if(s.home_score!==null)matchScores[s.id]={home_score:s.home_score,away_score:s.away_score,status:s.status};});
+    let scores=null;
+    try{const r=await sb.from('matches').select('id,home_score,away_score,status,match_minute,injury_time');scores=r.data;}catch(e){}
+    if(!scores){const r=await sb.from('matches').select('id,home_score,away_score,status');scores=r.data;}
+    if(scores)scores.forEach(s=>{if(s.home_score!==null)matchScores[s.id]={home_score:s.home_score,away_score:s.away_score,status:s.status,match_minute:s.match_minute||0,injury_time:s.injury_time||0};});
     renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');renderGroupsWithStandings();renderLiveScores();observeReveals();
   }catch(e){console.error('Load scores error:',e);}
 }
@@ -936,7 +938,18 @@ function renderMatchCard(m,idx){
   else if(hasResult){predHTML=`<div class="match-pred-inline locked"><span class="match-result-score">${ms.home_score} : ${ms.away_score}</span></div>`;}
   else if(existing){predHTML=`<div class="match-pred-inline locked"><span class="pred-inline-score">${existing.home_score}</span><span class="pred-inline-vs">:</span><span class="pred-inline-score">${existing.away_score}</span><span class="pred-locked-badge">✓</span></div>`;}
   else{predHTML=`<div class="match-pred-inline"><input class="pred-inline-input" placeholder="-" maxlength="2" id="schH_${matchDbId}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onclick="event.stopPropagation()"><span class="pred-inline-vs">:</span><input class="pred-inline-input" placeholder="-" maxlength="2" id="schA_${matchDbId}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onclick="event.stopPropagation()"><button class="pred-inline-btn" onclick="event.stopPropagation();submitPrediction(${matchDbId},'${m.home.replace(/'/g,"\'")}','${m.away.replace(/'/g,"\'")}','sch')" title="快速预测">猜</button></div>`;}
-  return `<div class="match-card reveal"><div class="match-date"><strong>${m.date}</strong>${m.time} 北京时间${statusBadge}</div><div class="match-info"><div class="match-teams">${hName}<span class="match-vs">VS</span>${aName}</div><div class="match-venue">${m.venue}${m.group?' · '+m.group+'组':''} · <span style="font-size:10px;color:var(--text-dim)">${stageLabel}</span></div></div><div class="match-actions">${predHTML}<button class="chat-card-btn" onclick="event.stopPropagation();openChatRoom(${matchDbId},'${m.home.replace(/'/g,"'")} vs ${m.away.replace(/'/g,"'")}')" title="进入聊天室">💬 聊</button></div></div>`;
+  const liveMinute=ms?formatMatchMinute(ms.match_minute,ms.injury_time,ms.status):'';
+  return `<div class="match-card reveal${ms&&ms.status==='live'?' live':''}${ms&&ms.status==='finished'?' finished':''}"><div class="match-date"><strong>${m.date}</strong>${m.time} 北京时间${statusBadge}${liveMinute?`<br>${liveMinute}`:''}</div><div class="match-info"><div class="match-teams">${hName}<span class="match-vs">VS</span>${aName}</div><div class="match-venue">${m.venue}${m.group?' · '+m.group+'组':''} · <span style="font-size:10px;color:var(--text-dim)">${stageLabel}</span></div></div><div class="match-actions">${predHTML}<button class="chat-card-btn" onclick="event.stopPropagation();openChatRoom(${matchDbId},'${m.home.replace(/'/g,"'")} vs ${m.away.replace(/'/g,"'")}')" title="进入聊天室">💬 聊</button></div></div>`;
+	}
+	function formatMatchMinute(minute,injuryTime,status){
+	  if(status==='halftime')return '<span style="color:#f39c12">中场</span>';
+	  if(status==='finished')return '<span style="color:var(--text-dim)">已结束</span>';
+	  if(!minute||minute<=0)return '<span style="color:var(--pitch)">即将开始</span>';
+	  if(injuryTime&&injuryTime>0){
+	    const base=minute<=45?45:90;
+	    return '<span style="color:var(--accent-red);animation:livePulse 1.5s ease infinite">'+base+'+'+injuryTime+"'</span>";
+	  }
+	  return '<span style="color:var(--accent-red);animation:livePulse 1.5s ease infinite">'+minute+"'</span>";
 	}
 function findTodayKey(){const now=getSimDate();const m=now.getMonth()+1,d=now.getDate();const test=m+'月'+d+'日';return ALL_MATCHES.find(m=>m.date===test)?test:null;}
 function toggleDay(dayId){document.getElementById(dayId).classList.toggle('open');const a=document.getElementById('arrow-'+dayId);if(a)a.classList.toggle('open');}
@@ -965,6 +978,7 @@ function calculateGroupStandings(){
     const g=m.group;if(!g||!standings[g])return;
     const dbId=idx+1;const ms=matchScores[dbId];
     if(!ms||ms.home_score==null||ms.away_score==null)return;
+    if(ms.status==='live'||ms.status==='halftime'||ms.status==='upcoming')return;
     const h=standings[g][m.home],a=standings[g][m.away];
     if(!h||!a)return;
     h.P++;a.P++;h.GF+=ms.home_score;a.GF+=ms.away_score;h.GA+=ms.away_score;a.GA+=ms.home_score;h.GD=h.GF-h.GA;a.GD=a.GF-a.GA;
@@ -1171,7 +1185,7 @@ function updateCountdown(){const start=new Date('2026-06-11T15:00:00-04:00');con
 function setupRealtimeSubscriptions(){
   if(!SUPABASE_READY)return;
   const onMatchChange=(payload)=>{
-    if(payload.new&&payload.new.home_score!=null){matchScores[payload.new.id]={home_score:payload.new.home_score,away_score:payload.new.away_score,status:payload.new.status};}
+    if(payload.new&&payload.new.home_score!=null){matchScores[payload.new.id]={home_score:payload.new.home_score,away_score:payload.new.away_score,status:payload.new.status,match_minute:payload.new.match_minute,injury_time:payload.new.injury_time};}
     renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');
     renderGroupsWithStandings();
     renderLiveScores();
@@ -1397,14 +1411,24 @@ async function renderLiveScores(){
   if(!el)return;
   if(!SUPABASE_READY){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim);font-size:13px">联网后可查看实时比分</div>';return;}
   try{
-    const{data,error}=await sb.from('matches').select('*').or('status.eq.live,status.eq.finished').order('match_date',{ascending:true});
+    let data=null,error=null;
+    try{const r=await sb.from('matches').select('*').or('status.eq.live,status.eq.finished').order('match_date',{ascending:true});data=r.data;error=r.error;}catch(e){}
+    if(!data){const r=await sb.from('matches').select('id,home_team,away_team,home_score,away_score,status,stage,group_name,match_date').or('status.eq.live,status.eq.finished').order('match_date',{ascending:true});data=r.data;error=r.error;}
     if(error)throw error;
     if(!data||data.length===0){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim);font-size:13px">暂无比赛数据，开赛后更新</div>';return;}
     const stageCN={group:'小组赛',r32:'1/16决赛',r16:'1/8决赛',qf:'1/4决赛',sf:'半决赛','3rd':'季军赛',final:'决赛'};
-    el.innerHTML=data.map(m=>`<div class="livescore-row">
-      <div class="livescore-row-stage">${stageCN[m.stage]||m.stage}${m.group_name?' · '+m.group_name+'组':''}</div>
+    el.innerHTML=data.map(m=>{
+      let minuteHTML='';
+      if(m.status==='halftime')minuteHTML='<span style="color:#f39c12;font-size:11px;margin-left:4px">中场</span>';
+      else if(m.status==='finished')minuteHTML='<span style="color:var(--text-dim);font-size:11px;margin-left:4px">已结束</span>';
+      else if(m.match_minute&&m.match_minute>0){
+        const disp=m.injury_time&&m.injury_time>0?(m.match_minute<=45?'45+':'90+')+m.injury_time:m.match_minute;
+        minuteHTML='<span style="color:var(--accent-red);font-size:11px;margin-left:4px;animation:livePulse 1.5s ease infinite">'+disp+"'</span>";
+      }
+      return`<div class="livescore-row">
+      <div class="livescore-row-stage">${stageCN[m.stage]||m.stage}${m.group_name?' · '+m.group_name+'组':''}${minuteHTML}</div>
       <div class="livescore-row-teams"><span>${m.home_team}</span><span class="livescore-row-score">${m.home_score??'-'} : ${m.away_score??'-'}</span><span>${m.away_team}</span></div>
-    </div>`).join('');
+    </div>`}).join('');
   }catch(e){console.error('Live scores:',e);el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim);font-size:13px">比分加载失败，请刷新重试</div>';}
 }
 

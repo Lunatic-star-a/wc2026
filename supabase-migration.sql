@@ -46,6 +46,8 @@ create table public.matches (
   home_score  integer,
   away_score  integer,
   status      text default 'upcoming' not null,
+  match_minute integer,
+  injury_time integer,
   created_at  timestamptz default now() not null,
   updated_at  timestamptz default now() not null
 );
@@ -341,3 +343,7 @@ begin
   alter publication supabase_realtime add table public.chat_messages;
 exception when duplicate_object then null;
 end $$;
+
+-- ── v6.5: Add live match tracking columns (run on existing databases) ──
+alter table public.matches add column if not exists match_minute integer;
+alter table public.matches add column if not exists injury_time integer;
