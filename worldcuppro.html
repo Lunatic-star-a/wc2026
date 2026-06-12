@@ -818,7 +818,7 @@ const ALL_MATCHES=RAW_MATCHES.map(formatMatch);
 /* ════════════════════════════════════════════════════
    APP STATE
    ════════════════════════════════════════════════════ */
-let currentUser=null,authMode='login',matchScores={1:{home_score:2,away_score:0,status:'finished',match_minute:90,injury_time:8},2:{home_score:2,away_score:1,status:'live',match_minute:84,injury_time:0}},userPredictions={};
+let currentUser=null,authMode='login',matchScores={1:{home_score:2,away_score:0,status:'finished',match_minute:90,injury_time:8},2:{home_score:2,away_score:1,status:'finished',match_minute:90,injury_time:7}},userPredictions={};
 
 function getSimDate(){const p=new URLSearchParams(location.search);const d=p.get('date');if(d){const parts=d.split('.');if(parts.length===2)return new Date(2026,parseInt(parts[0])-1,parseInt(parts[1]));}return new Date();}
 function isTodayMatch(m){const now=getSimDate();const mDate=new Date(2026,m.date.split('月')[0]-1,parseInt(m.date.split('月')[1]));return mDate.toDateString()===now.toDateString();
@@ -894,12 +894,18 @@ function resolveStatus(s,matchObj){
   if(s.home_score!=null&&s.away_score!=null)return 'finished';
   return s.status;
 }
+var _lastScoresHash='';
+function _scoresHash(){var a=[];for(var i=1;i<=104;i++){var m=matchScores[i];if(m&&m.home_score!=null)a.push(i+':'+m.home_score+'-'+m.away_score+':'+m.status+':'+m.match_minute+':'+m.injury_time);}return a.join('|');}
 async function loadMatchScores(){
   if(!SUPABASE_READY)return;
   try{
+    var flatHash='';
     const{data:scores}=await sb.from('matches').select('id,home_score,away_score,status,match_minute,injury_time,match_date,match_time');
-    if(scores)scores.forEach(s=>{if(s.home_score!==null){var old=matchScores[s.id];var id=s.id-1;var mo=ALL_MATCHES[id]||null;var st=resolveStatus(s,mo);if(old&&(old.status==='live'||old.status==='finished'||old.status==='halftime')&&st==='upcoming')st=old.status;matchScores[s.id]={home_score:s.home_score,away_score:s.away_score,status:st,match_minute:s.match_minute||(old?old.match_minute:0),injury_time:s.injury_time||(old?old.injury_time:0)};}});
-    renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');renderGroupsWithStandings();renderLiveScores();observeReveals();
+    if(scores){
+      scores.forEach(s=>{if(s.home_score!==null){var old=matchScores[s.id];var id=s.id-1;var mo=ALL_MATCHES[id]||null;var st=resolveStatus(s,mo);if(old&&(old.status==='live'||old.status==='finished'||old.status==='halftime')&&st==='upcoming')st=old.status;matchScores[s.id]={home_score:s.home_score,away_score:s.away_score,status:st,match_minute:s.match_minute||(old?old.match_minute:0),injury_time:s.injury_time||(old?old.injury_time:0)};flatHash+=s.id+':'+s.home_score+'-'+s.away_score+':'+st+'|';}});
+      var h=_scoresHash();
+      if(h!==_lastScoresHash){renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');renderGroupsWithStandings();renderThirdPlace();renderLiveScores();observeReveals();_lastScoresHash=h;}
+    }
   }catch(e){console.error('Load scores error:',e);}
 }
 async function loadUserPredictions(){
@@ -958,7 +964,7 @@ function renderMatchCard(m,idx){
   const liveMinute=ms?formatMatchMinute(ms.match_minute,ms.injury_time,ms.status):'';
   const combinedStatus=liveMinute?`${statusBadge}<br>${liveMinute}`:statusBadge;
   const cardStatus=ms&&(ms.status==='live'||ms.status==='halftime')?' live':'';
-  return `<div class="match-card reveal${cardStatus}${ms&&ms.status==='finished'?' finished':''}"><div class="match-date"><strong>${m.date}</strong>${m.time} 北京时间</div><div class="match-info"><div class="match-teams">${hName}<span class="match-vs">VS</span>${aName}</div><div class="match-venue">${m.venue}${m.group?' · '+m.group+'组':''} · <span style="font-size:10px;color:var(--text-dim)">${stageLabel}</span></div></div><div class="match-actions">${predHTML}<button class="chat-card-btn" onclick="event.stopPropagation();openChatRoom(${matchDbId},'${m.home.replace(/'/g,"\\'")} vs ${m.away.replace(/'/g,"\\'")}')" title="进入聊天室">💬 聊</button><div style="font-size:10px;margin-top:2px;text-align:center">${combinedStatus}</div></div></div>`;
+  return `<div class="match-card reveal${cardStatus}${ms&&ms.status==='finished'?' finished':''}" id="mc-${matchDbId}"><div class="match-date"><strong>${m.date}</strong>${m.time} 北京时间</div><div class="match-info"><div class="match-teams">${hName}<span class="match-vs">VS</span>${aName}</div><div class="match-venue">${m.venue}${m.group?' · '+m.group+'组':''} · <span style="font-size:10px;color:var(--text-dim)">${stageLabel}</span></div></div><div class="match-actions">${predHTML}<button class="chat-card-btn" onclick="event.stopPropagation();openChatRoom(${matchDbId},'${m.home.replace(/'/g,"\\'")} vs ${m.away.replace(/'/g,"\\'")}')" title="进入聊天室">💬 聊</button><div style="font-size:10px;margin-top:2px;text-align:center">${combinedStatus}</div></div></div>`;
 	}
 	function formatMatchMinute(minute,injuryTime,status){
 	  if(status==='halftime')return '<span style="color:#f39c12">中场</span>';
@@ -1112,15 +1118,13 @@ async function submitPrediction(matchDbId,home,away,src){
 /* ═══ LEADERBOARD ═══ */
 async function renderLeaderboard(){
   const list=document.getElementById('lbList');
-  if(!SUPABASE_READY){
-    list.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim)">联网后可查看排行榜</div>';return;
-  }
+  if(!SUPABASE_READY){list.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim)">联网后可查看排行榜</div>';return;}
   try{
     const{data,error}=await sb.from('leaderboard').select('*').limit(8);
     if(error)throw error;
     if(!data||data.length===0){list.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim)">还没有预测数据，快来参与吧！</div>';return;}
-    list.innerHTML=data.map((p,i)=>{let rc='';if(i===0)rc='gold';else if(i===1)rc='silver';else if(i===2)rc='bronze';return`<div class="lb-row reveal"><span class="lb-rank ${rc}">${p.rank||i+1}</span><span class="lb-name">${p.username}</span><span class="lb-meta">${p.predictions_count}次预测</span><span class="lb-points">${p.points} pts</span></div>`;}).join('');
-  }catch(err){console.error('Leaderboard error:',err);list.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim)">排行榜加载失败</div>';}
+    list.innerHTML=data.map((p,i)=>{var rc='';if(i===0)rc='gold';else if(i===1)rc='silver';else if(i===2)rc='bronze';return'<div class=\"lb-row reveal\"><span class=\"lb-rank '+rc+'\">'+(p.rank||i+1)+'</span><span class=\"lb-name\">'+(p.username||'')+'</span><span class=\"lb-meta\">'+(p.predictions_count||0)+'次预测</span><span class=\"lb-points\">'+(p.points||0)+' pts</span></div>';}).join('');
+  }catch(err){console.error('Leaderboard error:',err);list.innerHTML='<div style=\"text-align:center;padding:40px;color:var(--text-dim)\">排行榜加载失败</div>';}
 }
 
 /* ═══ TEAM PAGE (opens in new tab) ═══ */
