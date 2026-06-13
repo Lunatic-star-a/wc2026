@@ -997,6 +997,61 @@ function resolveStatus(s,matchObj){
 }
 var _lastScoresHash='';
 function _scoresHash(){var a=[];for(var i=1;i<=104;i++){var m=matchScores[i];if(m&&m.home_score!=null)a.push(i+':'+m.home_score+'-'+m.away_score+':'+m.status+':'+m.match_minute+':'+m.injury_time);}return a.join('|');}
+/* ═══ ESPN LIVE POLLER (browser fetches scores directly — no GitHub latency) ═══ */
+var ESPN_TEAM_CN={"mexico":"墨西哥","south africa":"南非","south korea":"韩国","czechia":"捷克","czech republic":"捷克","canada":"加拿大","bosnia and herzegovina":"波黑","bosnia":"波黑","united states":"美国","usa":"美国","paraguay":"巴拉圭","qatar":"卡塔尔","switzerland":"瑞士","brazil":"巴西","morocco":"摩洛哥","haiti":"海地","scotland":"苏格兰","australia":"澳大利亚","turkey":"土耳其","germany":"德国","curacao":"库拉索","curaçao":"库拉索","netherlands":"荷兰","japan":"日本","sweden":"瑞典","tunisia":"突尼斯","ivory coast":"科特迪瓦","cote d'ivoire":"科特迪瓦","ecuador":"厄瓜多尔","spain":"西班牙","cape verde":"佛得角","belgium":"比利时","egypt":"埃及","saudi arabia":"沙特","uruguay":"乌拉圭","iran":"伊朗","new zealand":"新西兰","france":"法国","senegal":"塞内加尔","iraq":"伊拉克","norway":"挪威","argentina":"阿根廷","algeria":"阿尔及利亚","austria":"奥地利","jordan":"约旦","portugal":"葡萄牙","dr congo":"刚果(金)","congo":"刚果(金)","uzbekistan":"乌兹别克斯坦","colombia":"哥伦比亚","england":"英格兰","croatia":"克罗地亚","ghana":"加纳","panama":"巴拿马"};
+var _pollTimer=null,_fastPollUntil=0;
+async function _pollESPN(){
+  try{
+    var resp=await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard');
+    if(!resp.ok)return;
+    var data=await resp.json(),updated=0,hasLive=!1;
+    for(var ei=0;ei<data.events.length;ei++){
+      var comps=data.events[ei].competitions[0];
+      if(!comps||comps.competitors.length<2)continue;
+      var h=comps.competitors[0],a=comps.competitors[1];
+      var hn=(h.team.displayName||'').toLowerCase().trim();
+      var an=(a.team.displayName||'').toLowerCase().trim();
+      var hcn=ESPN_TEAM_CN[hn]||hn,acn=ESPN_TEAM_CN[an]||an;
+      if(!ESPN_TEAM_CN[hn])for(var k in ESPN_TEAM_CN){if(k.indexOf(hn)>=0||hn.indexOf(k)>=0){hcn=ESPN_TEAM_CN[k];break}}
+      if(!ESPN_TEAM_CN[an])for(var k in ESPN_TEAM_CN){if(k.indexOf(an)>=0||an.indexOf(k)>=0){acn=ESPN_TEAM_CN[k];break}}
+      var hs=parseInt(h.score)||0,as=parseInt(a.score)||0;
+      var stInfo=data.events[ei].status,stType=stInfo.type.name||'';
+      var dbSt='upcoming',period=stInfo.period||0,clock=stInfo.displayClock||'';
+      if(stType==='STATUS_FULL_TIME'||stType==='STATUS_FINAL')dbSt='finished';
+      else if(stType==='STATUS_HALF_TIME'||stType==='STATUS_END_OF_PERIOD')dbSt='halftime';
+      else if(stType==='STATUS_IN_PROGRESS'||stType==='STATUS_SECOND_HALF'||stType==='STATUS_FIRST_HALF'||stType==='STATUS_DELAYED'||stType==='STATUS_RAIN_DELAY')dbSt='live';
+      var min=0,inj=0,cm=clock.match(/(\d+)'?\s*\+?\s*(\d*)'?/);
+      if(cm){min=parseInt(cm[1]);inj=cm[2]?parseInt(cm[2]):0;}
+      else{var nums=clock.match(/\d+/);if(nums)min=parseInt(nums[0]);}
+      if(period===2&&min>0&&min<45){inj=min;min=45;}
+      if(dbSt==='upcoming'&&hs===0&&as===0&&!clock)continue;
+      var dbId=null;
+      for(var mi=0;mi<ALL_MATCHES.length;mi++){
+        var mm=ALL_MATCHES[mi];
+        if(mm.home===hcn&&mm.away===acn){dbId=mi+1;break;}
+      }
+      if(!dbId)continue;
+      var old=matchScores[dbId]||{};
+      var oldHash=dbId+':'+(old.home_score||'')+'-'+(old.away_score||'')+':'+(old.status||'')+':'+(old.match_minute||'')+':'+(old.injury_time||'');
+      var newHash=dbId+':'+hs+'-'+as+':'+dbSt+':'+min+':'+inj;
+      if(oldHash===newHash)continue;
+      matchScores[dbId]={home_score:hs,away_score:as,status:dbSt,match_minute:min,injury_time:inj};
+      updated++;if(dbSt==='live'||dbSt==='halftime')hasLive=!0;
+      if(SUPABASE_READY)sb.from('matches').update({home_score:hs,away_score:as,status:dbSt,match_minute:min,injury_time:inj}).eq('id',dbId).then(function(){}).catch(function(){});
+    }
+    if(updated>0){
+      renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');
+      renderGroupsWithStandings();renderThirdPlace();renderLiveScores();observeReveals();
+      _lastScoresHash='';
+    }
+    if(hasLive)_fastPollUntil=Date.now()+900000;
+  }catch(e){/* silent fallback to Supabase poller */}
+}
+function _autoPoll(){
+  _pollESPN();
+  if(_pollTimer)clearTimeout(_pollTimer);
+  (function schedule(){var now=Date.now();var iv=now<_fastPollUntil?5000:(now<_fastPollUntil+3600000?15000:60000);_pollTimer=setTimeout(function(){_pollESPN();schedule();},iv);})();
+}
 async function loadMatchScores(){
   if(!SUPABASE_READY)return;
   try{
@@ -1559,7 +1614,7 @@ function init(){
     // Force all reveals visible after async rendering completes
     setTimeout(function(){document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('visible');});},800);
   }).catch(function(){});
-  setInterval(loadMatchScores,20000);
+  _autoPoll(); // Smart poller: 5s during live, 15s near kickoff, 60s idle
   setTimeout(()=>collapseAll(),100);
   updateCountdown();setInterval(updateCountdown,1000);
   document.body.classList.add('loaded');
