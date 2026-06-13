@@ -58,22 +58,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 .groups-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
 .group-card{background:var(--card);border:1px solid rgba(255,255,255,0.05);border-radius:var(--radius);overflow:hidden;transition:transform 0.3s ease,border-color 0.3s ease,box-shadow 0.3s ease;}
 .group-card:hover{transform:translateY(-4px);border-color:rgba(212,168,67,0.25);box-shadow:0 20px 60px rgba(0,0,0,0.3),0 0 40px var(--glow-gold);}
-.group-header{background:rgba(212,168,67,0.06);padding:14px 18px;font-family:var(--font-display);font-size:20px;letter-spacing:2px;color:var(--gold);border-bottom:1px solid rgba(255,255,255,0.06);cursor:pointer;user-select:none}
+.group-header{background:linear-gradient(135deg,rgba(13,140,60,0.15),rgba(13,140,60,0.02));padding:16px 18px;font-family:var(--font-display);font-size:22px;letter-spacing:2px;color:var(--pitch);border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;user-select:none}
 .group-table{width:100%;border-collapse:collapse;}
 .group-table th{font-family:var(--font-mono);font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;padding:10px 12px 6px;text-align:left;font-weight:400;}
-.group-table th:nth-child(n+3),.group-table td:nth-child(n+3){text-align:center}
+.group-table th:nth-child(2),.group-table th:nth-child(3),.group-table th:nth-child(4),.group-table td:nth-child(2),.group-table td:nth-child(3),.group-table td:nth-child(4){text-align:center;}
 .group-table td{padding:8px 12px;font-size:13px;border-top:1px solid rgba(255,255,255,0.02);}
-.group-matches{padding:6px 10px 8px;display:flex;flex-direction:column;gap:4px;border-top:1px solid rgba(255,255,255,0.04)}
-.gms{display:flex;align-items:center;justify-content:center;gap:8px;font-size:11px;padding:4px 8px;border-radius:6px}
-.gms span{font-weight:500}
-.gms-up{color:var(--text-dim);background:transparent}
-.gms-up .gms-v{font-size:9px;color:rgba(255,255,255,0.2)}
-.gms-fin{color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.02)}
-.gms-fin .gms-s{font-family:var(--font-mono);font-weight:700;color:var(--text);font-size:12px;padding:1px 6px;background:rgba(255,255,255,0.06);border-radius:4px}
-.gms-live{color:var(--text);background:rgba(212,168,67,0.06)}
-.gms-live .gms-s{font-family:var(--font-mono);font-weight:700;color:var(--gold);font-size:12px;padding:1px 6px;background:rgba(212,168,67,0.15);border-radius:4px;animation:livePulse 1.5s ease infinite}
-.gms-v{font-size:9px;color:rgba(255,255,255,0.2);flex-shrink:0}
-.gms-s{flex-shrink:0}
 .team-flag{display:inline-block;width:22px;text-align:center;margin-right:6px;font-size:14px;}
 .team-link{color:var(--text);text-decoration:none;font-weight:500;cursor:pointer;transition:color 0.2s;border-bottom:1px dashed transparent;}
 .team-link:hover{color:var(--gold);border-bottom-color:var(--gold);}
@@ -1178,7 +1167,14 @@ function renderThirdPlace(){
 function toggleThirdPlace(){const b=document.getElementById('thirdPlaceBody');const a=document.getElementById('tpArrow');const o=b.style.display!=='none';b.style.display=o?'none':'block';if(a)a.textContent=o?'▼':'▲';}
 /* ═══ GROUP STANDINGS (live calculation matching real-time scores) ═══ */
 function calculateGroupStandings(){var s={};GROUPS.forEach(function(g){s[g.name]={};g.teams.forEach(function(t){s[g.name][t.name]={team:t,P:0,W:0,D:0,L:0,GF:0,GA:0,GD:0,PTS:0};});});ALL_MATCHES.forEach(function(m,idx){if(m.stage!=='group')return;var g=m.group;if(!g||!s[g])return;var ms=matchScores[idx+1];if(!ms||ms.home_score==null||ms.away_score==null)return;var h=s[g][m.home],a=s[g][m.away];if(!h||!a)return;h.P++;a.P++;h.GF+=ms.home_score;a.GF+=ms.away_score;h.GA+=ms.away_score;a.GA+=ms.home_score;h.GD=h.GF-h.GA;a.GD=a.GF-a.GA;if(ms.status==='live'||ms.status==='halftime')return;if(ms.home_score>ms.away_score){h.W++;h.PTS+=3;a.L++;}else if(ms.home_score<ms.away_score){a.W++;a.PTS+=3;h.L++;}else{h.D++;a.D++;h.PTS++;a.PTS++;}});return s;}
-function renderGroupsWithStandings(){var sts=calculateGroupStandings();document.getElementById('groupsGrid').innerHTML=GROUPS.map(function(g){var st=sts[g.name];var rows=Object.values(st).sort(function(a,b){return b.PTS-a.PTS||b.GD-a.GD||b.GF-a.GF||a.team.name.localeCompare(b.team.name,'zh');});var gm=ALL_MATCHES.filter(function(m){return m.group===g.name;});var badges=gm.map(function(m){var idx=ALL_MATCHES.indexOf(m);var ms=matchScores[idx+1];var has=ms&&ms.home_score!=null&&ms.away_score!=null;if(!has)return'<div class="gms gms-up"><span>'+m.home+'</span><span class="gms-v">VS</span><span>'+m.away+'</span></div>';var bc='gms-fin';if(ms.status==='live'||ms.status==='halftime')bc='gms-live';return'<div class="gms '+bc+'"><span>'+m.home+'</span><span class="gms-s">'+ms.home_score+':'+ms.away_score+'</span><span>'+m.away+'</span></div>';}).join('');return'<div class="group-card reveal"><div class="group-header" onclick="if(window.innerWidth<=768){this.parentElement.classList.toggle(\'collapsed\');var b=this.querySelector(\'.group-card-toggle\');if(b)b.textContent=this.parentElement.classList.contains(\'collapsed\')?\'▶\':\'▼\'}">'+g.name+' 组<button class="group-card-toggle" onclick="event.stopPropagation();var g=this.closest(\'.group-card\');g.classList.toggle(\'collapsed\');this.textContent=g.classList.contains(\'collapsed\')?\'▶\':\'▼\'">▼</button></div><table class="group-table"><thead><tr><th>#</th><th>球队</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>PTS</th></tr></thead><tbody>'+rows.map(function(s,i){return'<tr><td style="color:var(--text-dim);font-size:11px">'+(i+1)+'</td><td>'+flagImg(s.team.cc,22)+' <a class="team-link" onclick="openTeamPage(\''+s.team.name+'\')" title="点击查看球队详情">'+s.team.name+'</a></td><td>'+s.P+'</td><td>'+s.W+'</td><td>'+s.D+'</td><td>'+s.L+'</td><td>'+s.GF+'</td><td>'+s.GA+'</td><td>'+(s.GD>0?'+':'')+s.GD+'</td><td class="pts">'+s.PTS+'</td></tr>';}).join('')+'</tbody></table><div class="group-matches">'+badges+'</div></div>';}).join('');}
+function renderGroupsWithStandings(){
+  var sts=calculateGroupStandings();
+  document.getElementById('groupsGrid').innerHTML=GROUPS.map(function(g){
+    var st=sts[g.name];
+    var sorted=Object.values(st).sort(function(a,b){return b.PTS-a.PTS||b.GD-a.GD||b.GF-a.GF||a.team.name.localeCompare(b.team.name,'zh');});
+    return'<div class="group-card reveal"><div class="group-header" onclick="if(window.innerWidth<=768){this.parentElement.classList.toggle(\'collapsed\');var b=this.querySelector(\'.group-card-toggle\');if(b)b.textContent=this.parentElement.classList.contains(\'collapsed\')?\'▶\':\'▼\'}">'+g.name+' 组<button class="group-card-toggle" onclick="event.stopPropagation();var g=this.closest(\'.group-card\');g.classList.toggle(\'collapsed\');this.textContent=g.classList.contains(\'collapsed\')?\'▶\':\'▼\'">▼</button></div><table class="group-table"><thead><tr><th>球队</th><th>P</th><th>GD</th><th>PTS</th></tr></thead><tbody>'+sorted.map(function(s){return'<tr><td>'+flagImg(s.team.cc,24)+' <a class="team-link" onclick="openTeamPage(\''+s.team.name+'\')" title="点击查看球队详情">'+s.team.name+'</a></td><td>'+s.P+'</td><td>'+(s.GD>0?'+':'')+s.GD+'</td><td class="pts">'+s.PTS+'</td></tr>';}).join('')+'</tbody></table></div>';
+  }).join('');
+}
 function toggleRules(){const b=document.getElementById('rulesBody');const a=document.getElementById('rulesArrow');const o=b.style.display!=='none';b.style.display=o?'none':'block';if(a)a.textContent=o?'▶':'▼';}
 
 /* ═══ FILTERS ═══ */
