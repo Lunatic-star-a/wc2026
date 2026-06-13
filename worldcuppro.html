@@ -290,6 +290,9 @@ footer{text-align:center;padding:60px 0;border-top:1px solid rgba(255,255,255,0.
 .chat-msg-body{flex:1;min-width:0}
 .chat-msg-name{font-size:11px;color:var(--gold);font-weight:600;margin-bottom:2px}
 .chat-msg-text{font-size:13px;color:var(--text);line-height:1.4;word-break:break-word}
+.chat-msg.self{flex-direction:row-reverse;text-align:right}
+.chat-msg.self .chat-msg-avatar{background:var(--gold);color:#000}
+.chat-msg.self .chat-msg-name{color:var(--pitch-bright)}
 .chat-input-row{display:flex;gap:8px;padding:12px 16px;border-top:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.2);flex-shrink:0}
 .chat-input{flex:1;background:var(--card);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;outline:none;font-family:var(--font-body)}
 .chat-input:focus{border-color:var(--pitch)}
@@ -1534,7 +1537,7 @@ async function loadChatMessages(){
     if(error)throw error;
     const msgs=document.getElementById('chatMessages');
     if(!data||data.length===0){msgs.innerHTML='<div class="chat-empty">暂无消息，来发第一条吧！</div>';return;}
-    msgs.innerHTML=data.map(m=>`<div class="chat-msg"><div class="chat-msg-avatar">${(m.username||'?')[0]}</div><div class="chat-msg-body"><div class="chat-msg-name">${m.username||'匿名'}</div><div class="chat-msg-text">${m.message.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div></div></div>`).join('');
+    msgs.innerHTML=data.map(function(m){var isMe=m.user_id===currentUser.id;return'<div class="chat-msg'+(isMe?' self':'')+'"><div class="chat-msg-avatar">'+(m.username||'?')[0]+'</div><div class="chat-msg-body"><div class="chat-msg-name">'+(m.username||'匿名')+'</div><div class="chat-msg-text">'+m.message.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div></div></div>';}).join('');
     msgs.scrollTop=msgs.scrollHeight;
   }catch(e){console.error('Chat load error:',e);}
 }
