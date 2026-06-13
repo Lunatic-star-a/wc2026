@@ -274,6 +274,17 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 .toast.error{border-left:3px solid var(--accent-red);}
 /* Footer */
 footer{text-align:center;padding:60px 0;border-top:1px solid rgba(255,255,255,0.04);color:var(--text-dim);font-size:13px;position:relative;z-index:1;}
+/* Live Video Player */
+.video-section{position:relative;z-index:1;padding:0 0 48px}
+.video-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.video-section-header .vs-title{font-family:var(--font-display);font-size:22px;letter-spacing:2px;color:var(--gold)}
+.video-section-toggle{background:none;border:1px solid rgba(255,255,255,0.12);color:var(--text-dim);padding:5px 14px;border-radius:100px;font-size:11px;cursor:pointer;transition:all 0.25s;font-family:var(--font-body)}
+.video-section-toggle:hover{color:var(--gold);border-color:var(--gold)}
+.video-container{background:var(--card);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);overflow:hidden;max-width:960px;margin:0 auto}
+.video-container video{display:block;width:100%;height:auto;background:#000}
+.video-container .video-placeholder{display:flex;align-items:center;justify-content:center;aspect-ratio:16/9;background:linear-gradient(135deg,rgba(10,14,23,0.98),rgba(20,26,38,0.98));color:var(--text-dim);font-size:15px;flex-direction:column;gap:12px}
+.video-container .video-placeholder .vp-icon{font-size:48px;opacity:0.5}
+.video-container .video-placeholder .vp-hint{font-family:var(--font-mono);font-size:11px;letter-spacing:2px;color:var(--text-dim);opacity:0.6}
 /* Chat Room - Right Sidebar */
 .chat-overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.5);opacity:0;visibility:hidden;transition:opacity 0.3s,visibility 0.3s}
 .chat-overlay.active{opacity:1;visibility:visible}
@@ -511,6 +522,9 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   .toast{font-size:12px;padding:10px 16px;max-width:100%}
   /* Footer */
   footer{padding:32px 16px;font-size:11px}
+  .video-section-header .vs-title{font-size:17px}
+  .video-container .video-placeholder{font-size:13px}
+  .video-container .video-placeholder .vp-icon{font-size:36px}
 }
 /* ── Mobile Portrait (≤480px) ── */
 @media(max-width:480px){
@@ -764,6 +778,24 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
     </div>
   </section>
   <footer><div class="container">Made for the love of <strong>Football</strong> &middot; FIFA World Cup 2026</div></footer>
+
+  <!-- Live Video Player -->
+  <section class="video-section reveal" id="videoSection">
+    <div class="container">
+      <div class="video-section-header">
+        <span class="vs-title">📺 赛事直播</span>
+        <button class="video-section-toggle" onclick="toggleVideoSection()" title="收起/展开">收起</button>
+      </div>
+      <div class="video-container" id="videoContainer">
+        <div class="video-placeholder" id="videoPlaceholder">
+          <span class="vp-icon">📺</span>
+          <span>直播信号将在赛前接入</span>
+          <span class="vp-hint">Live streaming coming soon</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
 <!-- Chat Room Overlay --><div class="chat-overlay" id="chatOverlay" onclick="closeChatRoom()"><div class="chat-panel" id="chatPanel" onclick="event.stopPropagation()"><div class="chat-header"><span class="chat-title" id="chatTitle">💬 聊天室</span><button class="chat-close" onclick="closeChatRoom()">&times;</button></div><div class="chat-messages" id="chatMessages"><div class="chat-empty">加载中...</div></div><div class="chat-input-row"><input class="chat-input" id="chatInput" placeholder="输入消息..." maxlength="200" onkeydown="if(event.key===`Enter`)sendChatMessage()"><button class="chat-send" onclick="sendChatMessage()">发送</button></div></div></div>
 </main>
 <script>
@@ -1529,6 +1561,17 @@ function closeChatRoom(){
   document.getElementById('chatOverlay').classList.remove('active');
   currentChatMatchId=null;
   if(chatChannel){sb.removeChannel(chatChannel);chatChannel=null;}
+}
+function toggleVideoSection(){
+  var container=document.getElementById('videoContainer');
+  var btn=document.querySelector('.video-section-toggle');
+  if(container.style.display==='none'){
+    container.style.display='';
+    btn.textContent='收起';
+  }else{
+    container.style.display='none';
+    btn.textContent='展开';
+  }
 }
 async function loadChatMessages(){
   if(!SUPABASE_READY||!currentChatMatchId)return;
