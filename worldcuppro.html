@@ -796,8 +796,8 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
       <div class="section-header reveal"><div class="section-tag">Live Scores</div><h2>实时比分</h2></div>
       <div class="livescore-board reveal">
         <div class="livescore-header">
-          <span class="livescore-title">🏆 FIFA World Cup 2026</span>
-          <span class="livescore-status"><span class="live-dot"></span> 赛事数据</span>
+          <span class="livescore-title">🏆 今日比分</span>
+          <span class="livescore-status"><span class="live-dot"></span> 实时数据</span>
         </div>
         <div class="livescore-embed" id="liveScoreList">
           <div style="text-align:center;padding:40px;color:var(--text-dim);font-size:13px">加载实时比分中...</div>
@@ -1711,8 +1711,10 @@ async function renderLiveScores(){
   try{
     const{data,error}=await sb.from('matches').select('id,home_team,away_team,home_score,away_score,status,stage,group_name,match_date,match_time,match_minute,injury_time').order('match_date',{ascending:true});
     if(error)throw error;
-    const liveData=(data||[]).filter(m=>m.home_score!=null);
-    if(liveData.length===0){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim);font-size:13px">暂无比赛数据，开赛后更新</div>';return;}
+    // Only today's matches
+    const today=Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai'}).format(new Date()); // "2026-06-13"
+    const liveData=(data||[]).filter(m=>m.match_date===today);
+    if(liveData.length===0){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim);font-size:13px">今日暂无比分数据</div>';return;}
     const stageCN={group:'小组赛',r32:'1/16决赛',r16:'1/8决赛',qf:'1/4决赛',sf:'半决赛','3rd':'季军赛',final:'决赛'};
     el.innerHTML=liveData.map(m=>{
       const st=resolveStatus(m);
