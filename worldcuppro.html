@@ -362,7 +362,9 @@ footer{text-align:center;padding:60px 0;border-top:1px solid rgba(255,255,255,0.
 .livescore-row-stage{font-size:10px;color:var(--text-dim);text-align:center}
 .livescore-row-teams{display:flex;align-items:center;gap:14px;justify-content:center;width:100%;overflow:hidden}
 .livescore-row-teams span{font-size:15px;color:var(--text);font-weight:500;flex:1 1 auto;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-.livescore-row-score{font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--gold);padding:4px 18px;background:rgba(212,168,67,0.1);border-radius:8px;letter-spacing:3px;flex:0 0 auto;text-align:center;white-space:nowrap}
+.livescore-row-score{font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--gold);padding:4px 12px;background:rgba(212,168,67,0.1);border-radius:8px;display:flex;align-items:center;gap:0;flex:0 0 auto}
+.livescore-row-score .lsh,.livescore-row-score .lsa{min-width:20px;text-align:center}
+.livescore-row-score .lscol{padding:0 6px;color:var(--text-dim)}
 footer strong{color:var(--gold);}
 /* Animations */
 @keyframes fadeInUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
@@ -548,7 +550,8 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   .livescore-row{padding:10px 12px;gap:6px}
   .livescore-row-stage{font-size:9px}
   .livescore-row-teams span{font-size:12px}
-  .livescore-row-score{font-size:18px;padding:3px 14px}
+  .livescore-row-score{font-size:18px;padding:3px 10px}
+  .livescore-row-score .lsh,.livescore-row-score .lsa{min-width:17px}
   /* Auth modal */
   .auth-modal{padding:28px 20px}
   .auth-modal h2{font-size:26px}
@@ -637,7 +640,8 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   /* Live scores */
   .livescore-row{padding:10px 8px;gap:6px}
   .livescore-row-teams span{font-size:11px}
-  .livescore-row-score{font-size:16px;padding:3px 12px}
+  .livescore-row-score{font-size:16px;padding:3px 8px}
+  .livescore-row-score .lsh,.livescore-row-score .lsa{min-width:15px}
   /* Auth */
   .auth-modal{padding:24px 16px}
   .auth-modal h2{font-size:24px}
@@ -1823,7 +1827,7 @@ async function renderLiveScores(){
       }
       return`<div class="livescore-row">
       <div class="livescore-row-stage">${stageCN[m.stage]||m.stage}${m.group_name?' · '+m.group_name+'组':''} ${minuteHTML}</div>
-      <div class="livescore-row-teams"><span>${m.home_team}</span><span class="livescore-row-score" style="${scoreClass}">${m.home_score??'-'} : ${m.away_score??'-'}</span><span>${m.away_team}</span></div>
+      <div class="livescore-row-teams"><span>${m.home_team}</span><span class="livescore-row-score" style="${scoreClass}"><span class="lsh">${m.home_score??'-'}</span><span class="lscol">:</span><span class="lsa">${m.away_score??'-'}</span></span><span>${m.away_team}</span></div>
     </div>`}).join('');
   }catch(e){console.error('Live scores:',e);el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim);font-size:13px">比分加载失败，请刷新重试</div>';}
 }
