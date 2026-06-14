@@ -93,7 +93,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 .match-card::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--pitch);transform:scaleY(0);transition:transform 0.3s ease;}
 .match-card:hover::after{transform:scaleY(1);}
 .match-card:hover{border-color:rgba(255,255,255,0.1);box-shadow:0 8px 32px rgba(0,0,0,0.2);}
-.match-card.live{border-color:rgba(212,168,67,0.3);}
+.match-card.live{border-color:rgba(212,168,67,0.3);animation:livePulse 2s ease-in-out infinite;}
 .match-card.finished{opacity:0.7;}
 .match-date{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);}
 .match-date strong{display:block;color:var(--text);font-size:14px;margin-top:1px;}
@@ -113,7 +113,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 .match-pred-inline.locked{display:flex;align-items:center;gap:4px}
 .pred-inline-score{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--gold);min-width:16px;text-align:center;background:rgba(212,168,67,0.08);padding:2px 6px;border-radius:4px}
 .pred-locked-badge{font-size:10px;color:var(--pitch);margin-left:2px}
-.match-live-badge{font-size:10px;color:var(--accent-red);margin-left:6px;animation:livePulse 1.5s ease infinite;display:inline-flex;align-items:center;gap:3px}
+.match-live-badge{font-size:10px;color:var(--accent-red);margin-left:6px;display:inline-flex;align-items:center;gap:3px}
 .live-dot-sm{width:6px;height:6px;border-radius:50%;background:var(--accent-red);display:inline-block}
 .match-finished-badge{font-size:10px;color:var(--text-dim);margin-left:6px}
 .match-status-row{white-space:nowrap;font-size:10px;margin-top:2px;text-align:center}
@@ -1245,12 +1245,12 @@ function renderMatchCard(m,idx){
 	  if(status==='halftime')return '<span style="color:#f39c12">中场</span>';
 	  if(status==='finished')return '';
 	  if(status==='live'){
-	    if(!minute||minute<=0)return '<span style="color:#0fa84a;animation:livePulse 1.5s ease infinite">0\'</span>';
+	    if(!minute||minute<=0)return '<span style="color:#0fa84a">0\'</span>';
 	    if(injuryTime&&injuryTime>0){
 	      const base=minute<=45?45:90;
-	      return '<span style="color:#0fa84a;animation:livePulse 1.5s ease infinite">'+base+'+'+injuryTime+"'</span>";
+	      return '<span style="color:#0fa84a">'+base+'+'+injuryTime+"'</span>";
 	    }
-	    return '<span style="color:#0fa84a;animation:livePulse 1.5s ease infinite">'+minute+"'</span>";
+	    return '<span style="color:#0fa84a">'+minute+"'</span>";
 	  }
 	  return '<span style="color:var(--pitch)">即将开始</span>';
 	}
@@ -1809,6 +1809,7 @@ function init(){
   createParticles();observeReveals();setupFilters();setupSmoothScroll();setupKeyboard();setupRealtimeSubscriptions();
   seedMatchesIfNeeded();
   Promise.all([loadMatchScores(),checkSession()]).then(function(){
+    renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');
     renderPredictions();renderLeaderboard();observeReveals();
     setTimeout(function(){document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('visible');});},800);
     _lastESPNHash=_scoresHash(); // Prevent first ESPN poll from triggering redundant re-render
