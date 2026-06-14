@@ -1073,7 +1073,6 @@ function resolveStatus(s,matchObj){
   }
   if(!ms&&s.match_date&&s.match_time){ms=(new Date(s.match_date+'T'+s.match_time+':00+08:00')).getTime();}
   if(ms){var elapsed=(Date.now()-ms)/60000;if(elapsed>150)return 'finished';if(elapsed>0)return 'live';}
-  if(s.home_score!=null&&s.away_score!=null)return 'finished';
   return s.status;
 }
 var _lastScoresHash='';
