@@ -1058,6 +1058,13 @@ async function handleAuthSubmit(e){
   if(authMode==='register'){
     const confirm=document.getElementById('authConfirm').value;
     if(password!==confirm){errEl.textContent='两次输入的密码不一致，请重新输入';return;}
+    // Check for duplicate username in profiles table
+    if(SUPABASE_READY){
+      try{
+        const{data:existing}=await sb.from('profiles').select('id').eq('username',username).maybeSingle();
+        if(existing){errEl.textContent='该用户名已被注册，请换一个用户名';return;}
+      }catch(e){/* proceed — let the DB unique constraint catch it as fallback */}
+    }
   }
   if(!SUPABASE_READY){currentUser={username,id:'local-'+Date.now()};onLoginSuccess();return;}
   try{
