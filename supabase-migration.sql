@@ -1,9 +1,13 @@
 -- ============================================================
 -- FIFA World Cup 2026 - Prediction Platform
--- Supabase Database Migration (v2 - safe re-run)
+-- Supabase Database Migration
 -- ============================================================
--- 可重复运行，不会报错。先用 DROP CASCADE 清理再重建。
--- https://app.supabase.com → 项目 → SQL Editor → New Query → 全选 → Run
+-- ⚠ 警告：不要全选运行！全选会 DROP TABLE 清空所有数据！
+-- 按需选择对应段落运行：
+--   第 104-136 行  → 重新定义算分函数 (SECURITY DEFINER)
+--   第 155-168 行 → 新建 INSERT 触发器
+--   第 375-386 行 → 一次性重算历史积分
+-- https://app.supabase.com → 项目 → SQL Editor → 选择性运行
 
 -- ── 清理旧对象（按依赖顺序） ──
 drop view if exists public.leaderboard cascade;
