@@ -1142,6 +1142,9 @@ async function _pollESPN(){
         if(mm.home===hcn&&mm.away===acn){dbId=mi+1;break;}
       }
       if(!dbId)continue;
+      // Never downgrade a finished match — DB is authoritative after full-time
+      var old=matchScores[dbId]||{};
+      if(old.status==='finished')continue;
       // Halftime detection: period 1 + minute>=45 + minute frozen from previous poll → halftime
       if(dbSt==='live'&&period===1&&min>=45){
         var prevKey=_lastESPNMinute[dbId];
@@ -1149,7 +1152,6 @@ async function _pollESPN(){
         if(prevKey===curKey){dbSt='halftime';}
         _lastESPNMinute[dbId]=curKey;
       }else{_lastESPNMinute[dbId]=period+':'+min;}
-      var old=matchScores[dbId]||{};
       var oldHash=dbId+':'+(old.home_score||'')+'-'+(old.away_score||'')+':'+(old.status||'')+':'+(old.match_minute||'')+':'+(old.injury_time||'');
       var newHash=dbId+':'+hs+'-'+as+':'+dbSt+':'+min+':'+inj;
       if(oldHash===newHash)continue;
@@ -1177,11 +1179,23 @@ async function loadMatchScores(){
   if(!SUPABASE_READY)return;
   try{
     const{data:scores}=await sb.from('matches').select('id,home_score,away_score,status,match_minute,injury_time,match_date,match_time');
-    if(scores){scores.forEach(s=>{if(s.home_score!==null){var old=matchScores[s.id];matchScores[s.id]={home_score:s.home_score,away_score:s.away_score,status:s.status||'upcoming',match_minute:s.match_minute||(old?old.match_minute:0),injury_time:s.injury_time||(old?old.injury_time:0)};}});
+    if(scores){scores.forEach(s=>{if(s.home_score!==null){var old=matchScores[s.id];var st=s.status||'upcoming';if(old&&(old.status==='live'||old.status==='finished'||old.status==='halftime')&&st==='upcoming')st=old.status;matchScores[s.id]={home_score:s.home_score,away_score:s.away_score,status:st,match_minute:s.match_minute||(old?old.match_minute:0),injury_time:s.injury_time||(old?old.injury_time:0)};}});
       var h=_scoresHash();
       if(h!==_lastScoresHash){renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');renderGroupsWithStandings();renderThirdPlace();renderLiveScores();observeReveals();_lastScoresHash=h;}
     }
   }catch(e){console.error('Load scores error:',e);}
+}
+// Known finished match scores that ESPN no longer returns (id → {hs,as,status,match_minute,injury_time})
+var KNOWN_FINISHED={2:{home_score:2,away_score:1,status:'finished',match_minute:90,injury_time:7},3:{home_score:1,away_score:1,status:'finished',match_minute:90,injury_time:7},4:{home_score:4,away_score:1,status:'finished',match_minute:90,injury_time:9}};
+async function patchFinishedScores(){
+  for(var id in KNOWN_FINISHED){
+    var kd=KNOWN_FINISHED[id];id=parseInt(id);
+    var existing=matchScores[id];
+    // Skip if already have correct data
+    if(existing&&existing.status==='finished'&&existing.home_score===kd.home_score&&existing.away_score===kd.away_score)continue;
+    matchScores[id]=kd;
+    if(SUPABASE_READY)try{sb.from('matches').update({home_score:kd.home_score,away_score:kd.away_score,status:kd.status,match_minute:kd.match_minute,injury_time:kd.injury_time}).eq('id',id).then(function(){}).catch(function(){});}catch(e){}
+  }
 }
 async function loadUserPredictions(){
   if(!currentUser||!SUPABASE_READY)return;
@@ -1816,6 +1830,7 @@ function init(){
   createParticles();observeReveals();setupFilters();setupSmoothScroll();setupKeyboard();setupRealtimeSubscriptions();
   seedMatchesIfNeeded();
   Promise.all([loadMatchScores(),checkSession()]).then(function(){
+    patchFinishedScores();
     renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');
     renderPredictions();renderLeaderboard();observeReveals();
     setTimeout(function(){document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('visible');});},800);
