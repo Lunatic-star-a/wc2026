@@ -394,3 +394,10 @@ begin
     perform public.calculate_prediction_points(mid);
   end loop;
 end $$;
+
+-- ── v7: Public Chat enhancements ──
+-- Run the following lines to add reply/withdraw support to public chat
+alter table public.chat_messages add column if not exists reply_to_id bigint;
+-- Allow users to update (withdraw) their own chat messages
+drop policy if exists "Users can update own chat" on public.chat_messages;
+create policy "Users can update own chat" on public.chat_messages for update using (auth.uid() = user_id);
