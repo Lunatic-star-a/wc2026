@@ -93,7 +93,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 .match-card::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--pitch);transform:scaleY(0);transition:transform 0.3s ease;}
 .match-card:hover::after{transform:scaleY(1);}
 .match-card:hover{border-color:rgba(255,255,255,0.1);box-shadow:0 8px 32px rgba(0,0,0,0.2);}
-.match-card.live{border-color:rgba(212,168,67,0.3);animation:livePulse 2s ease-in-out infinite;}
+.match-card.live{border-color:rgba(212,168,67,0.3);}
 .match-card.finished{opacity:0.7;}
 .match-date{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);}
 .match-date strong{display:block;color:var(--text);font-size:14px;margin-top:1px;}
@@ -129,15 +129,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 .match-pred-wrap{position:absolute;right:0;top:0;bottom:0;display:flex;align-items:center;z-index:2;pointer-events:none}
 .match-pred-tab{position:absolute;right:0;top:50%;transform:translateY(-50%);width:24px;height:52px;background:linear-gradient(135deg,rgba(212,168,67,0.18),rgba(212,168,67,0.04));border:1px solid rgba(212,168,67,0.3);border-radius:6px 0 0 6px;cursor:pointer;display:flex;align-items:center;justify-content:center;writing-mode:vertical-lr;font-size:10px;color:var(--gold);letter-spacing:2px;transition:all 0.3s ease;pointer-events:auto;user-select:none;z-index:3}
 .match-pred-tab:hover{background:rgba(212,168,67,0.2);border-color:rgba(212,168,67,0.5)}
-.match-pred-tab.open{background:rgba(212,168,67,0.25);border-color:var(--gold);color:var(--gold-bright);writing-mode:horizontal-tb;width:56px;height:28px;padding:0 6px;font-size:10px;letter-spacing:1px;border-radius:4px 0 0 4px;right:180px}
+.match-pred-tab.open{background:rgba(212,168,67,0.25);border-color:var(--gold);color:var(--gold-bright);right:180px}
 .match-pred-panel{position:absolute;right:0;top:0;bottom:0;width:0;overflow:hidden;background:var(--slate);border:1px solid rgba(212,168,67,0.2);border-radius:var(--radius) 0 0 var(--radius);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;transition:width 0.3s ease;z-index:2;white-space:nowrap}
 .match-pred-panel.open{width:180px}
 .match-pred-panel .mpp-inner{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px;min-width:180px}
 .match-pred-panel .mpp-label{font-size:10px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase}
 .match-pred-panel .mpp-score{font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--gold);letter-spacing:2px}
 .match-pred-panel .mpp-teams{font-size:10px;color:var(--text-dim);text-align:center;line-height:1.4}
-.match-pred-panel .mpp-close{position:absolute;top:6px;left:6px;background:none;border:none;color:var(--text-dim);font-size:14px;cursor:pointer;line-height:1}
-.match-pred-panel .mpp-close:hover{color:#fff}
 .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#e74c3c;margin-right:4px;animation:livePulse 1s ease-in-out infinite;}
 /* Search */
 .search-wrap{position:relative;margin-right:8px}
@@ -520,7 +518,7 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   .match-pred-panel .mpp-inner{min-width:140px}
   .match-pred-panel .mpp-score{font-size:18px}
   .match-pred-tab{width:20px;height:40px;font-size:9px}
-  .match-pred-tab.open{width:52px;height:26px;font-size:9px;padding:0 4px;right:140px}
+  .match-pred-tab.open{right:140px}
   .day-header{padding:12px 14px}
   .day-header-text{font-size:16px}
   .day-header-meta{font-size:11px}
@@ -660,7 +658,7 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   .match-pred-panel.open{width:130px}
   .match-pred-panel .mpp-inner{min-width:130px}
   .match-pred-panel .mpp-score{font-size:16px}
-  .match-pred-tab.open{width:46px;height:24px;font-size:8px;padding:0 3px;right:130px}
+  .match-pred-tab.open{right:130px}
   /* Toast */
   .toast-container{top:60px}
   .toast{font-size:11px;padding:8px 14px}
@@ -1239,7 +1237,7 @@ function renderMatchCard(m,idx){
   var predSidebarHTML='',hasSidebar='';
   if(existing&&hasResult&&(resolvedStatus==='finished'||resolvedStatus==='live'||resolvedStatus==='halftime')){
     hasSidebar=' has-sidebar';
-    predSidebarHTML='<div class="match-pred-wrap"><div class="match-pred-panel" id="predPanel-'+matchDbId+'"><div class="mpp-inner"><button class="mpp-close" onclick="event.stopPropagation();togglePredSide('+matchDbId+')">&times;</button><div class="mpp-label">你的预测</div><div class="mpp-score">'+existing.home_score+' : '+existing.away_score+'</div><div class="mpp-teams">'+m.home+' vs '+m.away+'</div></div></div><div class="match-pred-tab" id="predTab-'+matchDbId+'" onclick="event.stopPropagation();togglePredSide('+matchDbId+')" title="查看我的预测">你的预测</div></div>';
+    predSidebarHTML='<div class="match-pred-wrap"><div class="match-pred-panel" id="predPanel-'+matchDbId+'"><div class="mpp-inner"><div class="mpp-label">你的预测</div><div class="mpp-score">'+existing.home_score+' : '+existing.away_score+'</div><div class="mpp-teams">'+m.home+' vs '+m.away+'</div></div></div><div class="match-pred-tab" id="predTab-'+matchDbId+'" onclick="event.stopPropagation();togglePredSide('+matchDbId+')" title="查看我的预测">你的预测</div></div>';
   }
   return `<div class="match-card reveal${cardStatus}${resolvedStatus==='finished'?' finished':''}${hasSidebar}" id="mc-${matchDbId}"><div class="match-date"><strong>${m.date}</strong>${m.time} 北京时间</div><div class="match-info"><div class="match-teams">${hName}<span class="match-vs">VS</span>${aName}</div><div class="match-venue">${m.venue}${m.group?' · '+m.group+'组':''} · <span style="font-size:10px;color:var(--text-dim)">${stageLabel}</span></div></div><div class="match-actions">${predHTML}<button class="chat-card-btn" onclick="event.stopPropagation();openChatRoom(${matchDbId},'${m.home.replace(/'/g,"\\'")} vs ${m.away.replace(/'/g,"\\'")}')" title="进入聊天室">💬 聊</button><div class="match-status-row">${combinedStatus}</div></div>${predSidebarHTML}</div>`;
 	}
@@ -1737,7 +1735,7 @@ function togglePredSide(matchDbId){
   }else{
     panel.classList.add('open');
     tab.classList.add('open');
-    tab.textContent='✕ 收起';
+    tab.textContent='收起';
   }
 }
 async function loadChatMessages(){
