@@ -124,7 +124,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 @keyframes goalFlash{0%,100%{box-shadow:0 0 0 0 rgba(13,140,60,0.4)}50%{box-shadow:0 0 0 8px rgba(13,140,60,0)}}
 .watch-link{font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:var(--pitch-bright);text-decoration:none;padding:3px 10px;border:1px solid rgba(13,140,60,0.3);border-radius:100px;transition:all 0.2s;text-transform:uppercase;white-space:nowrap;}
 .watch-link:hover{background:rgba(13,140,60,0.2);}
-.match-card.has-sidebar{padding-right:44px}
+.match-card.has-sidebar{padding-right:44px;border-top-right-radius:0;border-bottom-right-radius:0}
 /* Match Card — Your Prediction Sidebar (right edge, opens leftwards) */
 .match-pred-wrap{position:absolute;right:0;top:0;bottom:0;display:flex;align-items:center;z-index:2;pointer-events:none}
 .match-pred-tab{position:absolute;right:0;top:50%;transform:translateY(-50%);width:24px;height:52px;background:linear-gradient(135deg,rgba(212,168,67,0.1),rgba(212,168,67,0.02));border:1px solid rgba(212,168,67,0.2);border-radius:4px 0 0 4px;cursor:pointer;display:flex;align-items:center;justify-content:center;writing-mode:vertical-lr;font-size:10px;color:var(--gold);letter-spacing:2px;transition:all 0.3s ease;pointer-events:auto;user-select:none;z-index:3}
@@ -513,7 +513,7 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   .pred-inline-input{width:22px;height:22px;font-size:11px}
   .pred-inline-btn{font-size:9px;padding:3px 7px}
   .chat-card-btn{font-size:9px;padding:3px 7px}
-  .match-card.has-sidebar{padding-right:38px}
+  .match-card.has-sidebar{padding-right:38px;border-top-right-radius:0;border-bottom-right-radius:0}
   .match-pred-panel.open{width:140px}
   .match-pred-panel .mpp-inner{min-width:140px}
   .match-pred-panel .mpp-score{font-size:18px}
@@ -654,7 +654,7 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   .bracket-match-inner{padding:3px}
   .bracket-team-row input[type=text]{font-size:8px;min-width:35px}
   .bracket-score-input{width:14px;height:14px;font-size:7px}
-  .match-card.has-sidebar{padding-right:34px}
+  .match-card.has-sidebar{padding-right:34px;border-top-right-radius:0;border-bottom-right-radius:0}
   .match-pred-panel.open{width:130px}
   .match-pred-panel .mpp-inner{min-width:130px}
   .match-pred-panel .mpp-score{font-size:16px}
