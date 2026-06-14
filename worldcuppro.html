@@ -123,17 +123,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 @keyframes goalFlash{0%,100%{box-shadow:0 0 0 0 rgba(13,140,60,0.4)}50%{box-shadow:0 0 0 8px rgba(13,140,60,0)}}
 .watch-link{font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:var(--pitch-bright);text-decoration:none;padding:3px 10px;border:1px solid rgba(13,140,60,0.3);border-radius:100px;transition:all 0.2s;text-transform:uppercase;white-space:nowrap;}
 .watch-link:hover{background:rgba(13,140,60,0.2);}
-/* Match Card Prediction Sidebar */
-.match-pred-tab{position:absolute;right:0;top:50%;transform:translateY(-50%);width:22px;height:48px;background:linear-gradient(135deg,rgba(212,168,67,0.15),rgba(212,168,67,0.05));border:1px solid rgba(212,168,67,0.25);border-right:none;border-radius:6px 0 0 6px;cursor:pointer;display:flex;align-items:center;justify-content:center;writing-mode:vertical-lr;font-size:10px;color:var(--gold);letter-spacing:1px;transition:all 0.25s ease;z-index:2}
-.match-pred-tab:hover{background:linear-gradient(135deg,rgba(212,168,67,0.25),rgba(212,168,67,0.1));border-color:rgba(212,168,67,0.5)}
-.match-pred-tab.open{right:200px;border-radius:6px 0 0 6px}
-.match-pred-panel{position:absolute;right:-210px;top:0;bottom:0;width:200px;background:var(--slate);border:1px solid rgba(212,168,67,0.2);border-radius:0 var(--radius) var(--radius) 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;transition:right 0.3s ease;z-index:1;overflow:hidden}
-.match-pred-panel.open{right:0}
-.match-pred-panel .mpp-label{font-size:10px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase}
-.match-pred-panel .mpp-score{font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--gold);letter-spacing:2px}
-.match-pred-panel .mpp-teams{font-size:11px;color:var(--text-dim);text-align:center;line-height:1.4}
-.match-pred-panel .mpp-close{position:absolute;top:6px;right:8px;background:none;border:none;color:var(--text-dim);font-size:14px;cursor:pointer;line-height:1}
-.match-pred-panel .mpp-close:hover{color:#fff}
+/* Match Card — Your Prediction button */
+.match-my-pred-btn{font-size:10px;padding:3px 8px;border-radius:100px;border:1px solid rgba(212,168,67,0.25);background:rgba(212,168,67,0.08);color:var(--gold);cursor:pointer;font-family:var(--font-body);white-space:nowrap;transition:all 0.2s}
+.match-my-pred-btn:hover{background:rgba(212,168,67,0.2);border-color:var(--gold)}
+.match-my-pred-btn.open{background:rgba(212,168,67,0.15);border-color:var(--gold);color:var(--gold-bright)}
+.match-my-pred-popup{display:none;position:absolute;right:0;top:100%;margin-top:6px;background:var(--slate);border:1px solid rgba(212,168,67,0.25);border-radius:var(--radius-sm);padding:12px 16px;z-index:10;text-align:center;min-width:140px;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+.match-my-pred-popup.open{display:block;animation:fadeInUp 0.2s ease}
+.match-my-pred-popup .mpp-label{font-size:10px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.match-my-pred-popup .mpp-score{font-family:var(--font-mono);font-size:20px;font-weight:700;color:var(--gold);letter-spacing:2px}
+.match-my-pred-popup .mpp-teams{font-size:10px;color:var(--text-dim);margin-top:2px}
+.match-my-pred-wrap{position:relative;display:inline-block}
 .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#e74c3c;margin-right:4px;animation:livePulse 1s ease-in-out infinite;}
 /* Search */
 .search-wrap{position:relative;margin-right:8px}
@@ -511,8 +510,7 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   .pred-inline-input{width:22px;height:22px;font-size:11px}
   .pred-inline-btn{font-size:9px;padding:3px 7px}
   .chat-card-btn{font-size:9px;padding:3px 7px}
-  .match-pred-panel{width:160px;right:-170px}
-  .match-pred-tab.open{right:160px}
+  .match-my-pred-popup{left:auto;right:0}
   .day-header{padding:12px 14px}
   .day-header-text{font-size:16px}
   .day-header-meta{font-size:11px}
@@ -648,9 +646,7 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   .bracket-match-inner{padding:3px}
   .bracket-team-row input[type=text]{font-size:8px;min-width:35px}
   .bracket-score-input{width:14px;height:14px;font-size:7px}
-  /* Match card pred sidebar — hide on small screens, show inline instead */
-  .match-pred-tab{display:none}
-  .match-pred-panel{display:none}
+  .match-my-pred-popup{left:auto;right:0}
   /* Toast */
   .toast-container{top:60px}
   .toast{font-size:11px;padding:8px 14px}
@@ -1095,7 +1091,7 @@ var _lastScoresHash='';
 function _scoresHash(){var a=[];for(var i=1;i<=104;i++){var m=matchScores[i];if(m&&m.home_score!=null)a.push(i+':'+m.home_score+'-'+m.away_score+':'+m.status+':'+m.match_minute+':'+m.injury_time);}return a.join('|');}
 /* ═══ ESPN LIVE POLLER (browser fetches scores directly — no GitHub latency) ═══ */
 var ESPN_TEAM_CN={"mexico":"墨西哥","south africa":"南非","south korea":"韩国","czechia":"捷克","czech republic":"捷克","canada":"加拿大","bosnia and herzegovina":"波黑","bosnia":"波黑","united states":"美国","usa":"美国","paraguay":"巴拉圭","qatar":"卡塔尔","switzerland":"瑞士","brazil":"巴西","morocco":"摩洛哥","haiti":"海地","scotland":"苏格兰","australia":"澳大利亚","turkey":"土耳其","germany":"德国","curacao":"库拉索","curaçao":"库拉索","netherlands":"荷兰","japan":"日本","sweden":"瑞典","tunisia":"突尼斯","ivory coast":"科特迪瓦","cote d'ivoire":"科特迪瓦","ecuador":"厄瓜多尔","spain":"西班牙","cape verde":"佛得角","belgium":"比利时","egypt":"埃及","saudi arabia":"沙特","uruguay":"乌拉圭","iran":"伊朗","new zealand":"新西兰","france":"法国","senegal":"塞内加尔","iraq":"伊拉克","norway":"挪威","argentina":"阿根廷","algeria":"阿尔及利亚","austria":"奥地利","jordan":"约旦","portugal":"葡萄牙","dr congo":"刚果(金)","congo":"刚果(金)","uzbekistan":"乌兹别克斯坦","colombia":"哥伦比亚","england":"英格兰","croatia":"克罗地亚","ghana":"加纳","panama":"巴拿马"};
-var _pollTimer=null,_fastPollUntil=0;
+var _pollTimer=null,_fastPollUntil=0,_lastESPNMinute={};
 async function _pollESPN(){
   try{
     var resp=await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard');
@@ -1127,6 +1123,13 @@ async function _pollESPN(){
         if(mm.home===hcn&&mm.away===acn){dbId=mi+1;break;}
       }
       if(!dbId)continue;
+      // Halftime detection: period 1 + minute>=45 + minute frozen from previous poll → halftime
+      if(dbSt==='live'&&period===1&&min>=45){
+        var prevKey=_lastESPNMinute[dbId];
+        var curKey=period+':'+min;
+        if(prevKey===curKey){dbSt='halftime';}
+        _lastESPNMinute[dbId]=curKey;
+      }else{_lastESPNMinute[dbId]=period+':'+min;}
       var old=matchScores[dbId]||{};
       var oldHash=dbId+':'+(old.home_score||'')+'-'+(old.away_score||'')+':'+(old.status||'')+':'+(old.match_minute||'')+':'+(old.injury_time||'');
       var newHash=dbId+':'+hs+'-'+as+':'+dbSt+':'+min+':'+inj;
@@ -1218,12 +1221,12 @@ function renderMatchCard(m,idx){
   const liveMinute=ms?formatMatchMinute(ms.match_minute,ms.injury_time,resolvedStatus):'';
   const combinedStatus=liveMinute?`${statusBadge}<br>${liveMinute}`:statusBadge;
   const cardStatus=resolvedStatus==='live'||resolvedStatus==='halftime'?' live':'';
-  // Prediction sidebar tab — only if user has a prediction
-  let predSidebarHTML='';
-  if(existing&&!hasResult){
-    predSidebarHTML=`<div class="match-pred-tab" id="predTab-${matchDbId}" onclick="event.stopPropagation();togglePredSidebar(${matchDbId})" title="我的预测">预测</div><div class="match-pred-panel" id="predPanel-${matchDbId}"><button class="mpp-close" onclick="event.stopPropagation();togglePredSidebar(${matchDbId})">&times;</button><div class="mpp-label">我的预测</div><div class="mpp-score">${existing.home_score} : ${existing.away_score}</div><div class="mpp-teams">${m.home} vs ${m.away}</div></div>`;
+  // Your Prediction button — only for finished/live/halftime matches where user predicted
+  var predSidebarHTML='';
+  if(existing&&hasResult&&(resolvedStatus==='finished'||resolvedStatus==='live'||resolvedStatus==='halftime')){
+    predSidebarHTML='<div class="match-my-pred-wrap"><button class="match-my-pred-btn" id="predBtn-'+matchDbId+'" onclick="event.stopPropagation();togglePredPopup('+matchDbId+')" title="查看我的预测">📋 你的预测</button><div class="match-my-pred-popup" id="predPopup-'+matchDbId+'"><div class="mpp-label">你的预测</div><div class="mpp-score">'+existing.home_score+' : '+existing.away_score+'</div><div class="mpp-teams">'+m.home+' vs '+m.away+'</div></div></div>';
   }
-  return `<div class="match-card reveal${cardStatus}${resolvedStatus==='finished'?' finished':''}" id="mc-${matchDbId}"><div class="match-date"><strong>${m.date}</strong>${m.time} 北京时间</div><div class="match-info"><div class="match-teams">${hName}<span class="match-vs">VS</span>${aName}</div><div class="match-venue">${m.venue}${m.group?' · '+m.group+'组':''} · <span style="font-size:10px;color:var(--text-dim)">${stageLabel}</span></div></div><div class="match-actions">${predHTML}<button class="chat-card-btn" onclick="event.stopPropagation();openChatRoom(${matchDbId},'${m.home.replace(/'/g,"\\'")} vs ${m.away.replace(/'/g,"\\'")}')" title="进入聊天室">💬 聊</button><div style="font-size:10px;margin-top:2px;text-align:center">${combinedStatus}</div></div>${predSidebarHTML}</div>`;
+  return `<div class="match-card reveal${cardStatus}${resolvedStatus==='finished'?' finished':''}" id="mc-${matchDbId}"><div class="match-date"><strong>${m.date}</strong>${m.time} 北京时间</div><div class="match-info"><div class="match-teams">${hName}<span class="match-vs">VS</span>${aName}</div><div class="match-venue">${m.venue}${m.group?' · '+m.group+'组':''} · <span style="font-size:10px;color:var(--text-dim)">${stageLabel}</span></div></div><div class="match-actions" style="position:relative">${predHTML}<button class="chat-card-btn" onclick="event.stopPropagation();openChatRoom(${matchDbId},'${m.home.replace(/'/g,"\\'")} vs ${m.away.replace(/'/g,"\\'")}')" title="进入聊天室">💬 聊</button><div style="font-size:10px;margin-top:2px;text-align:center">${combinedStatus}</div></div>${predSidebarHTML}</div>`;
 	}
 	function formatMatchMinute(minute,injuryTime,status){
 	  if(status==='halftime')return '<span style="color:#f39c12">中场</span>';
@@ -1692,20 +1695,34 @@ function subscribeLiveChat(){
   if(liveChatChannel){sb.removeChannel(liveChatChannel);}
   liveChatChannel=sb.channel('live-chat-'+Date.now()).on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_messages',filter:'match_id=eq.0'},function(){loadLiveChatMessages();}).subscribe();
 }
-/* ═══ Match Card Prediction Sidebar ═══ */
-function togglePredSidebar(matchDbId){
-  var tab=document.getElementById('predTab-'+matchDbId);
-  var panel=document.getElementById('predPanel-'+matchDbId);
-  if(!tab||!panel)return;
-  var isOpen=panel.classList.contains('open');
+/* ═══ Match Card Prediction Popup ═══ */
+function togglePredPopup(matchDbId){
+  var btn=document.getElementById('predBtn-'+matchDbId);
+  var popup=document.getElementById('predPopup-'+matchDbId);
+  if(!btn||!popup)return;
+  // Close all other open popups first
+  document.querySelectorAll('.match-my-pred-popup.open').forEach(function(p){
+    if(p!==popup){p.classList.remove('open');}
+  });
+  document.querySelectorAll('.match-my-pred-btn.open').forEach(function(b){
+    if(b!==btn){b.classList.remove('open');}
+  });
+  var isOpen=popup.classList.contains('open');
   if(isOpen){
-    panel.classList.remove('open');
-    tab.classList.remove('open');
+    popup.classList.remove('open');
+    btn.classList.remove('open');
   }else{
-    panel.classList.add('open');
-    tab.classList.add('open');
+    popup.classList.add('open');
+    btn.classList.add('open');
   }
 }
+// Close popup when clicking outside
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.match-my-pred-wrap')){
+    document.querySelectorAll('.match-my-pred-popup.open').forEach(function(p){p.classList.remove('open');});
+    document.querySelectorAll('.match-my-pred-btn.open').forEach(function(b){b.classList.remove('open');});
+  }
+});
 async function loadChatMessages(){
   if(!SUPABASE_READY||!currentChatMatchId)return;
   try{
@@ -1779,8 +1796,9 @@ function init(){
   Promise.all([loadMatchScores(),checkSession()]).then(function(){
     renderPredictions();renderLeaderboard();observeReveals();
     setTimeout(function(){document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('visible');});},800);
-    _autoPoll(); // Start ESPN poller after initial load is stable
-  }).catch(function(){_autoPoll();});
+    _lastESPNHash=_scoresHash(); // Prevent first ESPN poll from triggering redundant re-render
+    _autoPoll();
+  }).catch(function(){_lastESPNHash=_scoresHash();_autoPoll();});
   setTimeout(()=>collapseAll(),100);
   updateCountdown();setInterval(updateCountdown,1000);
   document.body.classList.add('loaded');
