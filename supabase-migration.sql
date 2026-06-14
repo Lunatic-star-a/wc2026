@@ -133,7 +133,7 @@ begin
     where id = pred.user_id;
   end loop;
 end;
-$$ language plpgsql;
+$$ language plpgsql security definer;
 
 -- ── Auto-settlement trigger: when match finishes, calculate points ──
 create or replace function public.auto_settle()
