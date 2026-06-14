@@ -127,9 +127,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 .match-card.has-sidebar{padding-right:44px}
 /* Match Card — Your Prediction Sidebar (right edge, opens leftwards) */
 .match-pred-wrap{position:absolute;right:0;top:0;bottom:0;display:flex;align-items:center;z-index:2;pointer-events:none}
-.match-pred-tab{position:absolute;right:0;top:50%;transform:translateY(-50%);width:24px;height:52px;background:linear-gradient(135deg,rgba(212,168,67,0.18),rgba(212,168,67,0.04));border:1px solid rgba(212,168,67,0.3);border-radius:6px 0 0 6px;cursor:pointer;display:flex;align-items:center;justify-content:center;writing-mode:vertical-lr;font-size:10px;color:var(--gold);letter-spacing:2px;transition:all 0.3s ease;pointer-events:auto;user-select:none;z-index:3}
-.match-pred-tab:hover{background:rgba(212,168,67,0.2);border-color:rgba(212,168,67,0.5)}
-.match-pred-tab.open{background:rgba(212,168,67,0.25);border-color:var(--gold);color:var(--gold-bright);right:180px}
+.match-pred-tab{position:absolute;right:0;top:50%;transform:translateY(-50%);width:24px;height:52px;background:linear-gradient(135deg,rgba(212,168,67,0.18),rgba(212,168,67,0.04));border-radius:6px 0 0 6px;cursor:pointer;display:flex;align-items:center;justify-content:center;writing-mode:vertical-lr;font-size:10px;color:var(--gold);letter-spacing:2px;transition:all 0.3s ease;pointer-events:auto;user-select:none;z-index:3}
+.match-pred-tab:hover{background:rgba(212,168,67,0.2)}
+.match-pred-tab.open{background:rgba(212,168,67,0.25);color:var(--gold-bright);right:180px}
 .match-pred-panel{position:absolute;right:0;top:0;bottom:0;width:0;overflow:hidden;background:var(--slate);border:1px solid rgba(212,168,67,0.2);border-radius:var(--radius) 0 0 var(--radius);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;transition:width 0.3s ease;z-index:2;white-space:nowrap}
 .match-pred-panel.open{width:180px}
 .match-pred-panel .mpp-inner{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px;min-width:180px}
