@@ -376,6 +376,13 @@ end $$;
 alter table public.matches add column if not exists match_minute integer;
 alter table public.matches add column if not exists injury_time integer;
 
+-- ── Restore known finished match scores (safe re-run — only overwrites null scores) ──
+-- Update these if actual match results differ.
+update public.matches set home_score=1, away_score=1, status='finished', match_minute=90, injury_time=7
+  where id=3 and home_score is null;  -- Canada 1-1 Bosnia (June 13)
+update public.matches set home_score=4, away_score=1, status='finished', match_minute=90, injury_time=9
+  where id=4 and home_score is null;  -- USA 4-1 Paraguay (June 13)
+
 -- ── One-time recalculation: score all finished matches ──
 -- (Retroactively fixes matches that were INSERTed as finished before the INSERT trigger existed)
 do $$
