@@ -1090,21 +1090,25 @@ function updateNavUI(){
   else{bl.style.display='inline-block';bout.style.display='none';ne.style.display='none';}
 }
 async function checkSession(){if(!SUPABASE_READY)return;try{const{data}=await sb.auth.getSession();if(data?.session?.user){currentUser={id:data.session.user.id,username:data.session.user.user_metadata?.username||'User'};updateNavUI();await loadUserPredictions();}}catch(e){console.warn('Session check failed:',e.message);}}
-function resolveStatus(s,matchObj){
-  if(s.status==='live'||s.status==='halftime'||s.status==='finished')return s.status;
-  if(s.home_score==null)return s.status;
-  var ms=0;
-  if(matchObj){
-    if(matchObj.date&&matchObj.time&&typeof matchObj.date==='string'&&matchObj.date.includes('月')){
-      var parts=matchObj.date.split('月'),tp=matchObj.time.split(':');
-      ms=(new Date(2026,parseInt(parts[0])-1,parseInt(parts[1]),parseInt(tp[0]),parseInt(tp[1]))).getTime();
-    }else if(matchObj.match_date&&matchObj.match_time){
-      ms=(new Date(matchObj.match_date+'T'+matchObj.match_time+':00+08:00')).getTime();
-    }
+function getMatchTimestamp(matchObj){
+  if(!matchObj)return 0;
+  if(matchObj.date&&matchObj.time&&typeof matchObj.date==='string'&&matchObj.date.includes('月')){
+    var parts=matchObj.date.split('月'),tp=matchObj.time.split(':');
+    return (new Date(2026,parseInt(parts[0])-1,parseInt(parts[1]),parseInt(tp[0]),parseInt(tp[1]))).getTime();
+  }else if(matchObj.match_date&&matchObj.match_time){
+    return (new Date(matchObj.match_date+'T'+matchObj.match_time+':00+08:00')).getTime();
   }
-  if(!ms&&s.match_date&&s.match_time){ms=(new Date(s.match_date+'T'+s.match_time+':00+08:00')).getTime();}
+  return 0;
+}
+function resolveStatus(s,matchObj){
+  // If DB/ESPN explicitly gave a live/finished/halftime status, trust it
+  if(s&&(s.status==='live'||s.status==='halftime'||s.status==='finished'))return s.status;
+  // Time-based inference — works even without score data (e.g. ESPN hasn't picked up the match yet)
+  var ms=getMatchTimestamp(matchObj);
+  if(!ms&&s)ms=getMatchTimestamp(s);
   if(ms){var elapsed=(Date.now()-ms)/60000;if(elapsed>150)return 'finished';if(elapsed>0)return 'live';}
-  return s.status;
+  // No explicit status and match hasn't started — return stored status or null
+  return s?s.status:null;
 }
 var _lastScoresHash='';
 function _scoresHash(){var a=[];for(var i=1;i<=104;i++){var m=matchScores[i];if(m&&m.home_score!=null)a.push(i+':'+m.home_score+'-'+m.away_score+':'+m.status+':'+m.match_minute+':'+m.injury_time);}return a.join('|');}
@@ -1241,7 +1245,7 @@ function renderMatchCard(m,idx){
   const ms=matchScores[matchDbId];
   const hasResult=ms&&ms.home_score!=null&&ms.away_score!=null;
   const existing=userPredictions[matchDbId];
-  const resolvedStatus=ms?resolveStatus(ms,m):null;
+  const resolvedStatus=resolveStatus(ms||{},m);
   let predHTML,statusBadge='';
   if(resolvedStatus==='live'){statusBadge='<span class="match-live-badge" style="color:#0fa84a"><span class="live-dot-sm" style="background:#0fa84a"></span> 直播中</span>';}
   else if(resolvedStatus==='halftime'){statusBadge='<span class="match-live-badge"><span class="live-dot-sm"></span> 中场</span>';}
