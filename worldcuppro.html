@@ -804,7 +804,7 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
       <div class="section-header reveal"><div class="section-tag">Play & Win</div><h2>比赛预测</h2></div>
       <p class="predict-intro reveal">猜对胜负得<strong style="color:var(--gold)">1分</strong>，猜对比分得<strong style="color:var(--gold)">3分</strong>。<br>截止开赛前提交，看看谁是真正的预言家！<br><span style="color:var(--accent-red);font-size:12px;font-weight:600">⚠ 预测提交后无法修改</span></p>
       <div class="predict-cards" id="predictCards"><div style="text-align:center;padding:40px;color:var(--text-dim);grid-column:1/-1" id="predictLoginHint">请先<a href="#" onclick="openAuthModal();return false" style="color:var(--gold)">登录</a>以参与预测</div></div>
-      <div class="leaderboard reveal" id="leaderboard"><h3>🏆 预测排行</h3><div id="lbList"></div></div>
+      <div class="leaderboard reveal" id="leaderboard"><h3>🏆 预测排行 <button onclick="recalcPoints()" style="font-size:10px;background:none;border:1px solid rgba(255,255,255,0.15);color:var(--text-dim);padding:3px 10px;border-radius:100px;cursor:pointer;vertical-align:middle;font-family:var(--font-body)">🔄 重算积分</button></h3><div id="lbList"></div></div>
     </div>
   </section>
   <!-- ═══ 观赛指南暂不启用 ═══
@@ -1400,6 +1400,16 @@ async function renderLeaderboard(){
     if(!data||data.length===0){list.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim)">还没有预测数据，快来参与吧！</div>';return;}
     list.innerHTML=data.map((p,i)=>{var rc='';if(i===0)rc='gold';else if(i===1)rc='silver';else if(i===2)rc='bronze';return'<div class=\"lb-row reveal visible\"><span class=\"lb-rank '+rc+'\">'+(p.rank||i+1)+'</span><span class=\"lb-name\">'+(p.username||'')+'</span><span class=\"lb-meta\">'+(p.predictions_count||0)+'次预测</span><span class=\"lb-points\">'+(p.points||0)+' pts</span></div>';}).join('');
   }catch(err){console.error('Leaderboard error:',err);list.innerHTML='<div style=\"text-align:center;padding:40px;color:var(--text-dim)\">排行榜加载失败</div>';}
+}
+async function recalcPoints(){
+  if(!SUPABASE_READY){showToast('需要联网','error');return;}
+  showToast('正在重算积分...','success');
+  try{
+    const{data:matches}=await sb.from('matches').select('id').eq('status','finished').not('home_score','is',null);
+    if(matches){for(var i=0;i<matches.length;i++){await sb.rpc('calculate_prediction_points',{p_match_id:matches[i].id});}}
+    await renderLeaderboard();
+    showToast('积分重算完成！','success');
+  }catch(e){console.error('Recalc error:',e);showToast('重算失败: '+e.message,'error');}
 }
 
 /* ═══ TEAM PAGE (renders in modal overlay — no popups) ═══ */

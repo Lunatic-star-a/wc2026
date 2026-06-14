@@ -151,6 +151,22 @@ create trigger trg_auto_settle
   after update on public.matches
   for each row execute function public.auto_settle();
 
+-- ── Auto-settle on INSERT (for seed data with finished status) ──
+create or replace function public.auto_settle_insert()
+returns trigger as $$
+begin
+  if new.status = 'finished' then
+    perform public.calculate_prediction_points(new.id);
+  end if;
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists trg_auto_settle_insert on public.matches;
+create trigger trg_auto_settle_insert
+  after insert on public.matches
+  for each row execute function public.auto_settle_insert();
+
 -- ── Leaderboard View ──
 create or replace view public.leaderboard as
 select
@@ -355,3 +371,15 @@ end $$;
 -- ── v6.5: Add live match tracking columns (run on existing databases) ──
 alter table public.matches add column if not exists match_minute integer;
 alter table public.matches add column if not exists injury_time integer;
+
+-- ── One-time recalculation: score all finished matches ──
+-- (Retroactively fixes matches that were INSERTed as finished before the INSERT trigger existed)
+do $$
+declare
+  mid bigint;
+begin
+  for mid in select id from public.matches where status = 'finished' and home_score is not null
+  loop
+    perform public.calculate_prediction_points(mid);
+  end loop;
+end $$;
