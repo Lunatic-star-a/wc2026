@@ -1142,9 +1142,6 @@ async function _pollESPN(){
         if(mm.home===hcn&&mm.away===acn){dbId=mi+1;break;}
       }
       if(!dbId)continue;
-      // Never downgrade a finished match — DB is authoritative after full-time
-      var old=matchScores[dbId]||{};
-      if(old.status==='finished')continue;
       // Halftime detection: period 1 + minute>=45 + minute frozen from previous poll → halftime
       if(dbSt==='live'&&period===1&&min>=45){
         var prevKey=_lastESPNMinute[dbId];
@@ -1152,6 +1149,7 @@ async function _pollESPN(){
         if(prevKey===curKey){dbSt='halftime';}
         _lastESPNMinute[dbId]=curKey;
       }else{_lastESPNMinute[dbId]=period+':'+min;}
+      var old=matchScores[dbId]||{};
       var oldHash=dbId+':'+(old.home_score||'')+'-'+(old.away_score||'')+':'+(old.status||'')+':'+(old.match_minute||'')+':'+(old.injury_time||'');
       var newHash=dbId+':'+hs+'-'+as+':'+dbSt+':'+min+':'+inj;
       if(oldHash===newHash)continue;
@@ -1179,7 +1177,7 @@ async function loadMatchScores(){
   if(!SUPABASE_READY)return;
   try{
     const{data:scores}=await sb.from('matches').select('id,home_score,away_score,status,match_minute,injury_time,match_date,match_time');
-    if(scores){scores.forEach(s=>{if(s.home_score!==null){var old=matchScores[s.id];var id=s.id-1;var mo=ALL_MATCHES[id]||null;var st=resolveStatus(s,mo);if(s.status==='finished')st='finished';if(old&&(old.status==='live'||old.status==='finished'||old.status==='halftime')&&st==='upcoming')st=old.status;matchScores[s.id]={home_score:s.home_score,away_score:s.away_score,status:st,match_minute:s.match_minute||(old?old.match_minute:0),injury_time:s.injury_time||(old?old.injury_time:0)};}});
+    if(scores){scores.forEach(s=>{if(s.home_score!==null){var old=matchScores[s.id];matchScores[s.id]={home_score:s.home_score,away_score:s.away_score,status:s.status||'upcoming',match_minute:s.match_minute||(old?old.match_minute:0),injury_time:s.injury_time||(old?old.injury_time:0)};}});
       var h=_scoresHash();
       if(h!==_lastScoresHash){renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');renderGroupsWithStandings();renderThirdPlace();renderLiveScores();observeReveals();_lastScoresHash=h;}
     }
