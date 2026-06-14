@@ -127,9 +127,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 .match-card.has-sidebar{padding-right:44px}
 /* Match Card — Your Prediction Sidebar (right edge, opens leftwards) */
 .match-pred-wrap{position:absolute;right:0;top:0;bottom:0;display:flex;align-items:center;z-index:2;pointer-events:none}
-.match-pred-tab{position:absolute;right:0;top:50%;transform:translateY(-50%);width:24px;height:52px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;writing-mode:vertical-lr;font-size:10px;color:var(--gold);letter-spacing:2px;transition:all 0.3s ease;pointer-events:auto;user-select:none;z-index:3}
-.match-pred-tab:hover{background:rgba(212,168,67,0.12)}
-.match-pred-tab.open{background:rgba(212,168,67,0.25);color:var(--gold-bright);right:180px}
+.match-pred-tab{position:absolute;right:0;top:50%;transform:translateY(-50%);width:24px;height:52px;background:linear-gradient(135deg,rgba(212,168,67,0.1),rgba(212,168,67,0.02));border:1px solid rgba(212,168,67,0.2);border-radius:4px 0 0 4px;cursor:pointer;display:flex;align-items:center;justify-content:center;writing-mode:vertical-lr;font-size:10px;color:var(--gold);letter-spacing:2px;transition:all 0.3s ease;pointer-events:auto;user-select:none;z-index:3}
+.match-pred-tab:hover{background:rgba(212,168,67,0.18);border-color:rgba(212,168,67,0.4)}
+.match-pred-tab.open{background:rgba(212,168,67,0.25);border-color:var(--gold);color:var(--gold-bright);right:180px}
 .match-pred-panel{position:absolute;right:0;top:0;bottom:0;width:0;overflow:hidden;background:var(--slate);border:1px solid rgba(212,168,67,0.2);border-radius:var(--radius) 0 0 var(--radius);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;transition:width 0.3s ease;z-index:2;white-space:nowrap}
 .match-pred-panel.open{width:180px}
 .match-pred-panel .mpp-inner{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px;min-width:180px}
@@ -1112,7 +1112,7 @@ var _lastScoresHash='';
 function _scoresHash(){var a=[];for(var i=1;i<=104;i++){var m=matchScores[i];if(m&&m.home_score!=null)a.push(i+':'+m.home_score+'-'+m.away_score+':'+m.status+':'+m.match_minute+':'+m.injury_time);}return a.join('|');}
 /* ═══ ESPN LIVE POLLER (browser fetches scores directly — no GitHub latency) ═══ */
 var ESPN_TEAM_CN={"mexico":"墨西哥","south africa":"南非","south korea":"韩国","czechia":"捷克","czech republic":"捷克","canada":"加拿大","bosnia and herzegovina":"波黑","bosnia":"波黑","united states":"美国","usa":"美国","paraguay":"巴拉圭","qatar":"卡塔尔","switzerland":"瑞士","brazil":"巴西","morocco":"摩洛哥","haiti":"海地","scotland":"苏格兰","australia":"澳大利亚","turkey":"土耳其","türkiye":"土耳其","germany":"德国","curacao":"库拉索","curaçao":"库拉索","netherlands":"荷兰","japan":"日本","sweden":"瑞典","tunisia":"突尼斯","ivory coast":"科特迪瓦","cote d'ivoire":"科特迪瓦","ecuador":"厄瓜多尔","spain":"西班牙","cape verde":"佛得角","belgium":"比利时","egypt":"埃及","saudi arabia":"沙特","uruguay":"乌拉圭","iran":"伊朗","new zealand":"新西兰","france":"法国","senegal":"塞内加尔","iraq":"伊拉克","norway":"挪威","argentina":"阿根廷","algeria":"阿尔及利亚","austria":"奥地利","jordan":"约旦","portugal":"葡萄牙","dr congo":"刚果(金)","congo":"刚果(金)","uzbekistan":"乌兹别克斯坦","colombia":"哥伦比亚","england":"英格兰","croatia":"克罗地亚","ghana":"加纳","panama":"巴拿马"};
-var _pollTimer=null,_fastPollUntil=0,_lastESPNMinute={};
+var _pollTimer=null,_fastPollUntil=0,_lastESPNMinute={},_lastPollDone=0;
 async function _pollESPN(){
   try{
     var today=Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai'}).format(new Date()).replace(/-/g,'');
@@ -1148,13 +1148,13 @@ async function _pollESPN(){
       // Never downgrade a finished match — DB is authoritative after full-time
       var old=matchScores[dbId]||{};
       if(old.status==='finished')continue;
-      // Halftime detection: period 1 + minute>=45 + minute frozen from previous poll → halftime
+      // Halftime detection: period 1 + minute>=45 + clock unchanged from previous poll → halftime
       if(dbSt==='live'&&period===1&&min>=45){
         var prevKey=_lastESPNMinute[dbId];
-        var curKey=period+':'+min;
+        var curKey=period+':'+min+':'+inj;
         if(prevKey===curKey){dbSt='halftime';}
         _lastESPNMinute[dbId]=curKey;
-      }else{_lastESPNMinute[dbId]=period+':'+min;}
+      }else{_lastESPNMinute[dbId]=period+':'+min+':'+inj;}
       var oldHash=dbId+':'+(old.home_score||'')+'-'+(old.away_score||'')+':'+(old.status||'')+':'+(old.match_minute||'')+':'+(old.injury_time||'');
       var newHash=dbId+':'+hs+'-'+as+':'+dbSt+':'+min+':'+inj;
       if(oldHash===newHash)continue;
@@ -1172,6 +1172,7 @@ async function _pollESPN(){
     }
     if(hasLive)_fastPollUntil=Date.now()+900000;
   }catch(e){/* silent fallback to Supabase poller */}
+  _lastPollDone=Date.now();
 }
 function _autoPoll(){
   _pollESPN();
@@ -1480,20 +1481,22 @@ function updateCountdown(){const start=new Date('2026-06-11T15:00:00-04:00');con
 /* ═══ REALTIME ═══ */
 function setupRealtimeSubscriptions(){
   if(!SUPABASE_READY)return;
-  var _suppressRender=0;
+  var _rtDebounce=0;
   const onMatchChange=(payload)=>{
+    if(Date.now()-_lastPollDone<3000)return;
     if(payload.new&&payload.new.home_score!=null){
       var old=matchScores[payload.new.id];
-      // Skip if data identical to what we already have (prevents self-triggered double render)
       if(old&&old.home_score===payload.new.home_score&&old.away_score===payload.new.away_score&&old.status===payload.new.status&&old.match_minute===payload.new.match_minute&&old.injury_time===payload.new.injury_time)return;
       matchScores[payload.new.id]={home_score:payload.new.home_score,away_score:payload.new.away_score,status:payload.new.status,match_minute:payload.new.match_minute,injury_time:payload.new.injury_time};
     }
-    if(_suppressRender>0)return;
-    renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');
-    renderGroupsWithStandings();
-    renderLiveScores();
-    renderLeaderboard();
-    observeReveals();
+    if(_rtDebounce)clearTimeout(_rtDebounce);
+    _rtDebounce=setTimeout(function(){
+      renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');
+      renderGroupsWithStandings();
+      renderLiveScores();
+      renderLeaderboard();
+      observeReveals();
+    },300);
   };
   sb.channel('match-updates').on('postgres_changes',{event:'UPDATE',schema:'public',table:'matches'},onMatchChange).on('postgres_changes',{event:'INSERT',schema:'public',table:'matches'},onMatchChange).subscribe();
   sb.channel('leaderboard-updates').on('postgres_changes',{event:'UPDATE',schema:'public',table:'profiles'},()=>{renderLeaderboard();}).on('postgres_changes',{event:'INSERT',schema:'public',table:'profiles'},()=>{renderLeaderboard();}).subscribe();
