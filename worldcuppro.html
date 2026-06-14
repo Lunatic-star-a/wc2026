@@ -116,6 +116,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 .match-live-badge{font-size:10px;color:var(--accent-red);margin-left:6px;animation:livePulse 1.5s ease infinite;display:inline-flex;align-items:center;gap:3px}
 .live-dot-sm{width:6px;height:6px;border-radius:50%;background:var(--accent-red);display:inline-block}
 .match-finished-badge{font-size:10px;color:var(--text-dim);margin-left:6px}
+.match-status-row{white-space:nowrap;font-size:10px;margin-top:2px;text-align:center}
 .match-result-score{font-family:var(--font-mono);font-size:13px;font-weight:700;color:#fff;letter-spacing:1px;background:rgba(255,255,255,0.06);padding:2px 6px;border-radius:5px}
 @keyframes predSuccess{0%{transform:scale(1)}50%{transform:scale(1.2);background:var(--gold);color:#000}100%{transform:scale(1);background:var(--pitch);color:#fff}}
 .pred-inline-btn.saved{animation:predSuccess 0.5s ease;background:var(--pitch);color:#fff;border-color:var(--pitch)}
@@ -123,18 +124,19 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 @keyframes goalFlash{0%,100%{box-shadow:0 0 0 0 rgba(13,140,60,0.4)}50%{box-shadow:0 0 0 8px rgba(13,140,60,0)}}
 .watch-link{font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:var(--pitch-bright);text-decoration:none;padding:3px 10px;border:1px solid rgba(13,140,60,0.3);border-radius:100px;transition:all 0.2s;text-transform:uppercase;white-space:nowrap;}
 .watch-link:hover{background:rgba(13,140,60,0.2);}
+.match-card.has-sidebar{padding-right:44px}
 /* Match Card — Your Prediction Sidebar (right edge, opens leftwards) */
 .match-pred-wrap{position:absolute;right:0;top:0;bottom:0;display:flex;align-items:center;z-index:2;pointer-events:none}
-.match-pred-tab{width:24px;height:52px;background:linear-gradient(135deg,rgba(212,168,67,0.18),rgba(212,168,67,0.04));border:1px solid rgba(212,168,67,0.3);border-radius:6px 0 0 6px;cursor:pointer;display:flex;align-items:center;justify-content:center;writing-mode:vertical-lr;font-size:10px;color:var(--gold);letter-spacing:2px;transition:background 0.25s,border-color 0.25s;pointer-events:auto;user-select:none}
+.match-pred-tab{width:24px;height:52px;background:linear-gradient(135deg,rgba(212,168,67,0.18),rgba(212,168,67,0.04));border:1px solid rgba(212,168,67,0.3);border-radius:6px 0 0 6px;cursor:pointer;display:flex;align-items:center;justify-content:center;writing-mode:vertical-lr;font-size:10px;color:var(--gold);letter-spacing:2px;transition:all 0.25s;pointer-events:auto;user-select:none}
 .match-pred-tab:hover{background:rgba(212,168,67,0.2);border-color:rgba(212,168,67,0.5)}
-.match-pred-tab.open{background:rgba(212,168,67,0.25);border-color:var(--gold);color:var(--gold-bright)}
+.match-pred-tab.open{background:rgba(212,168,67,0.25);border-color:var(--gold);color:var(--gold-bright);writing-mode:horizontal-tb;width:auto;height:52px;padding:0 8px;font-size:11px;letter-spacing:1px}
 .match-pred-panel{position:absolute;right:0;top:0;bottom:0;width:0;overflow:hidden;background:var(--slate);border:1px solid rgba(212,168,67,0.2);border-radius:var(--radius) 0 0 var(--radius);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;transition:width 0.3s ease;z-index:1;white-space:nowrap}
 .match-pred-panel.open{width:180px}
 .match-pred-panel .mpp-inner{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px;min-width:180px}
 .match-pred-panel .mpp-label{font-size:10px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase}
 .match-pred-panel .mpp-score{font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--gold);letter-spacing:2px}
 .match-pred-panel .mpp-teams{font-size:10px;color:var(--text-dim);text-align:center;line-height:1.4}
-.match-pred-panel .mpp-close{position:absolute;top:6px;right:8px;background:none;border:none;color:var(--text-dim);font-size:14px;cursor:pointer;line-height:1}
+.match-pred-panel .mpp-close{position:absolute;top:6px;left:6px;background:none;border:none;color:var(--text-dim);font-size:14px;cursor:pointer;line-height:1}
 .match-pred-panel .mpp-close:hover{color:#fff}
 .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#e74c3c;margin-right:4px;animation:livePulse 1s ease-in-out infinite;}
 /* Search */
@@ -513,10 +515,12 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   .pred-inline-input{width:22px;height:22px;font-size:11px}
   .pred-inline-btn{font-size:9px;padding:3px 7px}
   .chat-card-btn{font-size:9px;padding:3px 7px}
+  .match-card.has-sidebar{padding-right:38px}
   .match-pred-panel.open{width:140px}
   .match-pred-panel .mpp-inner{min-width:140px}
   .match-pred-panel .mpp-score{font-size:18px}
   .match-pred-tab{width:20px;height:40px;font-size:9px}
+  .match-pred-tab.open{font-size:10px;padding:0 6px}
   .day-header{padding:12px 14px}
   .day-header-text{font-size:16px}
   .day-header-meta{font-size:11px}
@@ -652,9 +656,11 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   .bracket-match-inner{padding:3px}
   .bracket-team-row input[type=text]{font-size:8px;min-width:35px}
   .bracket-score-input{width:14px;height:14px;font-size:7px}
+  .match-card.has-sidebar{padding-right:34px}
   .match-pred-panel.open{width:130px}
   .match-pred-panel .mpp-inner{min-width:130px}
   .match-pred-panel .mpp-score{font-size:16px}
+  .match-pred-tab.open{font-size:9px}
   /* Toast */
   .toast-container{top:60px}
   .toast{font-size:11px;padding:8px 14px}
@@ -798,7 +804,7 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   <section class="predict-section" id="predict">
     <div class="container">
       <div class="section-header reveal"><div class="section-tag">Play & Win</div><h2>比赛预测</h2></div>
-      <p class="predict-intro reveal">猜对胜负得<strong style="color:var(--gold)">1分</strong>，猜对比分得<strong style="color:var(--gold)">3分</strong>。截止开赛前提交。<span style="color:var(--accent-red);font-size:12px;font-weight:600">⚠ 预测提交后无法修改</span> 看看谁是真正的预言家！</p>
+      <p class="predict-intro reveal">猜对胜负得<strong style="color:var(--gold)">1分</strong>，猜对比分得<strong style="color:var(--gold)">3分</strong>。<br>截止开赛前提交，看看谁是真正的预言家！<br><span style="color:var(--accent-red);font-size:12px;font-weight:600">⚠ 预测提交后无法修改</span></p>
       <div class="predict-cards" id="predictCards"><div style="text-align:center;padding:40px;color:var(--text-dim);grid-column:1/-1" id="predictLoginHint">请先<a href="#" onclick="openAuthModal();return false" style="color:var(--gold)">登录</a>以参与预测</div></div>
       <div class="leaderboard reveal" id="leaderboard"><h3>🏆 预测排行</h3><div id="lbList"></div></div>
     </div>
@@ -1227,14 +1233,15 @@ function renderMatchCard(m,idx){
   else if(existing){predHTML=`<div class="match-pred-inline locked"><span class="pred-inline-score">${existing.home_score}</span><span class="pred-inline-vs">:</span><span class="pred-inline-score">${existing.away_score}</span><span class="pred-locked-badge">✓</span></div>`;}
   else{predHTML=`<div class="match-pred-inline"><input class="pred-inline-input" placeholder="-" maxlength="2" id="schH_${matchDbId}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onclick="event.stopPropagation()"><span class="pred-inline-vs">:</span><input class="pred-inline-input" placeholder="-" maxlength="2" id="schA_${matchDbId}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onclick="event.stopPropagation()"><button class="pred-inline-btn" onclick="event.stopPropagation();submitPrediction(${matchDbId},'${m.home.replace(/'/g,"\\'")}','${m.away.replace(/'/g,"\\'")}','sch')" title="快速预测">猜</button></div>`;}
   const liveMinute=ms?formatMatchMinute(ms.match_minute,ms.injury_time,resolvedStatus):'';
-  const combinedStatus=liveMinute?`${statusBadge}<br>${liveMinute}`:statusBadge;
+  const combinedStatus=liveMinute?`${statusBadge} ${liveMinute}`:statusBadge;
   const cardStatus=resolvedStatus==='live'||resolvedStatus==='halftime'?' live':'';
   // Your Prediction sidebar — only for finished/live/halftime matches where user predicted
-  var predSidebarHTML='';
+  var predSidebarHTML='',hasSidebar='';
   if(existing&&hasResult&&(resolvedStatus==='finished'||resolvedStatus==='live'||resolvedStatus==='halftime')){
+    hasSidebar=' has-sidebar';
     predSidebarHTML='<div class="match-pred-wrap"><div class="match-pred-panel" id="predPanel-'+matchDbId+'"><div class="mpp-inner"><button class="mpp-close" onclick="event.stopPropagation();togglePredSide('+matchDbId+')">&times;</button><div class="mpp-label">你的预测</div><div class="mpp-score">'+existing.home_score+' : '+existing.away_score+'</div><div class="mpp-teams">'+m.home+' vs '+m.away+'</div></div></div><div class="match-pred-tab" id="predTab-'+matchDbId+'" onclick="event.stopPropagation();togglePredSide('+matchDbId+')" title="查看我的预测">你的预测</div></div>';
   }
-  return `<div class="match-card reveal${cardStatus}${resolvedStatus==='finished'?' finished':''}" id="mc-${matchDbId}"><div class="match-date"><strong>${m.date}</strong>${m.time} 北京时间</div><div class="match-info"><div class="match-teams">${hName}<span class="match-vs">VS</span>${aName}</div><div class="match-venue">${m.venue}${m.group?' · '+m.group+'组':''} · <span style="font-size:10px;color:var(--text-dim)">${stageLabel}</span></div></div><div class="match-actions">${predHTML}<button class="chat-card-btn" onclick="event.stopPropagation();openChatRoom(${matchDbId},'${m.home.replace(/'/g,"\\'")} vs ${m.away.replace(/'/g,"\\'")}')" title="进入聊天室">💬 聊</button><div style="font-size:10px;margin-top:2px;text-align:center">${combinedStatus}</div></div>${predSidebarHTML}</div>`;
+  return `<div class="match-card reveal${cardStatus}${resolvedStatus==='finished'?' finished':''}${hasSidebar}" id="mc-${matchDbId}"><div class="match-date"><strong>${m.date}</strong>${m.time} 北京时间</div><div class="match-info"><div class="match-teams">${hName}<span class="match-vs">VS</span>${aName}</div><div class="match-venue">${m.venue}${m.group?' · '+m.group+'组':''} · <span style="font-size:10px;color:var(--text-dim)">${stageLabel}</span></div></div><div class="match-actions">${predHTML}<button class="chat-card-btn" onclick="event.stopPropagation();openChatRoom(${matchDbId},'${m.home.replace(/'/g,"\\'")} vs ${m.away.replace(/'/g,"\\'")}')" title="进入聊天室">💬 聊</button><div class="match-status-row">${combinedStatus}</div></div>${predSidebarHTML}</div>`;
 	}
 	function formatMatchMinute(minute,injuryTime,status){
 	  if(status==='halftime')return '<span style="color:#f39c12">中场</span>';
@@ -1726,9 +1733,11 @@ function togglePredSide(matchDbId){
   if(isOpen){
     panel.classList.remove('open');
     tab.classList.remove('open');
+    tab.textContent='你的预测';
   }else{
     panel.classList.add('open');
     tab.classList.add('open');
+    tab.textContent='✕ 收起';
   }
 }
 async function loadChatMessages(){
