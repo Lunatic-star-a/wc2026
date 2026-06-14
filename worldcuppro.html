@@ -1101,14 +1101,12 @@ function getMatchTimestamp(matchObj){
   return 0;
 }
 function resolveStatus(s,matchObj){
-  // If DB/ESPN explicitly gave a live/finished/halftime status, trust it
-  if(s&&(s.status==='live'||s.status==='halftime'||s.status==='finished'))return s.status;
-  // Time-based inference — works even without score data (e.g. ESPN hasn't picked up the match yet)
+  if(s.status==='live'||s.status==='halftime'||s.status==='finished')return s.status;
+  if(s.home_score==null)return s.status;
   var ms=getMatchTimestamp(matchObj);
-  if(!ms&&s)ms=getMatchTimestamp(s);
+  if(!ms&&s.match_date&&s.match_time)ms=getMatchTimestamp(s);
   if(ms){var elapsed=(Date.now()-ms)/60000;if(elapsed>150)return 'finished';if(elapsed>0)return 'live';}
-  // No explicit status and match hasn't started — return stored status or null
-  return s?s.status:null;
+  return s.status;
 }
 var _lastScoresHash='';
 function _scoresHash(){var a=[];for(var i=1;i<=104;i++){var m=matchScores[i];if(m&&m.home_score!=null)a.push(i+':'+m.home_score+'-'+m.away_score+':'+m.status+':'+m.match_minute+':'+m.injury_time);}return a.join('|');}
@@ -1245,7 +1243,7 @@ function renderMatchCard(m,idx){
   const ms=matchScores[matchDbId];
   const hasResult=ms&&ms.home_score!=null&&ms.away_score!=null;
   const existing=userPredictions[matchDbId];
-  const resolvedStatus=resolveStatus(ms||{},m);
+  const resolvedStatus=ms?resolveStatus(ms,m):null;
   let predHTML,statusBadge='';
   if(resolvedStatus==='live'){statusBadge='<span class="match-live-badge" style="color:#0fa84a"><span class="live-dot-sm" style="background:#0fa84a"></span> 直播中</span>';}
   else if(resolvedStatus==='halftime'){statusBadge='<span class="match-live-badge"><span class="live-dot-sm"></span> 中场</span>';}
