@@ -1274,23 +1274,26 @@ function renderGroups(){
 
 /* ═══ RENDER: Schedule (collapsible by date) ═══ */
 function renderMatches(filter){
-  // Snapshot currently open days to preserve state on re-render
+  // Snapshot open days to preserve state across re-renders
   var savedOpen=new Set();
-  document.querySelectorAll('.day-matches.open').forEach(function(dm){savedOpen.add(dm.id);});
-  var list=document.getElementById('matchList');
-  var filtered=ALL_MATCHES;
-  if(filter&&filter!=='all'){filtered=ALL_MATCHES.filter(function(m){return m.stage===filter;});}
+  var openEls=document.querySelectorAll('.day-matches.open');
+  for(var oi=0;oi<openEls.length;oi++)savedOpen.add(openEls[oi].id);
+  var filtered=(filter&&filter!=='all')?ALL_MATCHES.filter(function(m){return m.stage===filter;}):ALL_MATCHES;
   var days={};filtered.forEach(function(m,i){if(!days[m.date])days[m.date]=[];days[m.date].push({m:m,idx:ALL_MATCHES.indexOf(m)});});
   var todayKey=findTodayKey();
-  list.innerHTML=Object.entries(days).map(function(entry){
-    var date=entry[0],entries=entry[1];
+  var list=document.getElementById('matchList');
+  list.innerHTML=Object.entries(days).map(function(e){
+    var date=e[0],entries=e[1];
     var isToday=todayKey&&date===todayKey;
     var dayId='day-'+date.replace(/[月日]/g,'-');
-    var wasOpen=savedOpen.has(dayId)||(isToday&&!allDatesExpanded);
-    return '<div class=\"schedule-day reveal\"><div class=\"day-header\" onclick=\"toggleDay(\''+dayId+'\')\"><span class=\"day-header-text\">📅 '+date+' '+(isToday?'<span style=\"color:var(--gold);font-size:12px;\">(今天)</span>':'')+'</span><span class=\"day-header-meta\">'+entries.length+'场比赛</span><span class=\"day-arrow'+(wasOpen?' open':'')+'\" id=\"arrow-'+dayId+'\">▼</span></div><div class=\"day-matches'+(wasOpen?' open':'')+'\" id=\"'+dayId+'\">'+entries.map(function(e){return renderMatchCard(e.m,e.idx);}).join('')+'</div></div>';
+    var wasOpen;
+    if(allDatesExpanded){wasOpen=true;}
+    else if(savedOpen.has(dayId)){wasOpen=true;}
+    else{wasOpen=isToday;}
+    return'<div class="schedule-day reveal"><div class="day-header" onclick="toggleDay(\''+dayId+'\')"><span class="day-header-text">📅 '+date+' '+(isToday?'<span style="color:var(--gold);font-size:12px;">(今天)</span>':'')+'</span><span class="day-header-meta">'+entries.length+'场比赛</span><span class="day-arrow'+(wasOpen?' open':'')+'" id="arrow-'+dayId+'">▼</span></div><div class="day-matches'+(wasOpen?' open':'')+'" id="'+dayId+'">'+entries.map(function(em){return renderMatchCard(em.m,em.idx);}).join('')+'</div></div>';
   }).join('');
-  if(filtered.length===0)list.innerHTML='<div style=\"text-align:center;padding:40px;color:var(--text-dim)\">暂无比赛数据</div>';
-  if(!allDatesExpanded&&(!filter||filter==='all'))showOnlyToday(true);
+  if(filtered.length===0)list.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim)">暂无比赛数据</div>';
+  if(!allDatesExpanded)showOnlyToday(true);
 }
 function renderMatchCard(m,idx){
   const stageLabel={group:'小组赛',r32:'1/16决赛',r16:'1/8决赛',qf:'1/4决赛',sf:'半决赛','3rd':'季军赛',final:'🏆决赛'}[m.stage]||m.stage;
@@ -1349,22 +1352,17 @@ function collapseAll(){showOnlyToday(true);allDatesExpanded=false;const btn=docu
 function scrollToToday(){
   var todayKey=findTodayKey();
   if(!todayKey){showToast('今天没有比赛');return;}
-  // Reset filter to first stage, show all stages
-  document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
-  var firstBtn=document.querySelector('.filter-btn');if(firstBtn)firstBtn.classList.add('active');
   allDatesExpanded=false;
   var btn=document.getElementById('toggleAllBtn');if(btn)btn.textContent='展开全部';
-  renderMatches(firstBtn?firstBtn.dataset.filter:'group');
-  // After render, show today expanded and scroll to it
+  renderMatches('all');
   setTimeout(function(){
-    showOnlyToday(true);
     var dayId='day-'+todayKey.replace(/[月日]/g,'-');
     var el=document.getElementById(dayId);
     if(el){el.parentElement.scrollIntoView({behavior:'smooth',block:'center'});}
   },100);
 }
 function buildJumpMenu(){const sel=document.querySelector('.jump-select');if(!sel)return;const dates=[...new Set(ALL_MATCHES.map(m=>m.date))];const ga=sel.querySelector('optgroup[label="🏟 小组赛"]');const ka=sel.querySelector('optgroup[label="🏆 淘汰赛"]');dates.forEach(d=>{const ms=ALL_MATCHES.filter(m=>m.date===d);const isGrp=ms[0]&&ms[0].stage==='group';const opt=document.createElement('option');opt.value=d;opt.textContent=d+' ('+ms.length+'场)'; (isGrp?ga:ka).appendChild(opt);});}
-function jumpToDate(d){if(!d)return;var dayId='day-'+d.replace(/[月日]/g,'-');document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});var firstBtn=document.querySelector('.filter-btn');if(firstBtn)firstBtn.classList.add('active');allDatesExpanded=false;var btn=document.getElementById('toggleAllBtn');if(btn)btn.textContent='展开全部';renderMatches(firstBtn?firstBtn.dataset.filter:'group');setTimeout(function(){showAllDates();var el=document.getElementById(dayId);if(el){el.parentElement.style.display='';var dm=el.parentElement.querySelector('.day-matches');if(dm)dm.classList.add('open');var a=document.getElementById('arrow-'+dayId);if(a)a.classList.add('open');el.parentElement.scrollIntoView({behavior:'smooth',block:'center'});}},100);}
+function jumpToDate(d){if(!d)return;var dayId='day-'+d.replace(/[月日]/g,'-');allDatesExpanded=false;var btn=document.getElementById('toggleAllBtn');if(btn)btn.textContent='展开全部';renderMatches('all');setTimeout(function(){showAllDates();var el=document.getElementById(dayId);if(el){el.parentElement.style.display='';var dm=el.parentElement.querySelector('.day-matches');if(dm)dm.classList.add('open');var a=document.getElementById('arrow-'+dayId);if(a)a.classList.add('open');el.parentElement.scrollIntoView({behavior:'smooth',block:'center'});}},100);}
 function renderThirdPlace(){
   const tbody=document.getElementById('thirdPlaceTbody');
   const standings=calculateGroupStandings();
@@ -1935,19 +1933,20 @@ async function renderLiveScores(){
 function init(){
   getSearchIdx();
   renderGroupsWithStandings();renderThirdPlace();renderMatches();collapseAll();renderBracket();renderPredictions();renderLeaderboard();renderLiveScores();
+  _lastScoresHash=_scoresHash(); // Lock initial hash so loadMatchScores won't duplicate renderMatches
   buildJumpMenu();
   createParticles();observeReveals();setupFilters();setupSmoothScroll();setupKeyboard();setupRealtimeSubscriptions();
   initEmojiBar();loadPublicChat();subscribePublicChat();
   seedMatchesIfNeeded();
   Promise.all([loadMatchScores(),checkSession()]).then(function(){
     patchFinishedScores();
-    renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');
+    var h2=_scoresHash();
+    if(h2!==_lastScoresHash){_lastScoresHash=h2;renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');}
     renderPredictions();renderLeaderboard();observeReveals();
     setTimeout(function(){document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('visible');});},800);
     _lastESPNHash=_scoresHash(); // Prevent first ESPN poll from triggering redundant re-render
     _autoPoll();
   }).catch(function(){_lastESPNHash=_scoresHash();_autoPoll();});
-  setTimeout(()=>collapseAll(),100);
   updateCountdown();setInterval(updateCountdown,1000);
   document.body.classList.add('loaded');
 }
