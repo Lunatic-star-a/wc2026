@@ -67,7 +67,7 @@ create table if not exists public.chat_messages (
   message     text not null,
   created_at  timestamptz default now() not null
 );
-create index idx_chat_match on public.chat_messages(match_id);
+create index if not exists idx_chat_match on public.chat_messages(match_id);
 
 -- ── Predictions ──
 create table if not exists public.predictions (
@@ -82,12 +82,12 @@ create table if not exists public.predictions (
 );
 
 -- ── Indexes ──
-create index idx_predictions_user    on public.predictions(user_id);
-create index idx_predictions_match   on public.predictions(match_id);
-create index idx_predictions_points  on public.predictions(points desc);
-create index idx_matches_status      on public.matches(status);
-create index idx_matches_date        on public.matches(match_date);
-create index idx_profiles_points     on public.profiles(total_points desc);
+create index if not exists idx_predictions_user    on public.predictions(user_id);
+create index if not exists idx_predictions_match   on public.predictions(match_id);
+create index if not exists idx_predictions_points  on public.predictions(points desc);
+create index if not exists idx_matches_status      on public.matches(status);
+create index if not exists idx_matches_date        on public.matches(match_date);
+create index if not exists idx_profiles_points     on public.profiles(total_points desc);
 
 -- ── Auto-update updated_at ──
 create or replace function public.update_timestamp()
@@ -98,10 +98,12 @@ begin
 end;
 $$ language plpgsql security definer;
 
+drop trigger if exists trg_profiles_updated on public.profiles;
 create trigger trg_profiles_updated
   before update on public.profiles
   for each row execute function public.update_timestamp();
 
+drop trigger if exists trg_matches_updated on public.matches;
 create trigger trg_matches_updated
   before update on public.matches
   for each row execute function public.update_timestamp();
@@ -191,23 +193,35 @@ alter table public.predictions enable row level security;
 alter table public.chat_messages enable row level security;
 
 -- Profiles
+drop policy if exists "Profiles are viewable by everyone" on public.profiles;
 create policy "Profiles are viewable by everyone" on public.profiles for select using (true);
+drop policy if exists "Users can update own profile" on public.profiles;
 create policy "Users can update own profile"     on public.profiles for update using (auth.uid() = id);
+drop policy if exists "Users can insert own profile" on public.profiles;
 create policy "Users can insert own profile"     on public.profiles for insert with check (auth.uid() = id);
 
 -- Matches
+drop policy if exists "Matches are viewable by everyone" on public.matches;
 create policy "Matches are viewable by everyone"    on public.matches for select using (true);
+drop policy if exists "Anyone can insert matches" on public.matches;
 create policy "Anyone can insert matches"           on public.matches for insert with check (true);
+drop policy if exists "Anyone can update matches" on public.matches;
 create policy "Anyone can update matches"           on public.matches for update using (true);
 
 -- Predictions
+drop policy if exists "Users view own predictions" on public.predictions;
 create policy "Users view own predictions"    on public.predictions for select using (auth.uid() = user_id);
+drop policy if exists "Users insert own predictions" on public.predictions;
 create policy "Users insert own predictions"  on public.predictions for insert with check (auth.uid() = user_id);
+drop policy if exists "Users update own predictions" on public.predictions;
 create policy "Users update own predictions"  on public.predictions for update using (auth.uid() = user_id);
+drop policy if exists "Users delete own predictions" on public.predictions;
 create policy "Users delete own predictions"  on public.predictions for delete using (auth.uid() = user_id);
 
 -- Chat
+drop policy if exists "Chat viewable by everyone" on public.chat_messages;
 create policy "Chat viewable by everyone"      on public.chat_messages for select using (true);
+drop policy if exists "Users insert chat" on public.chat_messages;
 create policy "Users insert chat"             on public.chat_messages for insert with check (auth.uid() = user_id);
 
 -- ── Auto-create profile on signup ──
@@ -224,6 +238,7 @@ begin
 end;
 $$ language plpgsql security definer;
 
+drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
