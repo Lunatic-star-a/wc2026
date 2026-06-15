@@ -805,8 +805,7 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
         <button class="expand-btn" onclick="scrollToToday()">跳到今天</button>
       </div>
       <div class="schedule-filters reveal">
-        <button class="filter-btn active" data-filter="all">全部</button>
-        <button class="filter-btn" data-filter="group">小组赛</button>
+        <button class="filter-btn active" data-filter="group">小组赛</button>
         <button class="filter-btn" data-filter="r32">1/16 决赛</button>
         <button class="filter-btn" data-filter="r16">1/8 决赛</button>
         <button class="filter-btn" data-filter="qf">1/4 决赛</button>
@@ -1274,18 +1273,24 @@ function renderGroups(){
 }
 
 /* ═══ RENDER: Schedule (collapsible by date) ═══ */
-function renderMatches(filter='all'){
-  const list=document.getElementById('matchList');
-  const filtered=filter==='all'?ALL_MATCHES:ALL_MATCHES.filter(m=>m.stage===filter);
-  const days={};filtered.forEach((m,i)=>{if(!days[m.date])days[m.date]=[];days[m.date].push({m,idx:ALL_MATCHES.indexOf(m)});});
-  const todayKey=findTodayKey();
-  list.innerHTML=Object.entries(days).map(([date,entries])=>{
-    const isToday=todayKey&&date===todayKey;
-    const dayId='day-'+date.replace(/[月日]/g,'-');
-    return `<div class="schedule-day reveal"><div class="day-header" onclick="toggleDay('${dayId}')"><span class="day-header-text">📅 ${date} ${isToday?'<span style="color:var(--gold);font-size:12px;">(今天)</span>':''}</span><span class="day-header-meta">${entries.length}场比赛</span><span class="day-arrow" id="arrow-${dayId}">▼</span></div><div class="day-matches ${isToday?'open':''}" id="${dayId}">${entries.map(e=>renderMatchCard(e.m,e.idx)).join('')}</div></div>`;
+function renderMatches(filter){
+  // Snapshot currently open days to preserve state on re-render
+  var savedOpen=new Set();
+  document.querySelectorAll('.day-matches.open').forEach(function(dm){savedOpen.add(dm.id);});
+  var list=document.getElementById('matchList');
+  var filtered=ALL_MATCHES;
+  if(filter&&filter!=='all'){filtered=ALL_MATCHES.filter(function(m){return m.stage===filter;});}
+  var days={};filtered.forEach(function(m,i){if(!days[m.date])days[m.date]=[];days[m.date].push({m:m,idx:ALL_MATCHES.indexOf(m)});});
+  var todayKey=findTodayKey();
+  list.innerHTML=Object.entries(days).map(function(entry){
+    var date=entry[0],entries=entry[1];
+    var isToday=todayKey&&date===todayKey;
+    var dayId='day-'+date.replace(/[月日]/g,'-');
+    var wasOpen=savedOpen.has(dayId)||(isToday&&!allDatesExpanded);
+    return '<div class=\"schedule-day reveal\"><div class=\"day-header\" onclick=\"toggleDay(\''+dayId+'\')\"><span class=\"day-header-text\">📅 '+date+' '+(isToday?'<span style=\"color:var(--gold);font-size:12px;\">(今天)</span>':'')+'</span><span class=\"day-header-meta\">'+entries.length+'场比赛</span><span class=\"day-arrow'+(wasOpen?' open':'')+'\" id=\"arrow-'+dayId+'\">▼</span></div><div class=\"day-matches'+(wasOpen?' open':'')+'\" id=\"'+dayId+'\">'+entries.map(function(e){return renderMatchCard(e.m,e.idx);}).join('')+'</div></div>';
   }).join('');
-  if(filtered.length===0)list.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim)">暂无比赛数据</div>';
-  if(!allDatesExpanded&&filter==='all')showOnlyToday(true);
+  if(filtered.length===0)list.innerHTML='<div style=\"text-align:center;padding:40px;color:var(--text-dim)\">暂无比赛数据</div>';
+  if(!allDatesExpanded&&(!filter||filter==='all'))showOnlyToday(true);
 }
 function renderMatchCard(m,idx){
   const stageLabel={group:'小组赛',r32:'1/16决赛',r16:'1/8决赛',qf:'1/4决赛',sf:'半决赛','3rd':'季军赛',final:'🏆决赛'}[m.stage]||m.stage;
@@ -1341,7 +1346,23 @@ function showAllDates(){document.querySelectorAll('.schedule-day').forEach(s=>{s
 function toggleAllDates(){allDatesExpanded=!allDatesExpanded;const btn=document.getElementById('toggleAllBtn');if(allDatesExpanded){showAllDates();btn.textContent='收起全部';}else{showOnlyToday(true);btn.textContent='展开全部';}}
 function expandAll(){showAllDates();allDatesExpanded=true;const btn=document.getElementById('toggleAllBtn');if(btn)btn.textContent='收起全部';}
 function collapseAll(){showOnlyToday(true);allDatesExpanded=false;const btn=document.getElementById('toggleAllBtn');if(btn)btn.textContent='展开全部';}
-function scrollToToday(){const todayKey=findTodayKey();if(!todayKey){showToast('今天没有比赛');return;}const dayId='day-'+todayKey.replace(/[月日]/g,'-');showOnlyToday(true);allDatesExpanded=false;const btn=document.getElementById('toggleAllBtn');if(btn)btn.textContent='展开全部';const el=document.getElementById(dayId);if(el){el.parentElement.scrollIntoView({behavior:'smooth',block:'center'});}}
+function scrollToToday(){
+  var todayKey=findTodayKey();
+  if(!todayKey){showToast('今天没有比赛');return;}
+  // Reset filter to first stage, show all stages
+  document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
+  var firstBtn=document.querySelector('.filter-btn');if(firstBtn)firstBtn.classList.add('active');
+  allDatesExpanded=false;
+  var btn=document.getElementById('toggleAllBtn');if(btn)btn.textContent='展开全部';
+  renderMatches(firstBtn?firstBtn.dataset.filter:'group');
+  // After render, show today expanded and scroll to it
+  setTimeout(function(){
+    showOnlyToday(true);
+    var dayId='day-'+todayKey.replace(/[月日]/g,'-');
+    var el=document.getElementById(dayId);
+    if(el){el.parentElement.scrollIntoView({behavior:'smooth',block:'center'});}
+  },100);
+}
 function buildJumpMenu(){const sel=document.querySelector('.jump-select');if(!sel)return;const dates=[...new Set(ALL_MATCHES.map(m=>m.date))];const ga=sel.querySelector('optgroup[label="🏟 小组赛"]');const ka=sel.querySelector('optgroup[label="🏆 淘汰赛"]');dates.forEach(d=>{const ms=ALL_MATCHES.filter(m=>m.date===d);const isGrp=ms[0]&&ms[0].stage==='group';const opt=document.createElement('option');opt.value=d;opt.textContent=d+' ('+ms.length+'场)'; (isGrp?ga:ka).appendChild(opt);});}
 function jumpToDate(d){if(!d)return;const dayId='day-'+d.replace(/[月日]/g,'-');showOnlyToday(false);allDatesExpanded=false;const btn=document.getElementById('toggleAllBtn');if(btn)btn.textContent='展开全部';setTimeout(()=>{const el=document.getElementById(dayId);if(el){el.parentElement.style.display='';const dm=el.parentElement.querySelector('.day-matches');if(dm)dm.classList.add('open');const a=document.getElementById('arrow-'+dayId);if(a)a.classList.add('open');el.parentElement.scrollIntoView({behavior:'smooth',block:'center'});}},150);}
 function renderThirdPlace(){
