@@ -1902,6 +1902,7 @@ async function renderLiveScores(){
         minuteHTML='<span style="color:#0fa84a;font-size:11px;animation:livePulse 1.5s ease infinite">'+disp+'</span>';
         scoreClass='color:#0fa84a;animation:livePulse 1.5s ease infinite';
       }
+      else{minuteHTML='<span style="color:var(--text-dim);font-size:11px">未开始</span>';}
       return`<div class="livescore-row">
       <div class="livescore-row-stage">${stageCN[m.stage]||m.stage}${m.group_name?' · '+m.group_name+'组':''} ${minuteHTML}</div>
       <div class="livescore-row-teams"><span>${m.home_team}</span><span class="livescore-row-score" style="${scoreClass}"><span class="lsh">${m.home_score??'-'}</span><span class="lscol">:</span><span class="lsa">${m.away_score??'-'}</span></span><span>${m.away_team}</span></div>
