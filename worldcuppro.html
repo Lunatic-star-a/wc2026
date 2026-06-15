@@ -1119,12 +1119,19 @@ var ESPN_TEAM_CN={"mexico":"墨西哥","south africa":"南非","south korea":"�
 var _pollTimer=null,_fastPollUntil=0,_lastESPNMinute={},_lastPollDone=0;
 async function _pollESPN(){
   try{
-    var today=Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai'}).format(new Date()).replace(/-/g,'');
-    var resp=await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates='+today);
-    if(!resp.ok)return;
-    var data=await resp.json(),updated=0,hasLive=!1;
-    for(var ei=0;ei<data.events.length;ei++){
-      var comps=data.events[ei].competitions[0];
+    var fmt=Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai'});
+    var today=fmt.format(new Date()).replace(/-/g,'');
+    var yesterday=fmt.format(new Date(Date.now()-864e5)).replace(/-/g,'');
+    var events=[];
+    for(var di=0;di<2;di++){
+      var dt=di===0?today:yesterday;
+      var resp=await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates='+dt);
+      if(resp.ok){var j=await resp.json();if(j.events)events=events.concat(j.events);}
+    }
+    var updated=0,hasLive=!1;
+    for(var ei=0;ei<events.length;ei++){
+      var evt=events[ei];
+      var comps=evt.competitions[0];
       if(!comps||comps.competitors.length<2)continue;
       var h=comps.competitors[0],a=comps.competitors[1];
       var hn=(h.team.displayName||'').toLowerCase().trim();
@@ -1133,7 +1140,7 @@ async function _pollESPN(){
       if(!ESPN_TEAM_CN[hn])for(var k in ESPN_TEAM_CN){if(k.indexOf(hn)>=0||hn.indexOf(k)>=0){hcn=ESPN_TEAM_CN[k];break}}
       if(!ESPN_TEAM_CN[an])for(var k in ESPN_TEAM_CN){if(k.indexOf(an)>=0||an.indexOf(k)>=0){acn=ESPN_TEAM_CN[k];break}}
       var hs=parseInt(h.score)||0,as=parseInt(a.score)||0;
-      var stInfo=data.events[ei].status,stType=stInfo.type.name||'';
+      var stInfo=evt.status,stType=stInfo.type.name||'';
       var dbSt='upcoming',period=stInfo.period||0,clock=stInfo.displayClock||'';
       if(stType==='STATUS_FULL_TIME'||stType==='STATUS_FINAL')dbSt='finished';
       else if(stType==='STATUS_HALF_TIME'||stType==='STATUS_END_OF_PERIOD')dbSt='halftime';
@@ -1272,7 +1279,7 @@ function renderMatchCard(m,idx){
   return `<div class="match-card reveal${cardStatus}${resolvedStatus==='finished'?' finished':''}${hasSidebar}" id="mc-${matchDbId}"><div class="match-date"><strong>${m.date}</strong>${m.time} 北京时间</div><div class="match-info"><div class="match-teams">${hName}<span class="match-vs">VS</span>${aName}</div><div class="match-venue">${m.venue}${m.group?' · '+m.group+'组':''} · <span style="font-size:10px;color:var(--text-dim)">${stageLabel}</span></div></div><div class="match-actions">${predHTML}<button class="chat-card-btn" onclick="event.stopPropagation();openChatRoom(${matchDbId},'${m.home.replace(/'/g,"\\'")} vs ${m.away.replace(/'/g,"\\'")}')" title="进入聊天室">💬 聊</button><div class="match-status-row">${combinedStatus}</div></div>${predSidebarHTML}</div>`;
 	}
 	function formatMatchMinute(minute,injuryTime,status){
-	  if(status==='halftime')return '<span style="color:#f39c12">中场</span>';
+	  if(status==='halftime')return '';
 	  if(status==='finished')return '';
 	  if(status==='live'){
 	    if(!minute||minute<=0)return '<span style="color:#0fa84a">0\'</span>';
