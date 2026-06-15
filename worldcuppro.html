@@ -372,7 +372,7 @@ footer{text-align:center;padding:60px 0;border-top:1px solid rgba(255,255,255,0.
 .livescore-row-stage{font-size:10px;color:var(--text-dim);text-align:center}
 .livescore-row-teams{display:flex;align-items:center;gap:8px;justify-content:center;width:100%;overflow:hidden}
 .livescore-row-teams span{font-size:14px;color:var(--text);font-weight:500;flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.livescore-row-score{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--gold);padding:2px 8px;background:rgba(212,168,67,0.1);border-radius:6px;display:flex;align-items:center;gap:0;flex:0 0 auto;min-width:48px;justify-content:center}
+.livescore-row-score{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--gold);padding:2px 8px;background:rgba(212,168,67,0.1);border-radius:6px;display:flex;align-items:center;gap:0;flex:0 0 auto;min-width:48px;justify-content:center;border:1.5px solid transparent}
 .livescore-row-score .lsh,.livescore-row-score .lsa{text-align:center;min-width:14px}
 .livescore-row-score .lscol{padding:0 3px;color:var(--text-dim)}
 footer strong{color:var(--gold);}
@@ -383,7 +383,7 @@ footer strong{color:var(--gold);}
 @keyframes livePulse{0%,100%{box-shadow:0 0 0 0 rgba(231,76,60,0.4);}50%{box-shadow:0 0 0 8px rgba(231,76,60,0);}}
 @keyframes scoreBlink{0%,100%{opacity:1;}50%{opacity:0.5;}}
 @keyframes livescoreBreath{0%,100%{border-color:rgba(212,168,67,0.4);box-shadow:0 0 4px rgba(212,168,67,0.2);transform:scale(1)}50%{border-color:rgba(212,168,67,0.9);box-shadow:0 0 12px rgba(212,168,67,0.4);transform:scale(1.04)}}
-.livescore-row-score.live{padding:2px 8px;border-radius:6px;display:flex;align-items:center;gap:0;flex:0 0 auto;min-width:48px;justify-content:center;border:1.5px solid rgba(212,168,67,0.5);animation:livescoreBreath 2s ease-in-out infinite}
+.livescore-row-score.live{border:1.5px solid rgba(212,168,67,0.5);animation:livescoreBreath 2s ease-in-out infinite}
 @keyframes float-up{0%{transform:translateY(100vh) scale(0);opacity:0;}10%{opacity:0.5;}90%{opacity:0;}100%{transform:translateY(-10vh) scale(1.5);opacity:0;}}
 /* Splash — commented out */
 /* .splash{position:fixed;inset:0;z-index:9999;background:var(--navy);display:flex;align-items:center;justify-content:center;transition:opacity 0.3s ease;overflow:hidden;animation:splashFadeOut 0.3s ease 2.2s forwards} */
@@ -1203,13 +1203,26 @@ async function _pollESPN(){
       // Never downgrade a finished match — DB is authoritative after full-time
       var old=matchScores[dbId]||{};
       if(old.status==='finished')continue;
-      // Halftime detection: period 1 + minute>=45 + clock unchanged from previous poll → halftime
-      if(dbSt==='live'&&period===1&&min>=45){
-        var prevKey=_lastESPNMinute[dbId];
-        var curKey=period+':'+min+':'+inj;
-        if(prevKey===curKey){dbSt='halftime';}
-        _lastESPNMinute[dbId]=curKey;
-      }else{_lastESPNMinute[dbId]=period+':'+min+':'+inj;}
+      // Enhanced halftime detection:
+      // 1. ESPN reports STATU_HALF_TIME / STATUS_END_OF_PERIOD — already caught above
+      // 2. Clock shows "HT" or "halftime"
+      // 3. period 1 + minute>=45 + clock frozen (injury time stopped changing)
+      // 4. period 2 + minute 0 (halftime, second half not yet started)
+      if(dbSt==='live'){
+        var clockLow=clock.toLowerCase();
+        if(clockLow.indexOf('ht')>=0||clockLow.indexOf('half')>=0){
+          dbSt='halftime';
+        } else if((period===1||period===2)&&min>=45){
+          var prevKey=_lastESPNMinute[dbId];
+          var curKey=period+':'+min+':'+inj;
+          if(prevKey===curKey){dbSt='halftime';}
+          _lastESPNMinute[dbId]=curKey;
+        } else {
+          _lastESPNMinute[dbId]=period+':'+min+':'+inj;
+        }
+      } else {
+        _lastESPNMinute[dbId]=period+':'+min+':'+inj;
+      }
       var oldHash=dbId+':'+(old.home_score||'')+'-'+(old.away_score||'')+':'+(old.status||'')+':'+(old.match_minute||'')+':'+(old.injury_time||'');
       var newHash=dbId+':'+hs+'-'+as+':'+dbSt+':'+min+':'+inj;
       if(oldHash===newHash)continue;
@@ -1276,13 +1289,17 @@ function renderGroups(){
 }
 
 /* ═══ RENDER: Schedule (collapsible by date) ═══ */
-function renderMatches(filter){
-  // Dedup guard: skip if same content already rendered
-  var rk=_renderKey(filter);
-  var now=Date.now();
-  if(rk===_lastRenderKey&&now-_renderCooldown<800)return;
-  if(now-_renderCooldown<300&&rk===_lastRenderKey)return;
-  _lastRenderKey=rk;_renderCooldown=now;
+function renderMatches(filter,force){
+  // Dedup guard: skip if same content already rendered — but "force" bypasses
+  if(!force){
+    var rk=_renderKey(filter);
+    var now=Date.now();
+    if(rk===_lastRenderKey&&now-_renderCooldown<800)return;
+    if(now-_renderCooldown<300&&rk===_lastRenderKey)return;
+    _lastRenderKey=rk;_renderCooldown=now;
+  } else {
+    _lastRenderKey='';_renderCooldown=0;
+  }
   // Snapshot open days + open prediction sidebars to preserve state across re-renders
   var savedOpen=new Set(),savedPanels=new Set();
   var openEls=document.querySelectorAll('.day-matches.open');
@@ -1366,18 +1383,22 @@ function collapseAll(){allDatesExpanded=false;const btn=document.getElementById(
 function scrollToToday(){
   var todayKey=findTodayKey();
   if(!todayKey){showToast('今天没有比赛');return;}
-  _lastRenderKey=''; // force re-render
   allDatesExpanded=false;
   var btn=document.getElementById('toggleAllBtn');if(btn)btn.textContent='展开全部';
-  // Reset filter buttons — show all stages
   document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
   var defaultBtn=document.querySelector('.filter-btn[data-filter="group"]');
   if(defaultBtn)defaultBtn.classList.add('active');
-  renderMatches('all');
+  renderMatches('all',true);
   setTimeout(function(){
     var dayId='day-'+todayKey.replace(/[月日]/g,'-');
     var el=document.getElementById(dayId);
-    if(el){el.parentElement.scrollIntoView({behavior:'smooth',block:'center'});}
+    if(el){
+      var dm=el.parentElement.querySelector('.day-matches');
+      if(dm)dm.classList.add('open');
+      var a=document.getElementById('arrow-'+dayId);
+      if(a)a.classList.add('open');
+      el.parentElement.scrollIntoView({behavior:'smooth',block:'center'});
+    }
   },150);
 }
 function jumpToStage(stage){
@@ -1386,9 +1407,7 @@ function jumpToStage(stage){
   document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
   var targetBtn=document.querySelector('.filter-btn[data-filter="'+stage+'"]');
   if(targetBtn)targetBtn.classList.add('active');
-  // Reset render key to force re-render
-  _lastRenderKey='';
-  renderMatches(stage);
+  renderMatches(stage,true);
   observeReveals();
   setTimeout(function(){
     var el=document.querySelector('.schedule-day');
@@ -1396,11 +1415,11 @@ function jumpToStage(stage){
   },150);
 }
 function buildJumpMenu(){const sel=document.querySelector('.jump-select');if(!sel)return;const dates=[...new Set(ALL_MATCHES.map(m=>m.date))];const ga=sel.querySelector('optgroup[label="🏟 小组赛"]');const ka=sel.querySelector('optgroup[label="🏆 淘汰赛"]');dates.forEach(d=>{const ms=ALL_MATCHES.filter(m=>m.date===d);const isGrp=ms[0]&&ms[0].stage==='group';const opt=document.createElement('option');opt.value=d;opt.textContent=d+' ('+ms.length+'场)'; (isGrp?ga:ka).appendChild(opt);});}
-function jumpToDate(d){if(!d)return;var dayId='day-'+d.replace(/[月日]/g,'-');_lastRenderKey='';allDatesExpanded=true;var btn=document.getElementById('toggleAllBtn');if(btn)btn.textContent='收起全部';// Reset filter buttons — show all stages
+function jumpToDate(d){if(!d)return;var dayId='day-'+d.replace(/[月日]/g,'-');allDatesExpanded=true;var btn=document.getElementById('toggleAllBtn');if(btn)btn.textContent='收起全部';
   document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
   var defaultBtn=document.querySelector('.filter-btn[data-filter="group"]');
   if(defaultBtn)defaultBtn.classList.add('active');
-  renderMatches('all');
+  renderMatches('all',true);
   setTimeout(function(){
     var el=document.getElementById(dayId);
     if(el){
