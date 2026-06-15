@@ -308,14 +308,13 @@ footer{text-align:center;padding:60px 0;border-top:1px solid rgba(255,255,255,0.
 .pchat-msg-name{font-size:11px;color:var(--gold);font-weight:600}
 .pchat-msg.self .pchat-msg-name{color:var(--pitch-bright)}
 .pchat-msg-time{font-size:9px;color:var(--text-dim);font-family:var(--font-mono)}
-.pchat-msg-text{font-size:13px;color:var(--text);line-height:1.5;word-break:break-word}
+.pchat-msg-text{font-size:13px;color:var(--text);line-height:1.5;word-break:break-word;display:inline}
 .pchat-msg-text.deleted{color:var(--text-dim);font-style:italic}
 .pchat-msg-quote{background:rgba(212,168,67,0.06);border-left:2px solid rgba(212,168,67,0.3);padding:4px 10px;border-radius:0 4px 4px 0;margin-bottom:4px;font-size:11px;color:var(--text-dim)}
 .pchat-msg-quote .pq-name{color:var(--gold);font-weight:600}
-.pchat-msg-actions{display:none;gap:4px;margin-top:3px}
-.pchat-msg:hover .pchat-msg-actions{display:flex}
-.pchat-msg.self .pchat-msg-actions{justify-content:flex-end}
-.pchat-msg-actions button{background:none;border:none;color:var(--text-dim);font-size:10px;cursor:pointer;padding:2px 6px;border-radius:3px;font-family:var(--font-body)}
+.pchat-msg-actions{display:inline-flex;gap:3px;margin-left:6px;vertical-align:middle;opacity:0;transition:opacity 0.2s}
+.pchat-msg:hover .pchat-msg-actions,.pchat-msg.self .pchat-msg-actions{opacity:1}
+.pchat-msg-actions button{background:none;border:none;color:var(--text-dim);font-size:9px;cursor:pointer;padding:1px 4px;border-radius:3px;font-family:var(--font-body)}
 .pchat-msg-actions button:hover{color:var(--gold);background:rgba(212,168,67,0.1)}
 .pchat-emoji-bar{display:none;flex-wrap:wrap;gap:4px;padding:8px 14px;border-top:1px solid rgba(255,255,255,0.06);flex-shrink:0;background:rgba(0,0,0,0.2)}
 .pchat-emoji-bar.open{display:flex}
@@ -383,6 +382,8 @@ footer strong{color:var(--gold);}
 @keyframes slideOutRight{from{opacity:1;transform:translateX(0);}to{opacity:0;transform:translateX(60px);}}
 @keyframes livePulse{0%,100%{box-shadow:0 0 0 0 rgba(231,76,60,0.4);}50%{box-shadow:0 0 0 8px rgba(231,76,60,0);}}
 @keyframes scoreBlink{0%,100%{opacity:1;}50%{opacity:0.5;}}
+@keyframes livescoreBreath{0%,100%{border-color:rgba(212,168,67,0.4);box-shadow:0 0 4px rgba(212,168,67,0.2);transform:scale(1)}50%{border-color:rgba(212,168,67,0.9);box-shadow:0 0 12px rgba(212,168,67,0.4);transform:scale(1.04)}}
+.livescore-row-score.live{padding:2px 8px;border-radius:6px;display:flex;align-items:center;gap:0;flex:0 0 auto;min-width:48px;justify-content:center;border:1.5px solid rgba(212,168,67,0.5);animation:livescoreBreath 2s ease-in-out infinite}
 @keyframes float-up{0%{transform:translateY(100vh) scale(0);opacity:0;}10%{opacity:0.5;}90%{opacity:0;}100%{transform:translateY(-10vh) scale(1.5);opacity:0;}}
 /* Splash — commented out */
 /* .splash{position:fixed;inset:0;z-index:9999;background:var(--navy);display:flex;align-items:center;justify-content:center;transition:opacity 0.3s ease;overflow:hidden;animation:splashFadeOut 0.3s ease 2.2s forwards} */
@@ -1297,13 +1298,15 @@ function renderMatches(filter){
     var isToday=todayKey&&date===todayKey;
     var dayId='day-'+date.replace(/[月日]/g,'-');
     var wasOpen;
-    if(allDatesExpanded){wasOpen=true;}
+    if(allDatesExpanded){wasOpen=false;}
     else if(savedOpen.has(dayId)){wasOpen=true;}
-    else{wasOpen=false;}
+    else{wasOpen=isToday;}
     return'<div class="schedule-day reveal"><div class="day-header" onclick="toggleDay(\''+dayId+'\')"><span class="day-header-text">📅 '+date+' '+(isToday?'<span style="color:var(--gold);font-size:12px;">(今天)</span>':'')+'</span><span class="day-header-meta">'+entries.length+'场比赛</span><span class="day-arrow'+(wasOpen?' open':'')+'" id="arrow-'+dayId+'">▼</span></div><div class="day-matches'+(wasOpen?' open':'')+'" id="'+dayId+'">'+entries.map(function(em){return renderMatchCard(em.m,em.idx,savedPanels);}).join('')+'</div></div>';
   }).join('');
   if(filtered.length===0)list.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim)">暂无比赛数据</div>';
-  if(!allDatesExpanded)showOnlyToday(false);
+  // Control visibility after building HTML
+  if(allDatesExpanded){showAllDates();}
+  else{showOnlyToday(true);}
 }
 function renderMatchCard(m,idx,savedPanels){
   const stageLabel={group:'小组赛',r32:'1/16决赛',r16:'1/8决赛',qf:'1/4决赛',sf:'半决赛','3rd':'季军赛',final:'🏆决赛'}[m.stage]||m.stage;
@@ -1363,6 +1366,7 @@ function collapseAll(){allDatesExpanded=false;const btn=document.getElementById(
 function scrollToToday(){
   var todayKey=findTodayKey();
   if(!todayKey){showToast('今天没有比赛');return;}
+  _lastRenderKey=''; // force re-render
   allDatesExpanded=false;
   var btn=document.getElementById('toggleAllBtn');if(btn)btn.textContent='展开全部';
   // Reset filter buttons — show all stages
@@ -1392,12 +1396,10 @@ function jumpToStage(stage){
   },150);
 }
 function buildJumpMenu(){const sel=document.querySelector('.jump-select');if(!sel)return;const dates=[...new Set(ALL_MATCHES.map(m=>m.date))];const ga=sel.querySelector('optgroup[label="🏟 小组赛"]');const ka=sel.querySelector('optgroup[label="🏆 淘汰赛"]');dates.forEach(d=>{const ms=ALL_MATCHES.filter(m=>m.date===d);const isGrp=ms[0]&&ms[0].stage==='group';const opt=document.createElement('option');opt.value=d;opt.textContent=d+' ('+ms.length+'场)'; (isGrp?ga:ka).appendChild(opt);});}
-function jumpToDate(d){if(!d)return;var dayId='day-'+d.replace(/[月日]/g,'-');allDatesExpanded=true;var btn=document.getElementById('toggleAllBtn');if(btn)btn.textContent='收起全部';// Reset filter buttons — show all stages
+function jumpToDate(d){if(!d)return;var dayId='day-'+d.replace(/[月日]/g,'-');_lastRenderKey='';allDatesExpanded=true;var btn=document.getElementById('toggleAllBtn');if(btn)btn.textContent='收起全部';// Reset filter buttons — show all stages
   document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
   var defaultBtn=document.querySelector('.filter-btn[data-filter="group"]');
   if(defaultBtn)defaultBtn.classList.add('active');
-  // Reset render key to force re-render
-  _lastRenderKey='';
   renderMatches('all');
   setTimeout(function(){
     var el=document.getElementById(dayId);
@@ -1450,11 +1452,25 @@ function renderPredictions(){
   const hintHTML='<div style="text-align:center;padding:40px;color:var(--text-dim);grid-column:1/-1">请先<a href="#" onclick="openAuthModal();return false" style="color:var(--gold)">登录</a>以参与预测</div>';
   if(!currentUser){container.innerHTML=hintHTML;return;}
   container.innerHTML='';
-  const upcoming=ALL_MATCHES.filter(m=>{const dbId=ALL_MATCHES.indexOf(m)+1;const ms=matchScores[dbId];return !m.home.includes('胜者')&&!m.home.includes('第一')&&!m.home.includes('第二')&&!m.home.includes('第三')&&!(ms&&(ms.status==='live'||ms.status==='finished'||ms.status==='halftime'));});
-  const todayKey=findTodayKey();
-  const todayMatches=upcoming.filter(m=>m.date===todayKey);
-  const otherMatches=upcoming.filter(m=>m.date!==todayKey).slice(0,6-Math.min(todayMatches.length,6));
-  const showMatches=[...todayMatches,...otherMatches].slice(0,6);
+  // Filter to only future matches (not TBD, not started, not finished)
+  const upcoming=ALL_MATCHES.filter(function(m){
+    if(m.home.includes('胜者')||m.home.includes('第一')||m.home.includes('第二')||m.home.includes('第三'))return false;
+    var dbId=ALL_MATCHES.indexOf(m)+1;
+    var ms=matchScores[dbId];
+    // Use resolveStatus to catch past matches even without explicit DB status
+    var st=ms?resolveStatus(ms,m):'upcoming';
+    if(st==='live'||st==='halftime'||st==='finished')return false;
+    // Check timestamp: exclude matches that started more than 5 minutes ago
+    var ts=getMatchTimestamp(m);
+    if(ts&&(Date.now()-ts)/60000>5)return false;
+    return true;
+  }).sort(function(a,b){return getMatchTimestamp(a)-getMatchTimestamp(b);});
+  var todayKey=findTodayKey();
+  var todayMatches=upcoming.filter(function(m){return m.date===todayKey;});
+  var otherMatches=upcoming.filter(function(m){return m.date!==todayKey;});
+  var showMatches=[];
+  for(var mi=0;mi<todayMatches.length&&showMatches.length<6;mi++)showMatches.push(todayMatches[mi]);
+  for(var oi=0;oi<otherMatches.length&&showMatches.length<6;oi++)showMatches.push(otherMatches[oi]);
   if(showMatches.length===0){container.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim);grid-column:1/-1">暂无可预测的比赛</div>';return;}
   const stageLabel=s=>({group:'小组赛',r32:'1/16决赛',r16:'1/8决赛',qf:'1/4决赛',sf:'半决赛','3rd':'季军赛',final:'决赛'})[s]||s;
   container.innerHTML=(todayMatches.length>0?`<div class="predict-today-label" style="grid-column:1/-1">📌 今日比赛预测</div>`:'')+showMatches.map(m=>{
@@ -1834,15 +1850,15 @@ async function loadPublicChat(){
         var rp=data.find(function(x){return x.id===m.reply_to_id;});
         if(rp)quoteHTML='<div class="pchat-msg-quote"><span class="pq-name">@'+(rp.username||'?')+'</span>: '+(rp.message||'').replace(/</g,'&lt;').substring(0,60)+'</div>';
       }
-      var actionsHTML='';
+      var actionBtns='';
       if(isMe&&!isDeleted){
-        actionsHTML='<div class="pchat-msg-actions"><button onclick="withdrawMessage('+m.id+')">撤回</button></div>';
+        actionBtns='<button onclick="withdrawMessage('+m.id+')">撤回</button>';
       }
       if(!isMe&&currentUser&&!isDeleted){
-        actionsHTML='<div class="pchat-msg-actions"><button onclick="replyMessage('+m.id+',\''+(m.username||'').replace(/'/g,'\\\'')+'\',\''+(m.message||'').replace(/'/g,'\\\'').substring(0,50)+'\')">回复</button></div>';
+        actionBtns='<button onclick="replyMessage('+m.id+',\''+(m.username||'').replace(/'/g,'\\\'')+'\',\''+(m.message||'').replace(/'/g,'\\\'').substring(0,50)+'\')">回复</button>';
       }
       var timeStr=m.created_at?new Date(m.created_at).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}):'';
-      return'<div class="pchat-msg'+(isMe?' self':'')+'" data-id="'+m.id+'"><div class="pchat-msg-avatar">'+(m.username||'?')[0]+'</div><div class="pchat-msg-body">'+quoteHTML+'<div class="pchat-msg-head"><span class="pchat-msg-name">'+(m.username||'匿名')+'</span><span class="pchat-msg-time">'+timeStr+'</span></div><div class="pchat-msg-text'+(isDeleted?' deleted':'')+'">'+m.message.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>'+actionsHTML+'</div></div>';
+      return'<div class="pchat-msg'+(isMe?' self':'')+'" data-id="'+m.id+'"><div class="pchat-msg-avatar">'+(m.username||'?')[0]+'</div><div class="pchat-msg-body">'+quoteHTML+'<div class="pchat-msg-head"><span class="pchat-msg-name">'+(m.username||'匿名')+'</span><span class="pchat-msg-time">'+timeStr+'</span></div><div class="pchat-msg-text'+(isDeleted?' deleted':'')+'">'+m.message.replace(/</g,'&lt;').replace(/>/g,'&gt;')+(actionBtns?' <span class="pchat-msg-actions">'+actionBtns+'</span>':'')+'</div></div></div>';
     }).join('');
     el.scrollTop=el.scrollHeight;
   }catch(e){console.error('Public chat load:',e);el.innerHTML='<div class="pchat-empty">加载失败，请刷新重试</div>';}
@@ -1961,19 +1977,19 @@ async function renderLiveScores(){
     const stageCN={group:'小组赛',r32:'1/16决赛',r16:'1/8决赛',qf:'1/4决赛',sf:'半决赛','3rd':'季军赛',final:'决赛'};
     el.innerHTML=liveData.map(m=>{
       const st=resolveStatus(m);
-      let minuteHTML='', scoreClass='';
-      if(st==='halftime'){minuteHTML='<span style="color:#f39c12;font-size:11px">中场</span>';scoreClass='color:#f39c12';}
+      let minuteHTML='', scoreStyle='', scoreExtraClass='';
+      if(st==='halftime'){minuteHTML='<span style="color:#f39c12;font-size:11px">中场</span>';scoreStyle='color:#f39c12';}
       else if(st==='finished'){minuteHTML='<span style="color:var(--text-dim);font-size:11px">已结束</span>';}
       else if(st==='live'){
         const min=m.match_minute||0;
         const disp=m.injury_time&&m.injury_time>0?(min<=45?'45+':'90+')+m.injury_time+"'":min+"'";
         minuteHTML='<span style="color:#0fa84a;font-size:11px">'+disp+'</span>';
-        scoreClass='color:#0fa84a';
+        scoreStyle='color:#0fa84a';scoreExtraClass=' live';
       }
       else{minuteHTML='<span style="color:var(--text-dim);font-size:11px">未开始</span>';}
       return`<div class="livescore-row">
       <div class="livescore-row-stage">${stageCN[m.stage]||m.stage}${m.group_name?' · '+m.group_name+'组':''} ${minuteHTML}</div>
-      <div class="livescore-row-teams"><span>${m.home_team}</span><span class="livescore-row-score" style="${scoreClass}"><span class="lsh">${m.home_score??'-'}</span><span class="lscol">:</span><span class="lsa">${m.away_score??'-'}</span></span><span>${m.away_team}</span></div>
+      <div class="livescore-row-teams"><span>${m.home_team}</span><span class="livescore-row-score${scoreExtraClass}" style="${scoreStyle}"><span class="lsh">${m.home_score??'-'}</span><span class="lscol">:</span><span class="lsa">${m.away_score??'-'}</span></span><span>${m.away_team}</span></div>
     </div>`}).join('');
   }catch(e){console.error('Live scores:',e);el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim);font-size:13px">比分加载失败，请刷新重试</div>';}
 }
