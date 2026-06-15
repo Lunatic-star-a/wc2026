@@ -92,7 +92,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 .match-card{background:var(--card);border:1px solid rgba(255,255,255,0.04);border-radius:var(--radius);padding:14px 20px;display:grid;grid-template-columns:100px 1fr auto;align-items:center;gap:12px;transition:all 0.3s ease;position:relative;overflow:visible;}
 .match-card::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--pitch);transform:scaleY(0);transition:transform 0.3s ease;}
 .match-card:hover::after{transform:scaleY(1);}
-.match-card:hover{border-color:rgba(255,255,255,0.1);box-shadow:0 8px 32px rgba(0,0,0,0.2);}
+.match-card:hover{border-color:rgba(255,255,255,0.1);box-shadow:0 8px 32px rgba(0,0,0,0.2);border-top-left-radius:0;border-bottom-left-radius:0}
 .match-card.live{border-color:rgba(212,168,67,0.3);animation:livePulse 2s ease-in-out infinite;}
 .match-card.finished{opacity:0.7;}
 .match-date{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);}
@@ -279,7 +279,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 footer{text-align:center;padding:60px 0;border-top:1px solid rgba(255,255,255,0.04);color:var(--text-dim);font-size:13px;position:relative;z-index:1;}
 /* Watch Guide */
 .watch-section{padding:0 0 80px;position:relative;z-index:1}
-.watch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;max-width:900px;margin:0 auto}
+.watch-grid{display:flex;justify-content:center;gap:16px;max-width:700px;margin:0 auto;flex-wrap:wrap}
+.watch-grid>*{flex:0 1 200px;min-width:170px}
 .watch-card-link{text-decoration:none;color:inherit;display:block}
 .watch-card{background:var(--card);border:1px solid rgba(255,255,255,0.05);border-radius:var(--radius);padding:20px;text-align:center;transition:all 0.3s ease;cursor:pointer;height:100%}
 .watch-card:hover{border-color:rgba(212,168,67,0.3);box-shadow:0 8px 32px rgba(0,0,0,0.3);transform:translateY(-2px)}
@@ -855,7 +856,6 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
           <div class="watch-card reveal">
             <div class="watch-card-icon">📡</div>
             <h4>咪咕视频</h4>
-            <p>中国移动旗下官方转播商，104场全程免费，詹俊/张路解说，4K/8K画质</p>
             <span class="watch-card-tag free">免费直播 · 中文解说</span>
           </div>
         </a>
@@ -863,7 +863,6 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
           <div class="watch-card reveal">
             <div class="watch-card-icon">📕</div>
             <h4>小红书</h4>
-            <p>独家持权转播商，首页「世界杯」入口，范志毅/谢晖解说，4K免费看</p>
             <span class="watch-card-tag free">免费直播 · 达人陪看</span>
           </div>
         </a>
@@ -871,16 +870,7 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
           <div class="watch-card reveal">
             <div class="watch-card-icon">📺</div>
             <h4>央视频</h4>
-            <p>央视总台官方平台，贺炜/张路原班解说，CCTV5全程直播，投屏回看</p>
             <span class="watch-card-tag free">免费直播 · 央视解说</span>
-          </div>
-        </a>
-        <a class="watch-card-link" href="https://www.plus.fifa.com" target="_blank" rel="noopener">
-          <div class="watch-card reveal">
-            <div class="watch-card-icon">🌍</div>
-            <h4>FIFA+ 官网</h4>
-            <p>国际足联官方平台，赛事集锦/回放/数据，部分场次免费直播</p>
-            <span class="watch-card-tag free">免费集锦 · 官方数据</span>
           </div>
         </a>
       </div>
@@ -1235,7 +1225,7 @@ async function _pollESPN(){
 function _autoPoll(){
   _pollESPN();
   if(_pollTimer)clearTimeout(_pollTimer);
-  (function schedule(){var now=Date.now();var iv=now<_fastPollUntil?5000:(now<_fastPollUntil+3600000?15000:60000);_pollTimer=setTimeout(function(){_pollESPN();schedule();},iv);})();
+  (function schedule(){var now=Date.now();var iv=now<_fastPollUntil?5000:(now<_fastPollUntil+3600000?30000:120000);_pollTimer=setTimeout(function(){_pollESPN();schedule();},iv);})();
 }
 async function loadMatchScores(){
   if(!SUPABASE_READY)return;
@@ -1541,7 +1531,7 @@ function setupRealtimeSubscriptions(){
   if(!SUPABASE_READY)return;
   var _rtDebounce=0;
   const onMatchChange=(payload)=>{
-    if(Date.now()-_lastPollDone<3000)return;
+    if(Date.now()-_lastPollDone<5000)return;
     if(payload.new&&payload.new.home_score!=null){
       var old=matchScores[payload.new.id];
       if(old&&old.home_score===payload.new.home_score&&old.away_score===payload.new.away_score&&old.status===payload.new.status&&old.match_minute===payload.new.match_minute&&old.injury_time===payload.new.injury_time)return;
