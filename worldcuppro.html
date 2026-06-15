@@ -270,16 +270,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
   .team-modal>div{padding-left:12px!important;padding-right:12px!important}
   .modal-overlay.active{align-items:flex-start}
 }
-/* Watch Module */
-.watch-section{padding:100px 0;position:relative;}
-.watch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;}
-.watch-card{background:var(--card);border:1px solid rgba(255,255,255,0.04);border-radius:var(--radius);padding:24px;transition:all 0.3s ease;text-align:center;}
-.watch-card:hover{border-color:rgba(212,168,67,0.2);box-shadow:0 12px 40px rgba(0,0,0,0.25);}
-.watch-card-icon{font-size:40px;margin-bottom:12px;}
-.watch-card h4{font-family:var(--font-display);font-size:22px;letter-spacing:1px;color:#fff;margin-bottom:8px;}
-.watch-card p{font-size:13px;color:var(--text-dim);margin-bottom:16px;line-height:1.5;}
-.watch-card-link{display:inline-block;font-family:var(--font-mono);font-size:12px;letter-spacing:1px;color:var(--gold);text-decoration:none;text-transform:uppercase;padding:8px 20px;border:1px solid rgba(212,168,67,0.3);border-radius:100px;transition:all 0.25s;}
-.watch-card-link:hover{background:rgba(212,168,67,0.1);border-color:var(--gold);}
 /* Toast */
 .toast-container{position:fixed;top:80px;right:24px;z-index:1100;display:flex;flex-direction:column;gap:8px;}
 .toast{background:var(--slate);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius);padding:14px 20px;font-size:13px;color:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.4);animation:slideInRight 0.3s ease,slideOutRight 0.3s ease 2.7s forwards;max-width:360px;}
@@ -287,6 +277,18 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 .toast.error{border-left:3px solid var(--accent-red);}
 /* Footer */
 footer{text-align:center;padding:60px 0;border-top:1px solid rgba(255,255,255,0.04);color:var(--text-dim);font-size:13px;position:relative;z-index:1;}
+/* Watch Guide */
+.watch-section{padding:0 0 80px;position:relative;z-index:1}
+.watch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;max-width:900px;margin:0 auto}
+.watch-card-link{text-decoration:none;color:inherit;display:block}
+.watch-card{background:var(--card);border:1px solid rgba(255,255,255,0.05);border-radius:var(--radius);padding:20px;text-align:center;transition:all 0.3s ease;cursor:pointer;height:100%}
+.watch-card:hover{border-color:rgba(212,168,67,0.3);box-shadow:0 8px 32px rgba(0,0,0,0.3);transform:translateY(-2px)}
+.watch-card-icon{font-size:36px;margin-bottom:10px}
+.watch-card h4{font-family:var(--font-display);font-size:20px;letter-spacing:1px;color:#fff;margin-bottom:6px}
+.watch-card p{font-size:12px;color:var(--text-dim);line-height:1.5;margin-bottom:10px}
+.watch-card-tag{display:inline-block;font-size:10px;padding:2px 10px;border-radius:100px;font-family:var(--font-mono);letter-spacing:1px}
+.watch-card-tag.free{background:rgba(13,140,60,0.2);color:var(--pitch-bright);border:1px solid rgba(13,140,60,0.3)}
+.watch-card-tag.cn{background:rgba(212,168,67,0.12);color:var(--gold);border:1px solid rgba(212,168,67,0.25)}
 /* Public Chat Room */
 .public-chat-section{position:relative;z-index:1;padding:0 0 48px}
 .public-chat-container{max-width:720px;margin:0 auto;background:var(--card);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;height:480px}
@@ -579,6 +581,11 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   .public-chat-container{height:400px}
   .pchat-msg-body{max-width:85%}
   .match-pred-tab{width:20px;height:40px;font-size:9px;letter-spacing:0}
+  .watch-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+  .watch-card{padding:16px}
+  .watch-card h4{font-size:17px}
+  .watch-card p{font-size:11px}
+  .watch-section{padding:0 0 60px}
 }
 /* ── Mobile Portrait (≤480px) ── */
 @media(max-width:480px){
@@ -660,6 +667,13 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   .public-chat-container{height:360px}
   .pchat-msg-body{max-width:90%}
   .pchat-msg-text{font-size:12px}
+  .watch-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+  .watch-card{padding:14px}
+  .watch-card h4{font-size:15px}
+  .watch-card p{font-size:10px}
+  .watch-card-icon{font-size:28px}
+  .watch-card-tag{font-size:9px;padding:1px 8px}
+  .watch-section{padding:0 0 48px}
   /* Bracket */
   .bracket-round{min-width:80px}
   .bracket-match-inner{padding:3px}
@@ -818,14 +832,6 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
       <div class="leaderboard reveal" id="leaderboard"><h3>🏆 预测排行</h3><div id="lbList"></div></div>
     </div>
   </section>
-  <!-- ═══ 观赛指南暂不启用 ═══
-  <section class="watch-section" id="watch">
-    <div class="container">
-      <div class="section-header reveal"><div class="section-tag">Live Scores & Watch</div><h2>观赛指南</h2></div>
-      ...
-    </div>
-  </section>
-  ═══ -->
   <section class="livescore-section" id="livescore">
     <div class="container">
       <div class="section-header reveal"><div class="section-tag">Live Scores</div><h2>实时比分</h2></div>
@@ -837,6 +843,68 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
         <div class="livescore-embed" id="liveScoreList">
           <div style="text-align:center;padding:40px;color:var(--text-dim);font-size:13px">加载实时比分中...</div>
         </div>
+      </div>
+    </div>
+  </section>
+  <!-- Watch Guide -->
+  <section class="watch-section reveal" id="watch">
+    <div class="container">
+      <div class="section-header reveal"><div class="section-tag">Watch Live</div><h2>📺 观赛导航</h2></div>
+      <div class="watch-grid">
+        <a class="watch-card-link" href="https://www.miguvideo.com/p/channel/10000001" target="_blank" rel="noopener">
+          <div class="watch-card reveal">
+            <div class="watch-card-icon">📡</div>
+            <h4>咪咕视频</h4>
+            <p>中国移动旗下，2026世界杯官方转播商，高清直播全部104场比赛</p>
+            <span class="watch-card-tag free">免费直播</span>
+            <span class="watch-card-tag cn">中文解说</span>
+          </div>
+        </a>
+        <a class="watch-card-link" href="https://www.douyin.com/search/世界杯直播" target="_blank" rel="noopener">
+          <div class="watch-card reveal">
+            <div class="watch-card-icon">🎵</div>
+            <h4>抖音</h4>
+            <p>抖音体育频道世界杯专区，多路直播信号，互动弹幕观赛</p>
+            <span class="watch-card-tag free">免费直播</span>
+            <span class="watch-card-tag cn">中文解说</span>
+          </div>
+        </a>
+        <a class="watch-card-link" href="https://www.xiaohongshu.com/search_result/世界杯直播" target="_blank" rel="noopener">
+          <div class="watch-card reveal">
+            <div class="watch-card-icon">📕</div>
+            <h4>小红书</h4>
+            <p>小红书世界杯直播，达人和球迷一起看球聊球，沉浸式观赛体验</p>
+            <span class="watch-card-tag free">免费直播</span>
+            <span class="watch-card-tag cn">达人陪看</span>
+          </div>
+        </a>
+        <a class="watch-card-link" href="https://www.cctv.com" target="_blank" rel="noopener">
+          <div class="watch-card reveal">
+            <div class="watch-card-icon">📺</div>
+            <h4>CCTV体育</h4>
+            <p>央视官方体育频道，央视频APP同步直播，最权威的赛事转播</p>
+            <span class="watch-card-tag free">免费直播</span>
+            <span class="watch-card-tag cn">央视解说</span>
+          </div>
+        </a>
+        <a class="watch-card-link" href="https://www.kuaishou.com/search/video?searchKey=世界杯直播" target="_blank" rel="noopener">
+          <div class="watch-card reveal">
+            <div class="watch-card-icon">🎬</div>
+            <h4>快手</h4>
+            <p>快手体育世界杯频道，短视频+直播观赛，随时随地看球</p>
+            <span class="watch-card-tag free">免费直播</span>
+            <span class="watch-card-tag cn">中文解说</span>
+          </div>
+        </a>
+        <a class="watch-card-link" href="https://www.iqiyi.com/sports/worldcup2026" target="_blank" rel="noopener">
+          <div class="watch-card reveal">
+            <div class="watch-card-icon">🎯</div>
+            <h4>爱奇艺体育</h4>
+            <p>爱奇艺体育频道，多机位直播+赛事回放，专业体育解说团队</p>
+            <span class="watch-card-tag free">免费直播</span>
+            <span class="watch-card-tag cn">专业解说</span>
+          </div>
+        </a>
       </div>
     </div>
   </section>
