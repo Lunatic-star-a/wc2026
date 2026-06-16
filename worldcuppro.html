@@ -239,6 +239,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 .players-table th{background:rgba(212,168,67,0.08);padding:10px 14px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--gold);border-bottom:1px solid rgba(212,168,67,0.2);white-space:nowrap}
 .players-table td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--text);white-space:nowrap}
 .players-table tbody tr:hover td{background:rgba(255,255,255,0.03)}
+.pred-hist-table{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0}
+.pred-hist-table th{background:rgba(212,168,67,0.08);padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--gold);border-bottom:1px solid rgba(212,168,67,0.2);white-space:nowrap;position:sticky;top:0}
+.pred-hist-table td{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--text);white-space:nowrap}
+.pred-hist-table tbody tr:hover td{background:rgba(255,255,255,0.03)}
+.pred-hist-table .ph-hit{color:#0fa84a;font-weight:700}
+.pred-hist-table .ph-miss{color:var(--text-dim)}
+.pred-hist-table .ph-pts{font-family:var(--font-mono);font-weight:700;color:var(--gold)}
+.ph-empty{text-align:center;padding:40px;color:var(--text-dim);font-size:14px}
+.ph-summary{text-align:center;padding:12px;font-family:var(--font-display);font-size:18px;color:var(--gold);letter-spacing:1px}
+@media(max-width:480px){.pred-hist-table{font-size:10px}.pred-hist-table th,.pred-hist-table td{padding:5px 6px}}
 .team-modal-link{display:inline-block;font-family:var(--font-mono);font-size:12px;letter-spacing:1px;color:var(--gold);text-decoration:none;text-transform:uppercase;padding:8px 20px;border:1px solid rgba(212,168,67,0.3);border-radius:100px;transition:all 0.25s;}
 .team-modal-link:hover{background:rgba(212,168,67,0.1);border-color:var(--gold);}
 .team-modal-close{position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.3);border:none;color:#fff;font-size:20px;width:32px;height:32px;border-radius:50%;cursor:pointer;transition:background 0.2s;display:flex;align-items:center;justify-content:center;}
@@ -367,7 +377,7 @@ footer{text-align:center;padding:60px 0;border-top:1px solid rgba(255,255,255,0.
 .live-dot{width:8px;height:8px;border-radius:50%;background:var(--accent-red);animation:livePulse 1.5s ease infinite}
 @keyframes livePulse{0%,100%{opacity:1}50%{opacity:0.3}}
 .livescore-embed{background:rgba(0,0,0,0.2);padding:8px;max-height:500px;overflow-y:auto}
-.livescore-row{display:flex;flex-direction:column;align-items:center;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.03);gap:8px}
+.livescore-row{display:flex;flex-direction:column;align-items:center;padding:18px 16px;border-bottom:1px solid rgba(255,255,255,0.03);gap:8px}
 .livescore-row:hover{background:rgba(255,255,255,0.02)}
 .livescore-row-stage{font-size:10px;color:var(--text-dim);text-align:center}
 .livescore-row-teams{display:flex;align-items:center;gap:8px;justify-content:center;width:100%;overflow:hidden}
@@ -559,7 +569,7 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   .lb-points{font-size:13px}
   /* Live scores */
   .livescore-board{max-width:100%}
-  .livescore-row{padding:10px 12px;gap:6px}
+  .livescore-row{padding:14px 12px;gap:6px}
   .livescore-row-stage{font-size:9px}
   .livescore-row-teams span{font-size:12px;flex:1}
   .livescore-row-score{font-size:14px;padding:2px 6px;min-width:42px}
@@ -651,7 +661,7 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   .lb-rank{font-size:16px;width:24px}
   .lb-name{font-size:12px}
   /* Live scores */
-  .livescore-row{padding:10px 8px;gap:6px}
+  .livescore-row{padding:14px 8px;gap:6px}
   .livescore-row-teams span{font-size:10px;flex:1}
   .livescore-row-score{font-size:12px;padding:1px 5px;min-width:38px}
   .livescore-row-score .lsh,.livescore-row-score .lsa{min-width:10px}
@@ -718,7 +728,7 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
         <div class="search-dropdown" id="searchDropdown"></div>
       </div>
       <button class="nav-user-btn" onclick="openAuthModal()" id="btnLogin">登录/注册</button>
-      <span class="nav-username" id="navUsername" style="display:none"></span>
+      <span class="nav-username" id="navUsername" style="display:none;cursor:pointer" onclick="openPredHistory()" title="查看我的预测记录"></span>
       <button class="nav-user-btn logout" onclick="handleLogout()" id="btnLogout" style="display:none">退出</button>
       <button class="hamburger" onclick="toggleMobileMenu()" aria-label="菜单"><span></span><span></span><span></span></button>
     </div>
@@ -748,6 +758,7 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   </div>
 </div>
 <div class="modal-overlay" id="teamOverlay" onclick="closeTeamModal(event)"><div class="team-modal" id="teamModal" onclick="event.stopPropagation()"></div></div>
+<div class="modal-overlay" id="predHistOverlay" onclick="closePredHistory(event)"><div class="team-modal" id="predHistModal" onclick="event.stopPropagation()"></div></div>
 <div class="player-card-overlay" id="playerCardOverlay" onclick="closePlayerCard()"><div class="player-card" id="playerCard" onclick="event.stopPropagation()"></div></div>
 <div class="toast-container" id="toastContainer"></div>
 <main>
@@ -1386,12 +1397,19 @@ function renderMatches(filter,force){
     var tel=document.getElementById(targetDayId);
     if(tel){
       if(allDatesExpanded){
-        // jumpToDate/jumpToStage: show all, expand target
+        // jumpToStage: show all dates, expand target
+        tel.classList.add('open');
+        var ta=document.getElementById('arrow-'+targetDayId);
+        if(ta)ta.classList.add('open');
+        tel.parentElement.style.display='';
+      } else {
+        // jumpToDate / scrollToToday: hide all other days, only show target
+        document.querySelectorAll('.schedule-day').forEach(function(sd){sd.style.display='none';});
+        tel.parentElement.style.display='';
         tel.classList.add('open');
         var ta=document.getElementById('arrow-'+targetDayId);
         if(ta)ta.classList.add('open');
       }
-      tel.parentElement.style.display='';
       tel.parentElement.scrollIntoView({behavior:'smooth',block:'center'});
     }
   }
@@ -1486,8 +1504,8 @@ function jumpToStage(stage){
 }
 function buildJumpMenu(){const sel=document.querySelector('.jump-select');if(!sel)return;const dates=[...new Set(ALL_MATCHES.map(m=>m.date))];const ga=sel.querySelector('optgroup[label="🏟 小组赛"]');const ka=sel.querySelector('optgroup[label="🏆 淘汰赛"]');dates.forEach(d=>{const ms=ALL_MATCHES.filter(m=>m.date===d);const isGrp=ms[0]&&ms[0].stage==='group';const opt=document.createElement('option');opt.value=d;opt.textContent=d+' ('+ms.length+'场)'; (isGrp?ga:ka).appendChild(opt);});}
 function jumpToDate(d){if(!d)return;
-  allDatesExpanded=true;
-  var btn=document.getElementById('toggleAllBtn');if(btn)btn.textContent='收起全部';
+  allDatesExpanded=false;
+  var btn=document.getElementById('toggleAllBtn');if(btn)btn.textContent='展开全部';
   document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
   var defaultBtn=document.querySelector('.filter-btn[data-filter="group"]');
   if(defaultBtn)defaultBtn.classList.add('active');
@@ -1645,6 +1663,77 @@ async function renderLeaderboard(){
   }catch(err){console.error('Leaderboard error:',err);list.innerHTML='<div style=\"text-align:center;padding:40px;color:var(--text-dim)\">排行榜加载失败</div>';}
 }
 
+/* ═══ PREDICTION HISTORY ═══ */
+function closePredHistory(e){if(e&&e.target!==document.getElementById('predHistOverlay'))return;document.getElementById('predHistOverlay').classList.remove('active');}
+async function openPredHistory(){
+  if(!currentUser){openAuthModal('login');return;}
+  var overlay=document.getElementById('predHistOverlay');
+  var modal=document.getElementById('predHistModal');
+  modal.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim)">加载中...</div>';
+  overlay.classList.add('active');
+  try{
+    if(!SUPABASE_READY){
+      // Local mode: show from userPredictions
+      var localPreds=Object.entries(userPredictions).map(function(e){return {match_id:parseInt(e[0]),home_score:e[1].home_score,away_score:e[1].away_score};});
+      var html='<div style="padding:24px 20px;text-align:center"><div style="font-family:var(--font-display);font-size:28px;letter-spacing:2px;color:var(--gold);margin-bottom:4px">📋 '+currentUser.username+' 的预测记录</div><div style="color:var(--text-dim);font-size:12px;margin-bottom:16px">本地模式 · 共'+localPreds.length+'条预测</div>';
+      if(localPreds.length===0){html+='<div class="ph-empty">尚未提交任何预测</div>';}
+      else{
+        html+='<div style="overflow-x:auto"><table class="pred-hist-table"><thead><tr><th>日期</th><th>比赛</th><th>预测</th><th>比分</th><th>结果</th><th>得分</th></tr></thead><tbody>';
+        localPreds.forEach(function(p){
+          var m=ALL_MATCHES[p.match_id-1]||{date:'?',home:'?',away:'?'};
+          var ms=matchScores[p.match_id];
+          var actual=ms&&ms.home_score!=null?ms.home_score+' : '+ms.away_score:'';
+          var pts=0,resultHTML='';
+          if(ms&&ms.status==='finished'){
+            if(p.home_score===ms.home_score&&p.away_score===ms.away_score){pts=3;resultHTML='<span class="ph-hit">完全正确</span>';}
+            else if((p.home_score>p.away_score&&ms.home_score>ms.away_score)||(p.home_score<p.away_score&&ms.home_score<ms.away_score)||(p.home_score===p.away_score&&ms.home_score===ms.away_score)){pts=1;resultHTML='<span>胜负正确</span>';}
+            else{resultHTML='<span class="ph-miss">预测失败</span>';}
+          }else if(ms&&(ms.status==='live'||ms.status==='halftime')){resultHTML='<span style="color:#0fa84a">进行中</span>';}
+          else{resultHTML='<span style="color:var(--text-dim)">待开赛</span>';}
+          html+='<tr><td>'+m.date+' '+m.time+'</td><td>'+m.home+' vs '+m.away+'</td><td>'+p.home_score+' : '+p.away_score+'</td><td>'+(actual||'—')+'</td><td>'+resultHTML+'</td><td class="ph-pts">'+(actual?pts:'—')+'</td></tr>';
+        });
+        html+='</tbody></table></div>';
+      }
+      html+='</div><button class="team-modal-close" onclick="closePredHistory()" style="position:absolute;top:12px;right:12px">&times;</button>';
+      modal.innerHTML=html;
+      return;
+    }
+    // Supabase mode
+    var{data:preds}=await sb.from('predictions').select('match_id,home_score,away_score').eq('user_id',currentUser.id);
+    if(!preds||preds.length===0){
+      modal.innerHTML='<div style="padding:24px 20px;text-align:center"><div style="font-family:var(--font-display);font-size:28px;letter-spacing:2px;color:var(--gold);margin-bottom:4px">📋 '+currentUser.username+' 的预测记录</div><div class="ph-empty">尚未提交任何预测</div><button class="team-modal-close" onclick="closePredHistory()" style="position:absolute;top:12px;right:12px">&times;</button></div>';
+      return;
+    }
+    // Fetch match scores for these predictions
+    var matchIds=preds.map(function(p){return p.match_id;});
+    var{data:scores}=await sb.from('matches').select('id,home_score,away_score,status,home_team,away_team,match_date,match_time,stage,group_name').in('id',matchIds);
+    var scoreMap={};
+    if(scores)scores.forEach(function(s){scoreMap[s.id]=s;});
+    // Sort by match date
+    preds.sort(function(a,b){var ma=scoreMap[a.match_id],mb=scoreMap[b.match_id];if(!ma||!mb)return 0;return (ma.match_date||'').localeCompare(mb.match_date||'');});
+    var totalPts=0,totalExact=0,totalOutcome=0;
+    var html='<div style="padding:24px 20px;text-align:center"><div style="font-family:var(--font-display);font-size:28px;letter-spacing:2px;color:var(--gold);margin-bottom:4px">📋 '+currentUser.username+' 的预测记录</div><div style="color:var(--text-dim);font-size:12px;margin-bottom:16px">共'+preds.length+'条预测</div>';
+    html+='<div style="overflow-y:auto;max-height:60vh"><table class="pred-hist-table"><thead><tr><th>日期</th><th>比赛</th><th>预测</th><th>比分</th><th>结果</th><th>得分</th></tr></thead><tbody>';
+    preds.forEach(function(p){
+      var sm=scoreMap[p.match_id]||{};
+      var actual=sm.home_score!=null?sm.home_score+' : '+sm.away_score:'';
+      var stageCN={group:'小组赛',r32:'1/16决赛',r16:'1/8决赛',qf:'1/4决赛',sf:'半决赛','3rd':'季军赛',final:'决赛'};
+      var pts=0,resultHTML='';
+      if(sm.status==='finished'){
+        if(p.home_score===sm.home_score&&p.away_score===sm.away_score){pts=3;resultHTML='<span class="ph-hit">🎯 完全正确</span>';totalExact++;}
+        else if((p.home_score>p.away_score&&sm.home_score>sm.away_score)||(p.home_score<p.away_score&&sm.home_score<sm.away_score)||(p.home_score===p.away_score&&sm.home_score===sm.away_score)){pts=1;resultHTML='<span>✅ 胜负正确</span>';totalOutcome++;}
+        else{resultHTML='<span class="ph-miss">❌ 错误</span>';}
+        totalPts+=pts;
+      }else if(sm.status==='live'||sm.status==='halftime'){resultHTML='<span style="color:#0fa84a">⚡ 进行中</span>';}
+      else{resultHTML='<span style="color:var(--text-dim)">⏳ 待开赛</span>';}
+      html+='<tr><td>'+(sm.match_date||'?')+' '+(sm.match_time||'')+'</td><td>'+(sm.home_team||'?')+' vs '+(sm.away_team||'?')+'</td><td>'+p.home_score+' : '+p.away_score+'</td><td>'+(actual||'—')+'</td><td>'+resultHTML+'</td><td class="ph-pts">'+(sm.status==='finished'?pts:'—')+'</td></tr>';
+    });
+    html+='</tbody></table></div>';
+    html+='<div class="ph-summary">🏆 总分: '+totalPts+' 分 ｜ 🎯 精确命中: '+totalExact+' 场 ｜ ✅ 胜负正确: '+totalOutcome+' 场</div></div>';
+    html+='<button class="team-modal-close" onclick="closePredHistory()" style="position:absolute;top:12px;right:12px">&times;</button>';
+    modal.innerHTML=html;
+  }catch(e){console.error('Pred history error:',e);modal.innerHTML='<div style="text-align:center;padding:40px;color:var(--accent-red)">加载失败，请重试</div><button class="team-modal-close" onclick="closePredHistory()" style="position:absolute;top:12px;right:12px">&times;</button>';}
+}
 /* ═══ TEAM PAGE (renders in modal overlay — no popups) ═══ */
 var TEAM_PLAYER_CN={"Santiago Giménez":"圣地亚哥·希门尼斯","Edson Álvarez":"埃德森·阿尔瓦雷斯","Percy Tau":"佩西·塔乌","Ronwen Williams":"朗文·威廉姆斯","Son Heung-min":"孙兴慜","Kim Min-jae":"金玟哉","Patrik Schick":"帕特里克·希克","Tomáš Souček":"托马斯·绍切克","Alphonso Davies":"阿方索·戴维斯","Jonathan David":"乔纳森·戴维","Edin Džeko":"埃丁·哲科","Miralem Pjanić":"米拉莱姆·皮亚尼奇","Akram Afif":"阿克拉姆·阿菲夫","Almoez Ali":"阿尔莫埃兹·阿里","Granit Xhaka":"格拉尼特·扎卡","Manuel Akanji":"曼努埃尔·阿坎吉","Vinícius Júnior":"维尼修斯","Rodrygo":"罗德里戈","Achraf Hakimi":"阿什拉夫·哈基米","Brahim Díaz":"卜拉欣·迪亚斯","Frantzdy Pierrot":"弗朗茨迪·皮埃罗","Duckens Nazon":"杜肯斯·纳宗","Andy Robertson":"安迪·罗伯逊","Scott McTominay":"斯科特·麦克托米奈","Christian Pulisic":"克里斯蒂安·普利西奇","Giovanni Reyna":"乔瓦尼·雷纳","Miguel Almirón":"米格尔·阿尔米隆","Julio Enciso":"胡利奥·恩西索","Mathew Ryan":"马修·瑞安","Harry Souttar":"哈里·苏塔","Hakan Çalhanoğlu":"哈坎·恰尔汗奥卢","Arda Güler":"阿尔达·居莱尔","Jamal Musiala":"贾马尔·穆西亚拉","Florian Wirtz":"弗洛里安·维尔茨","Leandro Bacuna":"莱安德罗·巴库纳","Juninho Bacuna":"儒尼尼奥·巴库纳","Franck Kessié":"弗兰克·凯西","Simon Adingra":"西蒙·阿丁格拉","Moisés Caicedo":"莫伊塞斯·凯塞多","Piero Hincapié":"皮耶罗·因卡皮耶","Virgil van Dijk":"维吉尔·范迪克","Frenkie de Jong":"弗伦基·德容","Kaoru Mitoma":"三笘薰","Takefusa Kubo":"久保建英","Alexander Isak":"亚历山大·伊萨克","Dejan Kulusevski":"德扬·库卢塞夫斯基","Ellyes Skhiri":"埃利斯·斯希里","Hannibal Mejbri":"汉尼拔·梅布里","Kevin De Bruyne":"凯文·德布劳内","Jérémy Doku":"杰雷米·多库","Mohamed Salah":"穆罕默德·萨拉赫","Omar Marmoush":"奥马尔·马尔穆什","Mehdi Taremi":"迈赫迪·塔雷米","Sardar Azmoun":"萨达尔·阿兹蒙","Chris Wood":"克里斯·伍德","Sarpreet Singh":"萨普里特·辛格","Lamine Yamal":"拉明·亚马尔","Pedri":"佩德里","Ryan Mendes":"瑞安·门德斯","Jovane Cabral":"若瓦内·卡布拉尔","Salem Al-Dawsari":"萨勒姆·多萨里","Firas Al-Buraikan":"菲拉斯·布赖坎","Federico Valverde":"费德里科·巴尔韦德","Darwin Núñez":"达尔文·努涅斯","Kylian Mbappé":"基利安·姆巴佩","Aurélien Tchouaméni":"奥雷利安·楚阿梅尼","Sadio Mané":"萨迪奥·马内","Kalidou Koulibaly":"卡利杜·库利巴利","Aymen Hussein":"艾曼·侯赛因","Ali Jasim":"阿里·贾西姆","Erling Haaland":"埃尔林·哈兰德","Martin Ødegaard":"马丁·厄德高","Lionel Messi":"利昂内尔·梅西","Julián Álvarez":"胡利安·阿尔瓦雷斯","Riyad Mahrez":"里亚德·马赫雷斯","Ismaël Bennacer":"伊斯梅尔·本纳赛尔","David Alaba":"大卫·阿拉巴","Marcel Sabitzer":"马塞尔·萨比策","Musa Al-Taamari":"穆萨·塔马里","Yazan Al-Naimat":"亚赞·奈马特","Cristiano Ronaldo":"克里斯蒂亚诺·罗纳尔多","Bruno Fernandes":"布鲁诺·费尔南德斯","Yoane Wissa":"约安·维萨","Chancel Mbemba":"尚塞尔·姆本巴","Eldor Shomurodov":"埃尔多尔·绍穆罗多夫","Jaloliddin Masharipov":"贾洛利丁·马沙里波夫","Luis Díaz":"路易斯·迪亚斯","James Rodríguez":"哈梅斯·罗德里格斯","Jude Bellingham":"裘德·贝林厄姆","Harry Kane":"哈里·凯恩","Luka Modrić":"卢卡·莫德里奇","Joško Gvardiol":"约什科·格瓦迪奥尔","Mohammed Kudus":"穆罕默德·库杜斯","Thomas Partey":"托马斯·帕尔特伊","Ismael Díaz":"伊斯梅尔·迪亚斯","José Fajardo":"何塞·法哈多"};
 var TEAM_CLUB_CN={"Inter Miami":"迈阿密国际","Atlético Madrid":"马德里竞技","West Ham":"西汉姆联","AC Milan":"AC米兰","Al Ahly":"开罗国民","Mamelodi Sundowns":"马梅洛迪日落","Tottenham":"托特纳姆热刺","Bayern Munich":"拜仁慕尼黑","Bayer Leverkusen":"勒沃库森","Al Sadd":"萨德","Al Duhail":"杜海勒","Al Sharjah":"沙迦","Fenerbahçe":"费内巴切","Lille":"里尔","PSG":"巴黎圣日耳曼","Real Madrid":"皇家马德里","Barcelona":"巴塞罗那","Liverpool":"利物浦","Man City":"曼城","Arsenal":"阿森纳","Chelsea":"切尔西","Man United":"曼联","Newcastle":"纽卡斯尔联","Brighton":"布莱顿","B. Dortmund":"多特蒙德","Borussia Mönchengladbach":"门兴格拉德巴赫","Inter Milan":"国际米兰","Napoli":"那不勒斯","Roma":"罗马","Al Nassr":"利雅得胜利","Al Hilal":"利雅得新月","Al Ahli":"吉达国民","Al Shorta":"巴格达警察","Como":"科莫","Real Sociedad":"皇家社会","Frankfurt":"法兰克福","Burnley":"伯恩利","Maccabi Haifa":"海法马卡比","Kayserispor":"开塞利体育","LAFC":"洛杉矶FC","Juventus":"尤文图斯","AZ Alkmaar":"阿尔克马尔","Leicester City":"莱斯特城","FC Groningen":"格罗宁根","Birmingham City":"伯明翰城","Union Berlin":"柏林联合","Nottm Forest":"诺丁汉森林","Sporting CP":"葡萄牙体育","Fatih Karagümrük":"卡拉古姆鲁克","Shabab Al Ahli":"迪拜青年国民","Montpellier":"蒙彼利埃","Brentford":"布伦特福德","Marseille":"马赛","Esteghlal":"德黑兰独立","Rayo Vallecano":"巴列卡诺","Universidad Católica":"天主教大学","Independiente":"独立队"};
@@ -1829,7 +1918,7 @@ function observeReveals(){var els=document.querySelectorAll('.reveal:not(.visibl
 function createParticles(){const c=document.getElementById('particles');for(let i=0;i<30;i++){const p=document.createElement('div');p.classList.add('particle');const s=Math.random()*4+2;p.style.width=s+'px';p.style.height=s+'px';p.style.left=Math.random()*100+'%';p.style.animationDuration=(Math.random()*12+8)+'s';p.style.animationDelay=(Math.random()*10)+'s';p.style.opacity=(Math.random()*0.3).toString();c.appendChild(p);}}
 function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
 function setupSmoothScroll(){document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth'});});});}
-function setupKeyboard(){document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAuthModal();closeTeamModal();closePlayerCard();const dd=document.getElementById('searchDropdown');if(dd)dd.classList.remove('open');}});}
+function setupKeyboard(){document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAuthModal();closeTeamModal();closePredHistory();closePlayerCard();const dd=document.getElementById('searchDropdown');if(dd)dd.classList.remove('open');}});}
 
 /* ═══ SEARCH ═══ */
 let searchTimer=null;
