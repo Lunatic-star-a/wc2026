@@ -240,7 +240,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 .players-table td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--text);white-space:nowrap}
 .players-table tbody tr:hover td{background:rgba(255,255,255,0.03)}
 .pred-hist-table{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0}
-.pred-hist-table th{background:rgba(212,168,67,0.08);padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--gold);border-bottom:1px solid rgba(212,168,67,0.2);white-space:nowrap;position:sticky;top:0}
+.pred-hist-table th{background:var(--slate);padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--gold);border-bottom:1px solid rgba(212,168,67,0.2);white-space:nowrap;position:sticky;top:0;z-index:1}
+.pred-hist-scroll{overflow-y:auto;max-height:50vh;border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-sm);background:var(--card)}
+.pred-hist-scroll::-webkit-scrollbar{width:6px}
+.pred-hist-scroll::-webkit-scrollbar-track{background:rgba(255,255,255,0.02)}
+.pred-hist-scroll::-webkit-scrollbar-thumb{background:rgba(212,168,67,0.3);border-radius:3px}
+.pred-hist-more{text-align:center;padding:8px;color:var(--text-dim);font-size:11px;border-top:1px solid rgba(255,255,255,0.04)}
 .pred-hist-table td{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--text);white-space:nowrap}
 .pred-hist-table tbody tr:hover td{background:rgba(255,255,255,0.03)}
 .pred-hist-table .ph-hit{color:#0fa84a;font-weight:700}
@@ -1675,10 +1680,13 @@ async function openPredHistory(){
     if(!SUPABASE_READY){
       // Local mode: show from userPredictions
       var localPreds=Object.entries(userPredictions).map(function(e){return {match_id:parseInt(e[0]),home_score:e[1].home_score,away_score:e[1].away_score};});
-      var html='<div style="padding:24px 20px;text-align:center"><div style="font-family:var(--font-display);font-size:28px;letter-spacing:2px;color:var(--gold);margin-bottom:4px">📋 '+currentUser.username+' 的预测记录</div><div style="color:var(--text-dim);font-size:12px;margin-bottom:16px">本地模式 · 共'+localPreds.length+'条预测</div>';
-      if(localPreds.length===0){html+='<div class="ph-empty">尚未提交任何预测</div>';}
+      // Sort oldest-first; container auto-scrolls to bottom to show recent 10
+      localPreds.sort(function(a,b){return a.match_id-b.match_id;});
+      var totalPreds=localPreds.length;
+      var html='<div style="padding:24px 20px;text-align:center"><div style="font-family:var(--font-display);font-size:28px;letter-spacing:2px;color:var(--gold);margin-bottom:4px">📋 '+currentUser.username+' 的预测记录</div><div style="color:var(--text-dim);font-size:12px;margin-bottom:14px">本地模式 · 共'+totalPreds+'条预测</div>';
+      if(totalPreds===0){html+='<div class="ph-empty">尚未提交任何预测</div>';}
       else{
-        html+='<div style="overflow-x:auto"><table class="pred-hist-table"><thead><tr><th>日期</th><th>比赛</th><th>预测</th><th>比分</th><th>结果</th><th>得分</th></tr></thead><tbody>';
+        html+='<div class="pred-hist-scroll"><table class="pred-hist-table"><thead><tr><th>日期</th><th>比赛</th><th>预测</th><th>比分</th><th>结果</th><th>得分</th></tr></thead><tbody>';
         localPreds.forEach(function(p){
           var m=ALL_MATCHES[p.match_id-1]||{date:'?',home:'?',away:'?'};
           var ms=matchScores[p.match_id];
@@ -1692,10 +1700,13 @@ async function openPredHistory(){
           else{resultHTML='<span style="color:var(--text-dim)">待开赛</span>';}
           html+='<tr><td>'+m.date+' '+m.time+'</td><td>'+m.home+' vs '+m.away+'</td><td>'+p.home_score+' : '+p.away_score+'</td><td>'+(actual||'—')+'</td><td>'+resultHTML+'</td><td class="ph-pts">'+(actual?pts:'—')+'</td></tr>';
         });
-        html+='</tbody></table></div>';
+        html+='</tbody></table>';
+        if(totalPreds>10)html+='<div class="pred-hist-more">⬆ 向上滚动查看更多预测记录</div>';
+        html+='</div>'; // close pred-hist-scroll
       }
       html+='</div><button class="team-modal-close" onclick="closePredHistory()" style="position:absolute;top:12px;right:12px">&times;</button>';
       modal.innerHTML=html;
+      setTimeout(function(){var sc=modal.querySelector('.pred-hist-scroll');if(sc)sc.scrollTop=sc.scrollHeight;},50);
       return;
     }
     // Supabase mode
@@ -1710,10 +1721,11 @@ async function openPredHistory(){
     var scoreMap={};
     if(scores)scores.forEach(function(s){scoreMap[s.id]=s;});
     // Sort by match date
-    preds.sort(function(a,b){var ma=scoreMap[a.match_id],mb=scoreMap[b.match_id];if(!ma||!mb)return 0;return (ma.match_date||'').localeCompare(mb.match_date||'');});
+    // Sort by match date ascending (oldest first), then by match_id ascending
+    preds.sort(function(a,b){var ma=scoreMap[a.match_id],mb=scoreMap[b.match_id];if(!ma||!mb)return 0;var dc=(ma.match_date||'').localeCompare(mb.match_date||'');if(dc!==0)return dc;return a.match_id-b.match_id;});
     var totalPts=0,totalExact=0,totalOutcome=0;
     var html='<div style="padding:24px 20px;text-align:center"><div style="font-family:var(--font-display);font-size:28px;letter-spacing:2px;color:var(--gold);margin-bottom:4px">📋 '+currentUser.username+' 的预测记录</div><div style="color:var(--text-dim);font-size:12px;margin-bottom:16px">共'+preds.length+'条预测</div>';
-    html+='<div style="overflow-y:auto;max-height:60vh"><table class="pred-hist-table"><thead><tr><th>日期</th><th>比赛</th><th>预测</th><th>比分</th><th>结果</th><th>得分</th></tr></thead><tbody>';
+    html+='<div class="pred-hist-scroll"><table class="pred-hist-table"><thead><tr><th>日期</th><th>比赛</th><th>预测</th><th>比分</th><th>结果</th><th>得分</th></tr></thead><tbody>';
     preds.forEach(function(p){
       var sm=scoreMap[p.match_id]||{};
       var actual=sm.home_score!=null?sm.home_score+' : '+sm.away_score:'';
@@ -1728,10 +1740,13 @@ async function openPredHistory(){
       else{resultHTML='<span style="color:var(--text-dim)">⏳ 待开赛</span>';}
       html+='<tr><td>'+(sm.match_date||'?')+' '+(sm.match_time||'')+'</td><td>'+(sm.home_team||'?')+' vs '+(sm.away_team||'?')+'</td><td>'+p.home_score+' : '+p.away_score+'</td><td>'+(actual||'—')+'</td><td>'+resultHTML+'</td><td class="ph-pts">'+(sm.status==='finished'?pts:'—')+'</td></tr>';
     });
-    html+='</tbody></table></div>';
+    html+='</tbody></table>';
+    if(preds.length>10)html+='<div class="pred-hist-more">⬆ 向上滚动查看更多预测记录</div>';
+    html+='</div>'; // close pred-hist-scroll
     html+='<div class="ph-summary">🏆 总分: '+totalPts+' 分 ｜ 🎯 精确命中: '+totalExact+' 场 ｜ ✅ 胜负正确: '+totalOutcome+' 场</div></div>';
     html+='<button class="team-modal-close" onclick="closePredHistory()" style="position:absolute;top:12px;right:12px">&times;</button>';
     modal.innerHTML=html;
+    setTimeout(function(){var sc=modal.querySelector('.pred-hist-scroll');if(sc)sc.scrollTop=sc.scrollHeight;},50);
   }catch(e){console.error('Pred history error:',e);modal.innerHTML='<div style="text-align:center;padding:40px;color:var(--accent-red)">加载失败，请重试</div><button class="team-modal-close" onclick="closePredHistory()" style="position:absolute;top:12px;right:12px">&times;</button>';}
 }
 /* ═══ TEAM PAGE (renders in modal overlay — no popups) ═══ */
