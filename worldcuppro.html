@@ -1154,9 +1154,56 @@ function resolveStatus(s,matchObj){
   if(ms){var elapsed=(Date.now()-ms)/60000;if(elapsed>150)return 'finished';if(elapsed>0)return 'live';}
   return s.status;
 }
-var _lastScoresHash='',_predVersion=0,_lastRenderKey='';
+var _lastScoresHash='',_predVersion=0,_lastRenderKey='',_scrollTargetDayId='';
 function _scoresHash(){var a=[];for(var i=1;i<=104;i++){var m=matchScores[i];if(m&&m.home_score!=null)a.push(i+':'+m.home_score+'-'+m.away_score+':'+m.status+':'+m.match_minute+':'+m.injury_time);}return a.join('|');}
-function _renderKey(filter){return (filter||'all')+'|'+_scoresHash()+'|'+_predVersion+'|'+(allDatesExpanded?'1':'0');}
+function _renderKey(filter){return (filter||'all')+'|'+_scoresHash()+'|'+_predVersion+'|'+(allDatesExpanded?'1':'0')+'|'+_scrollTargetDayId;}
+/* ═══ INCREMENTAL DOM PATCH (no full re-render on score update) ═══ */
+function patchMatchDisplay(dbId){
+  var ms=matchScores[dbId];
+  if(!ms)return;
+  var card=document.getElementById('mc-'+dbId);
+  if(!card)return;
+  var m=ALL_MATCHES[dbId-1];
+  if(!m)return;
+  var fm=formatMatchStatus(m,ms);
+  // 1. Update status badge + minute in the match-status-row
+  var row=card.querySelector('.match-status-row');
+  if(row){
+    var combined=fm.statusBadge;
+    if(fm.minuteHTML)combined+=' '+fm.minuteHTML;
+    row.innerHTML=combined;
+  }
+  // 2. Update score display
+  var scoreEl=card.querySelector('.match-result-score');
+  if(scoreEl){
+    scoreEl.textContent=ms.home_score+' : '+ms.away_score;
+    if(fm.status==='live')scoreEl.style.color='#0fa84a';
+    else if(fm.status==='finished')scoreEl.style.color='';
+  }
+  // 3. Update the inline pred locked area if no result yet
+  var mA=card.querySelector('.match-actions');
+  if(mA){
+    var locked=mA.querySelector('.match-pred-inline.locked');
+    if(!locked&&ms.home_score!=null&&ms.away_score!=null){
+      // Match started — hide prediction inputs and show score
+      var predEl=mA.querySelector('.match-pred-inline');
+      if(predEl){predEl.outerHTML='<div class=\"match-pred-inline locked\"><span class=\"match-result-score\">'+ms.home_score+' : '+ms.away_score+'</span></div>';}
+    }
+  }
+  // 4. Add/remove .live class
+  if(fm.status==='live'||fm.status==='halftime'){
+    card.classList.add('live');
+  } else {
+    card.classList.remove('live');
+  }
+  if(fm.status==='finished'){
+    card.classList.add('finished');
+  } else {
+    card.classList.remove('finished');
+  }
+  // 5. Dispatch a custom event so live scores board can update too
+  document.dispatchEvent(new CustomEvent('scorePatched',{detail:{dbId:dbId,ms:ms,status:fm.status}}));
+}
 /* ═══ ESPN LIVE POLLER (browser fetches scores directly — no GitHub latency) ═══ */
 var ESPN_TEAM_CN={"mexico":"墨西哥","south africa":"南非","south korea":"韩国","czechia":"捷克","czech republic":"捷克","canada":"加拿大","bosnia and herzegovina":"波黑","bosnia":"波黑","united states":"美国","usa":"美国","paraguay":"巴拉圭","qatar":"卡塔尔","switzerland":"瑞士","brazil":"巴西","morocco":"摩洛哥","haiti":"海地","scotland":"苏格兰","australia":"澳大利亚","turkey":"土耳其","türkiye":"土耳其","germany":"德国","curacao":"库拉索","curaçao":"库拉索","netherlands":"荷兰","japan":"日本","sweden":"瑞典","tunisia":"突尼斯","ivory coast":"科特迪瓦","cote d'ivoire":"科特迪瓦","ecuador":"厄瓜多尔","spain":"西班牙","cape verde":"佛得角","belgium":"比利时","egypt":"埃及","saudi arabia":"沙特","uruguay":"乌拉圭","iran":"伊朗","new zealand":"新西兰","france":"法国","senegal":"塞内加尔","iraq":"伊拉克","norway":"挪威","argentina":"阿根廷","algeria":"阿尔及利亚","austria":"奥地利","jordan":"约旦","portugal":"葡萄牙","dr congo":"刚果(金)","congo":"刚果(金)","uzbekistan":"乌兹别克斯坦","colombia":"哥伦比亚","england":"英格兰","croatia":"克罗地亚","ghana":"加纳","panama":"巴拿马"};
 var _pollTimer=null,_fastPollUntil=0,_lastESPNMinute={},_lastESPNFreeze={},_lastPollDone=0;
@@ -1240,12 +1287,15 @@ async function _pollESPN(){
     if(updated>0){
       var h2=_scoresHash();
       if(h2!==_lastESPNHash){
-        _lastESPNHash=h2;_lastScoresHash='';
-        // Save scroll position so silent score update doesn't jump the page
-        var scrollY=window.scrollY;
-        renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');
-        window.scrollTo(0,scrollY);
-        renderGroupsWithStandings();renderThirdPlace();renderLiveScores();observeReveals();
+        _lastESPNHash=h2;
+        // Patch individual match cards — no full re-render, no page flicker
+        for(var mi=1;mi<=104;mi++){
+          if(matchScores[mi]&&matchScores[mi].home_score!=null)patchMatchDisplay(mi);
+        }
+        // Update standings (includes live match GD/PTS)
+        renderGroupsWithStandings();renderThirdPlace();
+        // Update live scores board
+        renderLiveScores();observeReveals();
       }
     }
     if(hasLive)_fastPollUntil=Date.now()+900000;
@@ -1313,13 +1363,16 @@ function renderMatches(filter,force){
   var filtered=(filter&&filter!=='all')?ALL_MATCHES.filter(function(m){return m.stage===filter;}):ALL_MATCHES;
   var days={};filtered.forEach(function(m,i){if(!days[m.date])days[m.date]=[];days[m.date].push({m:m,idx:ALL_MATCHES.indexOf(m)});});
   var todayKey=findTodayKey();
+  var targetDayId=_scrollTargetDayId;
+  _scrollTargetDayId='';
   var list=document.getElementById('matchList');
   list.innerHTML=Object.entries(days).map(function(e){
     var date=e[0],entries=e[1];
     var isToday=todayKey&&date===todayKey;
     var dayId='day-'+date.replace(/[月日]/g,'-');
     var wasOpen;
-    if(allDatesExpanded){wasOpen=false;}
+    if(dayId===targetDayId){wasOpen=true;}
+    else if(allDatesExpanded){wasOpen=false;}
     else if(savedOpen.has(dayId)){wasOpen=true;}
     else{wasOpen=isToday;}
     return'<div class="schedule-day reveal"><div class="day-header" onclick="toggleDay(\''+dayId+'\')"><span class="day-header-text">📅 '+date+' '+(isToday?'<span style="color:var(--gold);font-size:12px;">(今天)</span>':'')+'</span><span class="day-header-meta">'+entries.length+'场比赛</span><span class="day-arrow'+(wasOpen?' open':'')+'" id="arrow-'+dayId+'">▼</span></div><div class="day-matches'+(wasOpen?' open':'')+'" id="'+dayId+'">'+entries.map(function(em){return renderMatchCard(em.m,em.idx,savedPanels);}).join('')+'</div></div>';
@@ -1328,6 +1381,20 @@ function renderMatches(filter,force){
   // Control visibility after building HTML
   if(allDatesExpanded){showAllDates();}
   else{showOnlyToday(true);}
+  // If scrollToToday/jumpToDate was called, expand target and scroll immediately (no timeout)
+  if(targetDayId){
+    var tel=document.getElementById(targetDayId);
+    if(tel){
+      if(allDatesExpanded){
+        // jumpToDate/jumpToStage: show all, expand target
+        tel.classList.add('open');
+        var ta=document.getElementById('arrow-'+targetDayId);
+        if(ta)ta.classList.add('open');
+      }
+      tel.parentElement.style.display='';
+      tel.parentElement.scrollIntoView({behavior:'smooth',block:'center'});
+    }
+  }
 }
 function renderMatchCard(m,idx,savedPanels){
   const stageLabel={group:'小组赛',r32:'1/16决赛',r16:'1/8决赛',qf:'1/4决赛',sf:'半决赛','3rd':'季军赛',final:'🏆决赛'}[m.stage]||m.stage;
@@ -1397,24 +1464,12 @@ function scrollToToday(){
   if(!todayKey){showToast('今天没有比赛');return;}
   allDatesExpanded=false;
   var btn=document.getElementById('toggleAllBtn');if(btn)btn.textContent='展开全部';
-  // Reset filters to 'group' active (same as initial load)
   document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
   var defaultBtn=document.querySelector('.filter-btn[data-filter="group"]');
   if(defaultBtn)defaultBtn.classList.add('active');
-  // Force full re-render like page reload
+  // Set target so renderMatches expands today — no timeout needed
+  _scrollTargetDayId='day-'+todayKey.replace(/[月日]/g,'-');
   renderMatches('all',true);
-  // Small timeout for DOM to settle, then open today
-  setTimeout(function(){
-    var dayId='day-'+todayKey.replace(/[月日]/g,'-');
-    var el=document.getElementById(dayId);
-    if(el){
-      el.parentElement.style.display='';
-      el.classList.add('open');
-      var a=document.getElementById('arrow-'+dayId);
-      if(a)a.classList.add('open');
-      el.parentElement.scrollIntoView({behavior:'smooth',block:'center'});
-    }
-  },50);
 }
 function jumpToStage(stage){
   allDatesExpanded=true;
@@ -1422,31 +1477,22 @@ function jumpToStage(stage){
   document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
   var targetBtn=document.querySelector('.filter-btn[data-filter="'+stage+'"]');
   if(targetBtn)targetBtn.classList.add('active');
+  // Find first date for this stage and set as scroll target
+  var firstMatch=ALL_MATCHES.filter(function(m){return m.stage===stage;})[0];
+  if(firstMatch)_scrollTargetDayId='day-'+firstMatch.date.replace(/[月日]/g,'-');
   renderMatches(stage,true);
   observeReveals();
-  setTimeout(function(){
-    var el=document.querySelector('.schedule-day');
-    if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
-  },50);
 }
 function buildJumpMenu(){const sel=document.querySelector('.jump-select');if(!sel)return;const dates=[...new Set(ALL_MATCHES.map(m=>m.date))];const ga=sel.querySelector('optgroup[label="🏟 小组赛"]');const ka=sel.querySelector('optgroup[label="🏆 淘汰赛"]');dates.forEach(d=>{const ms=ALL_MATCHES.filter(m=>m.date===d);const isGrp=ms[0]&&ms[0].stage==='group';const opt=document.createElement('option');opt.value=d;opt.textContent=d+' ('+ms.length+'场)'; (isGrp?ga:ka).appendChild(opt);});}
-function jumpToDate(d){if(!d)return;var dayId='day-'+d.replace(/[月日]/g,'-');
+function jumpToDate(d){if(!d)return;
   allDatesExpanded=true;
   var btn=document.getElementById('toggleAllBtn');if(btn)btn.textContent='收起全部';
   document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
   var defaultBtn=document.querySelector('.filter-btn[data-filter="group"]');
   if(defaultBtn)defaultBtn.classList.add('active');
+  _scrollTargetDayId='day-'+d.replace(/[月日]/g,'-');
   renderMatches('all',true);
-  setTimeout(function(){
-    var el=document.getElementById(dayId);
-    if(el){
-      el.parentElement.style.display='';
-      el.classList.add('open');
-      var a=document.getElementById('arrow-'+dayId);
-      if(a)a.classList.add('open');
-      el.parentElement.scrollIntoView({behavior:'smooth',block:'center'});
-    }
-  },50);}
+}
 function renderThirdPlace(){
   const tbody=document.getElementById('thirdPlaceTbody');
   const standings=calculateGroupStandings();
@@ -1466,7 +1512,7 @@ function renderThirdPlace(){
 }
 function toggleThirdPlace(){const b=document.getElementById('thirdPlaceBody');const a=document.getElementById('tpArrow');const o=b.style.display!=='none';b.style.display=o?'none':'block';if(a)a.textContent=o?'▼':'▲';}
 /* ═══ GROUP STANDINGS (live calculation matching real-time scores) ═══ */
-function calculateGroupStandings(){var s={};GROUPS.forEach(function(g){s[g.name]={};g.teams.forEach(function(t){s[g.name][t.name]={team:t,P:0,W:0,D:0,L:0,GF:0,GA:0,GD:0,PTS:0};});});ALL_MATCHES.forEach(function(m,idx){if(m.stage!=='group')return;var g=m.group;if(!g||!s[g])return;var ms=matchScores[idx+1];if(!ms||ms.home_score==null||ms.away_score==null)return;var h=s[g][m.home],a=s[g][m.away];if(!h||!a)return;h.P++;a.P++;h.GF+=ms.home_score;a.GF+=ms.away_score;h.GA+=ms.away_score;a.GA+=ms.home_score;h.GD=h.GF-h.GA;a.GD=a.GF-a.GA;if(ms.status==='live'||ms.status==='halftime')return;if(ms.home_score>ms.away_score){h.W++;h.PTS+=3;a.L++;}else if(ms.home_score<ms.away_score){a.W++;a.PTS+=3;h.L++;}else{h.D++;a.D++;h.PTS++;a.PTS++;}});return s;}
+function calculateGroupStandings(){var s={};GROUPS.forEach(function(g){s[g.name]={};g.teams.forEach(function(t){s[g.name][t.name]={team:t,P:0,W:0,D:0,L:0,GF:0,GA:0,GD:0,PTS:0};});});ALL_MATCHES.forEach(function(m,idx){if(m.stage!=='group')return;var g=m.group;if(!g||!s[g])return;var ms=matchScores[idx+1];if(!ms||ms.home_score==null||ms.away_score==null)return;var h=s[g][m.home],a=s[g][m.away];if(!h||!a)return;h.P++;a.P++;h.GF+=ms.home_score;a.GF+=ms.away_score;h.GA+=ms.away_score;a.GA+=ms.home_score;h.GD=h.GF-h.GA;a.GD=a.GF-a.GA;if(ms.status==='live'||ms.status==='halftime'){if(ms.home_score>ms.away_score){h.PTS+=3;a.PTS+=0}else if(ms.home_score<ms.away_score){a.PTS+=3;h.PTS+=0}else{h.PTS+=1;a.PTS+=1}return;}if(ms.home_score>ms.away_score){h.W++;h.PTS+=3;a.L++;}else if(ms.home_score<ms.away_score){a.W++;a.PTS+=3;h.L++;}else{h.D++;a.D++;h.PTS++;a.PTS++;}});return s;}
 function renderGroupsWithStandings(){
   var sts=calculateGroupStandings();
   document.getElementById('groupsGrid').innerHTML=GROUPS.map(function(g){
@@ -1666,7 +1712,7 @@ function setupRealtimeSubscriptions(){
       var rk=_renderKey(filter);
       if(rk===_lastRenderKey)return;
       renderMatches(filter);
-      renderGroupsWithStandings();
+      renderGroupsWithStandings();renderThirdPlace();
       renderLiveScores();
       renderLeaderboard();
       observeReveals();
