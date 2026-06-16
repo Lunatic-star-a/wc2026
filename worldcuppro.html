@@ -1701,7 +1701,6 @@ async function openPredHistory(){
           html+='<tr><td>'+m.date+' '+m.time+'</td><td>'+m.home+' vs '+m.away+'</td><td>'+p.home_score+' : '+p.away_score+'</td><td>'+(actual||'—')+'</td><td>'+resultHTML+'</td><td class="ph-pts">'+(actual?pts:'—')+'</td></tr>';
         });
         html+='</tbody></table>';
-        if(totalPreds>10)html+='<div class="pred-hist-more">⬆ 向上滚动查看更多预测记录</div>';
         html+='</div>'; // close pred-hist-scroll
       }
       html+='</div><button class="team-modal-close" onclick="closePredHistory()" style="position:absolute;top:12px;right:12px">&times;</button>';
@@ -1741,7 +1740,6 @@ async function openPredHistory(){
       html+='<tr><td>'+(sm.match_date||'?')+' '+(sm.match_time||'')+'</td><td>'+(sm.home_team||'?')+' vs '+(sm.away_team||'?')+'</td><td>'+p.home_score+' : '+p.away_score+'</td><td>'+(actual||'—')+'</td><td>'+resultHTML+'</td><td class="ph-pts">'+(sm.status==='finished'?pts:'—')+'</td></tr>';
     });
     html+='</tbody></table>';
-    if(preds.length>10)html+='<div class="pred-hist-more">⬆ 向上滚动查看更多预测记录</div>';
     html+='</div>'; // close pred-hist-scroll
     html+='<div class="ph-summary">🏆 总分: '+totalPts+' 分 ｜ 🎯 精确命中: '+totalExact+' 场 ｜ ✅ 胜负正确: '+totalOutcome+' 场</div></div>';
     html+='<button class="team-modal-close" onclick="closePredHistory()" style="position:absolute;top:12px;right:12px">&times;</button>';
