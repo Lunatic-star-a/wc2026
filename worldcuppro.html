@@ -1377,7 +1377,7 @@ async function loadMatchScores(){
   if(!SUPABASE_READY)return;
   try{
     const{data:scores}=await sb.from('matches').select('id,home_score,away_score,status,match_minute,injury_time,match_date,match_time');
-    if(scores){scores.forEach(s=>{if(s.home_score!==null){var old=matchScores[s.id];var st=s.status||'upcoming';if(old&&(old.status==='live'||old.status==='finished'||old.status==='halftime')&&st==='upcoming')st=old.status;matchScores[s.id]={home_score:s.home_score,away_score:s.away_score,status:st,match_minute:s.match_minute||(old?old.match_minute:0),injury_time:s.injury_time||(old?old.injury_time:0)};}});
+    if(scores){scores.forEach(function(s){if(s.home_score!==null){var old=matchScores[s.id];var st=s.status||'upcoming';/* 如果 DB 状态为 upcoming 但有比分，用 resolveStatus 修正 */if(st==='upcoming'){st=resolveStatus(s,ALL_MATCHES[s.id-1]||null);}/* 保留比 DB 更具体的旧状态（如 polling 更新了的 live/halftime）*/if(old&&(old.status==='live'||old.status==='finished'||old.status==='halftime')&&st==='upcoming')st=old.status;matchScores[s.id]={home_score:s.home_score,away_score:s.away_score,status:st,match_minute:s.match_minute||(old?old.match_minute:0),injury_time:s.injury_time||(old?old.injury_time:0)};}});
       var h=_scoresHash();
       if(h!==_lastScoresHash){renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');renderGroupsWithStandings();renderThirdPlace();renderLiveScores();observeReveals();_lastScoresHash=h;}
     }
@@ -1586,7 +1586,42 @@ function renderThirdPlace(){
 }
 function toggleThirdPlace(){const b=document.getElementById('thirdPlaceBody');const a=document.getElementById('tpArrow');const o=b.style.display!=='none';b.style.display=o?'none':'block';if(a)a.textContent=o?'▼':'▲';}
 /* ═══ GROUP STANDINGS (live calculation matching real-time scores) ═══ */
-function calculateGroupStandings(){var s={};GROUPS.forEach(function(g){s[g.name]={};g.teams.forEach(function(t){s[g.name][t.name]={team:t,P:0,W:0,D:0,L:0,GF:0,GA:0,GD:0,PTS:0};});});ALL_MATCHES.forEach(function(m,idx){if(m.stage!=='group')return;var g=m.group;if(!g||!s[g])return;var ms=matchScores[idx+1];if(!ms||ms.home_score==null||ms.away_score==null)return;var h=s[g][m.home],a=s[g][m.away];if(!h||!a)return;h.P++;a.P++;h.GF+=ms.home_score;a.GF+=ms.away_score;h.GA+=ms.away_score;a.GA+=ms.home_score;h.GD=h.GF-h.GA;a.GD=a.GF-a.GA;if(ms.status==='live'||ms.status==='halftime'){if(ms.home_score>ms.away_score){h.PTS+=3;a.PTS+=0}else if(ms.home_score<ms.away_score){a.PTS+=3;h.PTS+=0}else{h.PTS+=1;a.PTS+=1}return;}if(ms.home_score>ms.away_score){h.W++;h.PTS+=3;a.L++;}else if(ms.home_score<ms.away_score){a.W++;a.PTS+=3;h.L++;}else{h.D++;a.D++;h.PTS++;a.PTS++;}});return s;}
+/* 小组积分计算 — 只用 resolveStatus 统一判定，与比赛卡片/实时比分状态保持一致 */
+function calculateGroupStandings(){
+  var s={};
+  GROUPS.forEach(function(g){
+    s[g.name]={};
+    g.teams.forEach(function(t){s[g.name][t.name]={team:t,P:0,W:0,D:0,L:0,GF:0,GA:0,GD:0,PTS:0};});
+  });
+  ALL_MATCHES.forEach(function(m,idx){
+    if(m.stage!=='group')return;
+    var g=m.group;if(!g||!s[g])return;
+    var ms=matchScores[idx+1];
+    if(!ms||ms.home_score==null||ms.away_score==null)return;
+    // 用 resolveStatus 统一判定比赛状态（与卡片/比分显示一致）
+    var st=resolveStatus(ms,m);
+    // upcoming 不参与积分计算 — 比赛尚未开始
+    if(st==='upcoming')return;
+    var h=s[g][m.home],a=s[g][m.away];
+    if(!h||!a)return;
+    h.P++;a.P++;
+    h.GF+=ms.home_score;a.GF+=ms.away_score;
+    h.GA+=ms.away_score;a.GA+=ms.home_score;
+    h.GD=h.GF-h.GA;a.GD=a.GF-a.GA;
+    // 进行中 / 中场 → 临时积分（最终由 finished 复位）
+    if(st==='live'||st==='halftime'){
+      if(ms.home_score>ms.away_score){h.PTS+=3;}
+      else if(ms.home_score<ms.away_score){a.PTS+=3;}
+      else{h.PTS+=1;a.PTS+=1;}
+      return;
+    }
+    // finished → 确定积分
+    if(ms.home_score>ms.away_score){h.W++;h.PTS+=3;a.L++;}
+    else if(ms.home_score<ms.away_score){a.W++;a.PTS+=3;h.L++;}
+    else{h.D++;a.D++;h.PTS++;a.PTS++;}
+  });
+  return s;
+}
 function renderGroupsWithStandings(){
   var sts=calculateGroupStandings();
   document.getElementById('groupsGrid').innerHTML=GROUPS.map(function(g){
@@ -1742,11 +1777,12 @@ async function openPredHistory(){
           var ms=matchScores[p.match_id];
           var actual=ms&&ms.home_score!=null?ms.home_score+' : '+ms.away_score:'';
           var pts=0,resultHTML='';
-          if(ms&&ms.status==='finished'){
+          var rSt=ms?resolveStatus(ms,m):'upcoming';
+          if(rSt==='finished'){
             if(p.home_score===ms.home_score&&p.away_score===ms.away_score){pts=3;resultHTML='<span class="ph-hit">完全正确</span>';}
             else if((p.home_score>p.away_score&&ms.home_score>ms.away_score)||(p.home_score<p.away_score&&ms.home_score<ms.away_score)||(p.home_score===p.away_score&&ms.home_score===ms.away_score)){pts=1;resultHTML='<span>胜负正确</span>';}
             else{resultHTML='<span class="ph-miss">预测失败</span>';}
-          }else if(ms&&(ms.status==='live'||ms.status==='halftime')){resultHTML='<span style="color:#0fa84a">进行中</span>';}
+          }else if(rSt==='live'||rSt==='halftime'){resultHTML='<span style="color:#0fa84a">进行中</span>';}
           else{resultHTML='<span style="color:var(--text-dim)">待开赛</span>';}
           html+='<tr><td>'+m.date+' '+m.time+'</td><td>'+m.home+' vs '+m.away+'</td><td>'+p.home_score+' : '+p.away_score+'</td><td>'+(actual||'—')+'</td><td>'+resultHTML+'</td><td class="ph-pts">'+(actual?pts:'—')+'</td></tr>';
         });
