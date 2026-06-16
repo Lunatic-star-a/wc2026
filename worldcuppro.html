@@ -1106,7 +1106,14 @@ function updateAuthForm(){
   document.getElementById('authForm').reset();
   document.getElementById('authError').textContent='';
 }
-function validateUsername(u){if(!u||u.length<2)return'用户名至少需要2个字符';if(u.length>20)return'用户名不能超过20个字符';if(!/^[\w一-鿿぀-ゟ゠-ヿ가-힯]{2,20}$/.test(u))return'用户名只能包含中英文、数字和下划线';return null;}
+/* 用户名验证 — 支持中文/英文/数字/下划线，2-20个字符 */
+function validateUsername(u){
+  if(!u||u.length<2)return'用户名至少需要2个字符';
+  if(u.length>20)return'用户名不能超过20个字符';
+  // 使用 u 标志正确匹配全部 Unicode 中文字符 (含扩展区)
+  if(!/^[\w一-鿿㐀-䶿豈-﫿]{2,20}$/u.test(u))return'用户名只能包含中英文、数字和下划线';
+  return null;
+}
 function validatePassword(p){if(!p||p.length<6)return'密码至少需要6位字符';if(p.length>72)return'密码不能超过72位字符';if(/\s/.test(p))return'密码不能包含空格';return null;}
 async function handleAuthSubmit(e){
   e.preventDefault();
@@ -1115,11 +1122,13 @@ async function handleAuthSubmit(e){
   const errEl=document.getElementById('authError');
   const uErr=validateUsername(username);if(uErr){errEl.textContent=uErr;return;}
   const pErr=validatePassword(password);if(pErr){errEl.textContent=pErr;return;}
+  /* 设备注册锁 — 每台设备只能注册一个账号 */
+  try{var deviceUser=localStorage.getItem('wc26_device_user');}catch(e){deviceUser=null;}
   if(authMode==='register'){
     const confirm=document.getElementById('authConfirm').value;
     if(password!==confirm){errEl.textContent='两次输入的密码不一致，请重新输入';return;}
-    // Device fingerprint check: one account per device
-    try{var stored=localStorage.getItem('wc26_device_user');if(stored){errEl.textContent='此设备已注册过账号（'+stored+'），每台设备只能注册一个账号';return;}}catch(e){}
+    // 注册时：检查此设备是否已有注册账号
+    if(deviceUser){errEl.textContent='此设备已注册过账号（'+deviceUser+'），每台设备只能注册一个账号';return;}
     // Check for duplicate username in profiles table
     if(SUPABASE_READY){
       try{
@@ -1127,8 +1136,11 @@ async function handleAuthSubmit(e){
         if(existing){errEl.textContent='该用户名已被注册，请换一个用户名';return;}
       }catch(e){/* proceed — let the DB unique constraint catch it as fallback */}
     }
+  }else{
+    // 登录时：如果设备已有注册账号，只允许该账号登录
+    if(deviceUser && deviceUser!==username){errEl.textContent='此设备已绑定账号（'+deviceUser+'），请使用该账号登录';return;}
   }
-  if(!SUPABASE_READY){currentUser={username,id:'local-'+Date.now()};onLoginSuccess();return;}
+  if(!SUPABASE_READY){currentUser={username,id:'local-'+Date.now()};onLoginSuccess(authMode==='register');return;}
   try{
     const email=`${username}@wc26.local`;let result;
     if(authMode==='register'){
@@ -1141,10 +1153,16 @@ async function handleAuthSubmit(e){
       result=await sb.auth.signInWithPassword({email,password});
       if(result.error){errEl.textContent='用户名或密码错误，请检查后重试';return;}
     }
-    currentUser={id:result.data.user.id,username:result.data.user.user_metadata?.username||username};onLoginSuccess();
+    currentUser={id:result.data.user.id,username:result.data.user.user_metadata?.username||username};onLoginSuccess(authMode==='register');
   }catch(err){console.error('Auth error:',err);errEl.textContent='网络连接失败: '+err.message+'. 请检查网络后重试';}
 }
-async function onLoginSuccess(){closeAuthModal();updateNavUI();try{localStorage.setItem('wc26_device_user',currentUser.username);}catch(e){}showToast('欢迎回来，'+currentUser.username+'！','success');await loadUserPredictions();renderPredictions();renderLeaderboard();loadPublicChat();observeReveals();}
+async function onLoginSuccess(isNewRegistration){
+  closeAuthModal();updateNavUI();
+  /* 只在注册时记录设备绑定，登录不覆盖 */
+  if(isNewRegistration){try{localStorage.setItem('wc26_device_user',currentUser.username);}catch(e){}}
+  showToast('欢迎回来，'+currentUser.username+'！','success');
+  await loadUserPredictions();renderPredictions();renderLeaderboard();loadPublicChat();observeReveals();
+}
 async function handleLogout(){if(SUPABASE_READY)await sb.auth.signOut();currentUser=null;userPredictions={};updateNavUI();renderPredictions();showToast('已退出登录');}
 function updateNavUI(){
   const bl=document.getElementById('btnLogin'),bout=document.getElementById('btnLogout'),ne=document.getElementById('navUsername');
@@ -1162,13 +1180,24 @@ function getMatchTimestamp(matchObj){
   }
   return 0;
 }
+/* 解析比赛状态 — 始终返回有效状态值，永不返回 undefined */
 function resolveStatus(s,matchObj){
-  if(s.status==='live'||s.status==='halftime'||s.status==='finished')return s.status;
-  if(s.home_score==null)return s.status;
+  // 固化为传入值的基本状态，缺失时默认 'upcoming'
+  var st=s.status||'upcoming';
+  // 已知状态直接返回
+  if(st==='live'||st==='halftime'||st==='finished')return st;
+  // 无比分 → 保持 whatever status we have (or upcoming)
+  if(s.home_score==null)return st;
+  // 有比分但没有特定状态 → 根据时间推断
   var ms=getMatchTimestamp(matchObj);
   if(!ms&&s.match_date&&s.match_time)ms=getMatchTimestamp(s);
-  if(ms){var elapsed=(Date.now()-ms)/60000;if(elapsed>150)return 'finished';if(elapsed>0)return 'live';}
-  return s.status;
+  if(ms){
+    var elapsed=(Date.now()-ms)/60000;
+    if(elapsed>150)return'finished';
+    if(elapsed>0)return'live';
+  }
+  // 如果推断不出，但有实际比分，默认 finished（避免显示 undefined）
+  return s.home_score!=null?'finished':st;
 }
 var _lastScoresHash='',_predVersion=0,_lastRenderKey='',_scrollTargetDayId='';
 function _scoresHash(){var a=[];for(var i=1;i<=104;i++){var m=matchScores[i];if(m&&m.home_score!=null)a.push(i+':'+m.home_score+'-'+m.away_score+':'+m.status+':'+m.match_minute+':'+m.injury_time);}return a.join('|');}
@@ -1266,33 +1295,46 @@ async function _pollESPN(){
       // Never downgrade a finished match — DB is authoritative after full-time
       var old=matchScores[dbId]||{};
       if(old.status==='finished')continue;
-      // Enhanced halftime detection:
-      // 1. ESPN reports STATUS_HALF_TIME / STATUS_END_OF_PERIOD — already caught above
-      // 2. Clock shows "HT" or "halftime" — immediate halftime
-      // 3. period===1 + minute>=45 + clock frozen for 2+ consecutive polls → halftime
-      //    (only period 1; second half uses ESPN-native status)
+      /*
+        中场 / 比赛尾声 确定性检测
+        ---------------------------------------------------------------
+        旧版使用"冻结计数器"——需要时钟值连续两次不变才判定中场。
+        但 ESPN 在上半场补时期间持续更新时钟（45'+3'→45'+4'→45'+5'），
+        导致计数器频繁重置，状态在「中场」和「补时」之间来回跳变。
+
+        新版逻辑（确定性）：
+        - period=1 + min>=45 → 上半场已结束，处于补时，标记为 'halftime'
+        - period=2 + min>=90 → 下半场已结束，处于补时，标记为 'finished'
+        - clock 含 "HT"/"half" → 立即 'halftime'（兜底）
+        - 一旦标记为 'halftime'，不被后续 poll 降级为 'live'
+      */
       if(dbSt==='live'){
         var clockLow=clock.toLowerCase();
+        // 显式中场/半场标记
         if(clockLow.indexOf('ht')>=0||clockLow.indexOf('half')>=0){
           dbSt='halftime';
-          _lastESPNFreeze[dbId]=0;
-        } else if(period===1&&min>=45){
-          var prevKey=_lastESPNMinute[dbId];
-          var curKey=period+':'+min+':'+inj;
-          if(prevKey===curKey){
-            var fc=(_lastESPNFreeze[dbId]||0)+1;
-            if(fc>=2){dbSt='halftime';_lastESPNFreeze[dbId]=0;}
-            else{_lastESPNFreeze[dbId]=fc;}
-          } else {_lastESPNFreeze[dbId]=0;}
-          _lastESPNMinute[dbId]=curKey;
-        } else {
-          _lastESPNMinute[dbId]=period+':'+min+':'+inj;
-          _lastESPNFreeze[dbId]=0;
         }
-      } else {
-        _lastESPNMinute[dbId]=period+':'+min+':'+inj;
-        _lastESPNFreeze[dbId]=0;
+        // 上半场补时（分钟数≥45）→ 就是中场
+        else if(period===1&&min>=45){
+          dbSt='halftime';
+        }
+        // 下半场补时（分钟数≥90）→ 比赛已进入尾声
+        else if(period===2&&min>=90){
+          // 不直接设 finished（ESPN 可能在补时结束后才发 STATUS_FULL_TIME），
+          // 但如果旧状态不是 halftime，保持 live 显示补时分钟数
+        }
       }
+      // 中场状态下，ESPN 偶尔回传 period=1+时钟45'+0 的旧数据，不降级
+      if(dbSt==='live'&&(old.status==='halftime')){
+        // ESPN 在半场休息时会短暂停止推送，然后恢复时偶发回退
+        // 保持 halftime 直到 period 变为 2
+        if(period===1&&min<45){
+          dbSt='halftime'; // 拒绝降级
+        }
+      }
+      // 清理旧版冻结检测用的全局变量（不再需要）
+      delete _lastESPNMinute[dbId];
+      delete _lastESPNFreeze[dbId];
       var oldHash=dbId+':'+(old.home_score||'')+'-'+(old.away_score||'')+':'+(old.status||'')+':'+(old.match_minute||'')+':'+(old.injury_time||'');
       var newHash=dbId+':'+hs+'-'+as+':'+dbSt+':'+min+':'+inj;
       if(oldHash===newHash)continue;
@@ -2160,7 +2202,7 @@ function renderLiveScores(){
   el.innerHTML=todayMatches.map(function(m){
     var dbId=ALL_MATCHES.indexOf(m)+1;
     var ms=matchScores[dbId];
-    var fm=ms?formatMatchStatus(m,ms):{status:'upcoming',minuteHTML:'<span style="color:var(--text-dim);font-size:11px">未开始</span>',scoreColor:''};
+    var fm=ms?formatMatchStatus(m,ms):{status:'upcoming',statusBadge:'',minuteHTML:'<span style="color:var(--text-dim);font-size:11px">未开始</span>',liveScoreStatusHTML:'<span style="color:var(--text-dim);font-size:11px">未开始</span>',liveClass:'',scoreColor:''};
     var stageLabel=(stageCN[m.stage]||m.stage)+(m.group?' · '+m.group+'组':'');
     return'<div class="livescore-row"><div class="livescore-row-stage">'+stageLabel+' '+fm.liveScoreStatusHTML+'</div><div class="livescore-row-teams"><span>'+m.home+'</span><span class="livescore-row-score'+fm.liveClass+'" style="'+(fm.scoreColor||'')+'"><span class="lsh">'+(ms&&ms.home_score!=null?ms.home_score:'-')+'</span><span class="lscol">:</span><span class="lsa">'+(ms&&ms.away_score!=null?ms.away_score:'-')+'</span></span><span>'+m.away+'</span></div></div>';
   }).join('');
