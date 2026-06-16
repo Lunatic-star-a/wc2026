@@ -375,19 +375,19 @@ footer{text-align:center;padding:60px 0;border-top:1px solid rgba(255,255,255,0.
 @media(max-width:480px){.chat-panel{width:100vw;max-width:100vw}}
 /* Live Score Board */
 .livescore-section{padding:100px 0;position:relative}
-.livescore-board{background:var(--card);border:1px solid rgba(255,255,255,0.06);border-radius:12px;overflow:hidden;max-width:900px;margin:0 auto}
+.livescore-board{background:var(--card);border:1px solid rgba(255,255,255,0.06);border-radius:12px;max-width:900px;margin:0 auto}
 .livescore-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:linear-gradient(135deg,rgba(13,140,60,0.2),rgba(13,140,60,0.05));border-bottom:1px solid rgba(255,255,255,0.06)}
 .livescore-title{font-family:var(--font-display);font-size:16px;color:#fff;letter-spacing:1px}
 .livescore-status{font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:6px}
 .live-dot{width:8px;height:8px;border-radius:50%;background:var(--accent-red);animation:livePulse 1.5s ease infinite}
 @keyframes livePulse{0%,100%{opacity:1}50%{opacity:0.3}}
 .livescore-embed{background:rgba(0,0,0,0.2);padding:8px;max-height:500px;overflow-y:auto}
-.livescore-row{display:flex;flex-direction:column;align-items:center;padding:18px 16px;border-bottom:1px solid rgba(255,255,255,0.03);gap:8px}
+.livescore-row{display:flex;flex-direction:column;align-items:center;padding:22px 16px;border-bottom:1px solid rgba(255,255,255,0.03);gap:8px}
 .livescore-row:hover{background:rgba(255,255,255,0.02)}
 .livescore-row-stage{font-size:10px;color:var(--text-dim);text-align:center}
-.livescore-row-teams{display:flex;align-items:center;gap:8px;justify-content:center;width:100%;overflow:hidden}
+.livescore-row-teams{display:flex;align-items:center;gap:10px;justify-content:center;width:100%;overflow:visible}
 .livescore-row-teams span{font-size:14px;color:var(--text);font-weight:500;flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.livescore-row-score{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--gold);padding:2px 8px;background:rgba(212,168,67,0.1);border-radius:6px;display:flex;align-items:center;gap:0;flex:0 0 auto;min-width:48px;justify-content:center;border:1.5px solid transparent}
+.livescore-row-score{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--gold);padding:6px 10px;background:rgba(212,168,67,0.1);border-radius:6px;display:flex;align-items:center;gap:0;flex:0 0 auto;min-width:50px;justify-content:center;border:1.5px solid transparent}
 .livescore-row-score .lsh,.livescore-row-score .lsa{text-align:center;min-width:14px}
 .livescore-row-score .lscol{padding:0 3px;color:var(--text-dim)}
 footer strong{color:var(--gold);}
@@ -574,10 +574,10 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   .lb-points{font-size:13px}
   /* Live scores */
   .livescore-board{max-width:100%}
-  .livescore-row{padding:14px 12px;gap:6px}
+  .livescore-row{padding:18px 12px;gap:6px}
   .livescore-row-stage{font-size:9px}
   .livescore-row-teams span{font-size:12px;flex:1}
-  .livescore-row-score{font-size:14px;padding:2px 6px;min-width:42px}
+  .livescore-row-score{font-size:14px;padding:5px 8px;min-width:44px}
   .livescore-row-score .lsh,.livescore-row-score .lsa{min-width:12px}
   /* Auth modal */
   .auth-modal{padding:28px 20px}
@@ -666,9 +666,9 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   .lb-rank{font-size:16px;width:24px}
   .lb-name{font-size:12px}
   /* Live scores */
-  .livescore-row{padding:14px 8px;gap:6px}
+  .livescore-row{padding:16px 8px;gap:5px}
   .livescore-row-teams span{font-size:10px;flex:1}
-  .livescore-row-score{font-size:12px;padding:1px 5px;min-width:38px}
+  .livescore-row-score{font-size:12px;padding:4px 6px;min-width:40px}
   .livescore-row-score .lsh,.livescore-row-score .lsa{min-width:10px}
   /* Auth */
   .auth-modal{padding:24px 16px}
@@ -2248,7 +2248,14 @@ function renderLiveScores(){
     var ms=matchScores[dbId];
     var fm=ms?formatMatchStatus(m,ms):{status:'upcoming',statusBadge:'',minuteHTML:'<span style="color:var(--text-dim);font-size:11px">未开始</span>',liveScoreStatusHTML:'<span style="color:var(--text-dim);font-size:11px">未开始</span>',liveClass:'',scoreColor:''};
     var stageLabel=(stageCN[m.stage]||m.stage)+(m.group?' · '+m.group+'组':'');
-    return'<div class="livescore-row"><div class="livescore-row-stage">'+stageLabel+' '+fm.liveScoreStatusHTML+'</div><div class="livescore-row-teams"><span>'+m.home+'</span><span class="livescore-row-score'+fm.liveClass+'" style="'+(fm.scoreColor||'')+'"><span class="lsh">'+(ms&&ms.home_score!=null?ms.home_score:'-')+'</span><span class="lscol">:</span><span class="lsa">'+(ms&&ms.away_score!=null?ms.away_score:'-')+'</span></span><span>'+m.away+'</span></div></div>';
+    // 未开始的比赛统一显示 0:0；有比分的显示实际比分
+    var showH = '-', showA = '-';
+    if (ms && ms.home_score != null && ms.away_score != null) {
+      showH = ms.home_score; showA = ms.away_score;
+    } else if (fm.status === 'upcoming') {
+      showH = 0; showA = 0;
+    }
+    return'<div class="livescore-row"><div class="livescore-row-stage">'+stageLabel+' '+fm.liveScoreStatusHTML+'</div><div class="livescore-row-teams"><span>'+m.home+'</span><span class="livescore-row-score'+fm.liveClass+'" style="'+(fm.scoreColor||'')+'"><span class="lsh">'+showH+'</span><span class="lscol">:</span><span class="lsa">'+showA+'</span></span><span>'+m.away+'</span></div></div>';
   }).join('');
 }
 
