@@ -1775,16 +1775,17 @@ async function openPredHistory(){
         localPreds.forEach(function(p){
           var m=ALL_MATCHES[p.match_id-1]||{date:'?',home:'?',away:'?'};
           var ms=matchScores[p.match_id];
-          var actual=ms&&ms.home_score!=null?ms.home_score+' : '+ms.away_score:'';
-          var pts=0,resultHTML='';
           var rSt=ms?resolveStatus(ms,m):'upcoming';
+          // 只对已开始的比赛显示实际比分，未开始的显示 —（即使 ESPN 已下发 0:0 数据）
+          var actual=(rSt==='finished'||rSt==='live'||rSt==='halftime')&&ms.home_score!=null ? ms.home_score+' : '+ms.away_score : '';
+          var pts=0,resultHTML='';
           if(rSt==='finished'){
             if(p.home_score===ms.home_score&&p.away_score===ms.away_score){pts=3;resultHTML='<span class="ph-hit">完全正确</span>';}
             else if((p.home_score>p.away_score&&ms.home_score>ms.away_score)||(p.home_score<p.away_score&&ms.home_score<ms.away_score)||(p.home_score===p.away_score&&ms.home_score===ms.away_score)){pts=1;resultHTML='<span>胜负正确</span>';}
             else{resultHTML='<span class="ph-miss">预测失败</span>';}
           }else if(rSt==='live'||rSt==='halftime'){resultHTML='<span style="color:#0fa84a">进行中</span>';}
           else{resultHTML='<span style="color:var(--text-dim)">待开赛</span>';}
-          html+='<tr><td>'+m.date+' '+m.time+'</td><td>'+m.home+' vs '+m.away+'</td><td>'+p.home_score+' : '+p.away_score+'</td><td>'+(actual||'—')+'</td><td>'+resultHTML+'</td><td class="ph-pts">'+(actual?pts:'—')+'</td></tr>';
+          html+='<tr><td>'+m.date+' '+m.time+'</td><td>'+m.home+' vs '+m.away+'</td><td>'+p.home_score+' : '+p.away_score+'</td><td>'+(actual||'—')+'</td><td>'+resultHTML+'</td><td class="ph-pts">'+(rSt==='finished'?pts:'—')+'</td></tr>';
         });
         html+='</tbody></table>';
         html+='</div>'; // close pred-hist-scroll
@@ -1813,17 +1814,21 @@ async function openPredHistory(){
     html+='<div class="pred-hist-scroll"><table class="pred-hist-table"><thead><tr><th>日期</th><th>比赛</th><th>预测</th><th>比分</th><th>结果</th><th>得分</th></tr></thead><tbody>';
     preds.forEach(function(p){
       var sm=scoreMap[p.match_id]||{};
-      var actual=sm.home_score!=null?sm.home_score+' : '+sm.away_score:'';
+      // resolveStatus 需要 s (score对象) + matchObj (含 match_date/match_time)
+      // sm 本身来自 Supabase matches 表，同时包含 score 字段和 match_date/match_time
+      var smStatus=resolveStatus(sm,sm);
+      // 只对已开始的比赛显示实际比分
+      var actual=(smStatus==='finished'||smStatus==='live'||smStatus==='halftime')&&sm.home_score!=null ? sm.home_score+' : '+sm.away_score : '';
       var stageCN={group:'小组赛',r32:'1/16决赛',r16:'1/8决赛',qf:'1/4决赛',sf:'半决赛','3rd':'季军赛',final:'决赛'};
       var pts=0,resultHTML='';
-      if(sm.status==='finished'){
+      if(smStatus==='finished'){
         if(p.home_score===sm.home_score&&p.away_score===sm.away_score){pts=3;resultHTML='<span class="ph-hit">🎯 完全正确</span>';totalExact++;}
         else if((p.home_score>p.away_score&&sm.home_score>sm.away_score)||(p.home_score<p.away_score&&sm.home_score<sm.away_score)||(p.home_score===p.away_score&&sm.home_score===sm.away_score)){pts=1;resultHTML='<span>✅ 胜负正确</span>';totalOutcome++;}
         else{resultHTML='<span class="ph-miss">❌ 错误</span>';}
         totalPts+=pts;
-      }else if(sm.status==='live'||sm.status==='halftime'){resultHTML='<span style="color:#0fa84a">⚡ 进行中</span>';}
+      }else if(smStatus==='live'||smStatus==='halftime'){resultHTML='<span style="color:#0fa84a">⚡ 进行中</span>';}
       else{resultHTML='<span style="color:var(--text-dim)">⏳ 待开赛</span>';}
-      html+='<tr><td>'+(sm.match_date||'?')+' '+(sm.match_time||'')+'</td><td>'+(sm.home_team||'?')+' vs '+(sm.away_team||'?')+'</td><td>'+p.home_score+' : '+p.away_score+'</td><td>'+(actual||'—')+'</td><td>'+resultHTML+'</td><td class="ph-pts">'+(sm.status==='finished'?pts:'—')+'</td></tr>';
+      html+='<tr><td>'+(sm.match_date||'?')+' '+(sm.match_time||'')+'</td><td>'+(sm.home_team||'?')+' vs '+(sm.away_team||'?')+'</td><td>'+p.home_score+' : '+p.away_score+'</td><td>'+(actual||'—')+'</td><td>'+resultHTML+'</td><td class="ph-pts">'+(smStatus==='finished'?pts:'—')+'</td></tr>';
     });
     html+='</tbody></table>';
     html+='</div>'; // close pred-hist-scroll
