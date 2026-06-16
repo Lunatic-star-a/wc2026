@@ -1154,12 +1154,12 @@ function resolveStatus(s,matchObj){
   if(ms){var elapsed=(Date.now()-ms)/60000;if(elapsed>150)return 'finished';if(elapsed>0)return 'live';}
   return s.status;
 }
-var _lastScoresHash='',_predVersion=0,_lastRenderKey='',_renderCooldown=0;
+var _lastScoresHash='',_predVersion=0,_lastRenderKey='';
 function _scoresHash(){var a=[];for(var i=1;i<=104;i++){var m=matchScores[i];if(m&&m.home_score!=null)a.push(i+':'+m.home_score+'-'+m.away_score+':'+m.status+':'+m.match_minute+':'+m.injury_time);}return a.join('|');}
 function _renderKey(filter){return (filter||'all')+'|'+_scoresHash()+'|'+_predVersion+'|'+(allDatesExpanded?'1':'0');}
 /* ═══ ESPN LIVE POLLER (browser fetches scores directly — no GitHub latency) ═══ */
 var ESPN_TEAM_CN={"mexico":"墨西哥","south africa":"南非","south korea":"韩国","czechia":"捷克","czech republic":"捷克","canada":"加拿大","bosnia and herzegovina":"波黑","bosnia":"波黑","united states":"美国","usa":"美国","paraguay":"巴拉圭","qatar":"卡塔尔","switzerland":"瑞士","brazil":"巴西","morocco":"摩洛哥","haiti":"海地","scotland":"苏格兰","australia":"澳大利亚","turkey":"土耳其","türkiye":"土耳其","germany":"德国","curacao":"库拉索","curaçao":"库拉索","netherlands":"荷兰","japan":"日本","sweden":"瑞典","tunisia":"突尼斯","ivory coast":"科特迪瓦","cote d'ivoire":"科特迪瓦","ecuador":"厄瓜多尔","spain":"西班牙","cape verde":"佛得角","belgium":"比利时","egypt":"埃及","saudi arabia":"沙特","uruguay":"乌拉圭","iran":"伊朗","new zealand":"新西兰","france":"法国","senegal":"塞内加尔","iraq":"伊拉克","norway":"挪威","argentina":"阿根廷","algeria":"阿尔及利亚","austria":"奥地利","jordan":"约旦","portugal":"葡萄牙","dr congo":"刚果(金)","congo":"刚果(金)","uzbekistan":"乌兹别克斯坦","colombia":"哥伦比亚","england":"英格兰","croatia":"克罗地亚","ghana":"加纳","panama":"巴拿马"};
-var _pollTimer=null,_fastPollUntil=0,_lastESPNMinute={},_lastPollDone=0;
+var _pollTimer=null,_fastPollUntil=0,_lastESPNMinute={},_lastESPNFreeze={},_lastPollDone=0;
 async function _pollESPN(){
   try{
     var fmt=Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai'});
@@ -1204,24 +1204,31 @@ async function _pollESPN(){
       var old=matchScores[dbId]||{};
       if(old.status==='finished')continue;
       // Enhanced halftime detection:
-      // 1. ESPN reports STATU_HALF_TIME / STATUS_END_OF_PERIOD — already caught above
-      // 2. Clock shows "HT" or "halftime"
-      // 3. period 1 + minute>=45 + clock frozen (injury time stopped changing)
-      // 4. period 2 + minute 0 (halftime, second half not yet started)
+      // 1. ESPN reports STATUS_HALF_TIME / STATUS_END_OF_PERIOD — already caught above
+      // 2. Clock shows "HT" or "halftime" — immediate halftime
+      // 3. period===1 + minute>=45 + clock frozen for 2+ consecutive polls → halftime
+      //    (only period 1; second half uses ESPN-native status)
       if(dbSt==='live'){
         var clockLow=clock.toLowerCase();
         if(clockLow.indexOf('ht')>=0||clockLow.indexOf('half')>=0){
           dbSt='halftime';
-        } else if((period===1||period===2)&&min>=45){
+          _lastESPNFreeze[dbId]=0;
+        } else if(period===1&&min>=45){
           var prevKey=_lastESPNMinute[dbId];
           var curKey=period+':'+min+':'+inj;
-          if(prevKey===curKey){dbSt='halftime';}
+          if(prevKey===curKey){
+            var fc=(_lastESPNFreeze[dbId]||0)+1;
+            if(fc>=2){dbSt='halftime';_lastESPNFreeze[dbId]=0;}
+            else{_lastESPNFreeze[dbId]=fc;}
+          } else {_lastESPNFreeze[dbId]=0;}
           _lastESPNMinute[dbId]=curKey;
         } else {
           _lastESPNMinute[dbId]=period+':'+min+':'+inj;
+          _lastESPNFreeze[dbId]=0;
         }
       } else {
         _lastESPNMinute[dbId]=period+':'+min+':'+inj;
+        _lastESPNFreeze[dbId]=0;
       }
       var oldHash=dbId+':'+(old.home_score||'')+'-'+(old.away_score||'')+':'+(old.status||'')+':'+(old.match_minute||'')+':'+(old.injury_time||'');
       var newHash=dbId+':'+hs+'-'+as+':'+dbSt+':'+min+':'+inj;
@@ -1234,7 +1241,10 @@ async function _pollESPN(){
       var h2=_scoresHash();
       if(h2!==_lastESPNHash){
         _lastESPNHash=h2;_lastScoresHash='';
+        // Save scroll position so silent score update doesn't jump the page
+        var scrollY=window.scrollY;
         renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');
+        window.scrollTo(0,scrollY);
         renderGroupsWithStandings();renderThirdPlace();renderLiveScores();observeReveals();
       }
     }
@@ -1290,16 +1300,10 @@ function renderGroups(){
 
 /* ═══ RENDER: Schedule (collapsible by date) ═══ */
 function renderMatches(filter,force){
-  // Dedup guard: skip if same content already rendered — but "force" bypasses
-  if(!force){
-    var rk=_renderKey(filter);
-    var now=Date.now();
-    if(rk===_lastRenderKey&&now-_renderCooldown<800)return;
-    if(now-_renderCooldown<300&&rk===_lastRenderKey)return;
-    _lastRenderKey=rk;_renderCooldown=now;
-  } else {
-    _lastRenderKey='';_renderCooldown=0;
-  }
+  // Content-hash dedup: skip if same data already rendered (unless forced)
+  var rk=_renderKey(filter);
+  if(!force&&rk===_lastRenderKey)return;
+  _lastRenderKey=rk;
   // Snapshot open days + open prediction sidebars to preserve state across re-renders
   var savedOpen=new Set(),savedPanels=new Set();
   var openEls=document.querySelectorAll('.day-matches.open');
@@ -1337,19 +1341,17 @@ function renderMatchCard(m,idx,savedPanels){
   const ms=matchScores[matchDbId];
   const hasResult=ms&&ms.home_score!=null&&ms.away_score!=null;
   const existing=userPredictions[matchDbId];
-  const resolvedStatus=ms?resolveStatus(ms,m):null;
-  let predHTML,statusBadge='';
-  if(resolvedStatus==='live'){statusBadge='<span class="match-live-badge" style="color:#0fa84a"><span class="live-dot-sm" style="background:#0fa84a"></span> 直播中</span>';}
-  else if(resolvedStatus==='halftime'){statusBadge='<span class="match-live-badge"><span class="live-dot-sm"></span> 中场</span>';}
-  else if(resolvedStatus==='finished'){statusBadge='<span class="match-finished-badge">已结束</span>';}
+  let predHTML;
+  var fm=ms?formatMatchStatus(m,ms):{status:'upcoming',statusBadge:'',minuteHTML:''};
+  var resolvedStatus=fm.status,statusBadge=fm.statusBadge,liveMinute=fm.minuteHTML;
+  var scoreColor=fm.scoreColor||'';
   if(isTBD){predHTML='<span style="font-size:10px;color:var(--text-dim)">待定</span>';}
   else if(hasResult&&(resolvedStatus==='live'||resolvedStatus==='halftime')){predHTML=`<div class="match-pred-inline locked"><span class="match-result-score" style="color:#0fa84a">${ms.home_score} : ${ms.away_score}</span></div>`;}
   else if(hasResult){predHTML=`<div class="match-pred-inline locked"><span class="match-result-score">${ms.home_score} : ${ms.away_score}</span></div>`;}
   else if(existing){predHTML=`<div class="match-pred-inline locked"><span class="pred-inline-score">${existing.home_score}</span><span class="pred-inline-vs">:</span><span class="pred-inline-score">${existing.away_score}</span><span class="pred-locked-badge">✓</span></div>`;}
   else{predHTML=`<div class="match-pred-inline"><input class="pred-inline-input" placeholder="-" maxlength="2" id="schH_${matchDbId}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onclick="event.stopPropagation()"><span class="pred-inline-vs">:</span><input class="pred-inline-input" placeholder="-" maxlength="2" id="schA_${matchDbId}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onclick="event.stopPropagation()"><button class="pred-inline-btn" onclick="event.stopPropagation();submitPrediction(${matchDbId},'${m.home.replace(/'/g,"\\'")}','${m.away.replace(/'/g,"\\'")}','sch')" title="快速预测">猜</button></div>`;}
-  const liveMinute=ms?formatMatchMinute(ms.match_minute,ms.injury_time,resolvedStatus):'';
   const combinedStatus=liveMinute?`${statusBadge} ${liveMinute}`:statusBadge;
-  const cardStatus=resolvedStatus==='live'||resolvedStatus==='halftime'?' live':'';
+  var cardStatus=resolvedStatus==='live'||resolvedStatus==='halftime'?' live':'';
   // My Prediction sidebar — only for finished/live/halftime matches where user predicted
   var predSidebarHTML='',hasSidebar='';
   if(existing&&hasResult&&(resolvedStatus==='finished'||resolvedStatus==='live'||resolvedStatus==='halftime')){
@@ -1359,18 +1361,28 @@ function renderMatchCard(m,idx,savedPanels){
   }
   return `<div class="match-card reveal${cardStatus}${resolvedStatus==='finished'?' finished':''}${hasSidebar}" id="mc-${matchDbId}"><div class="match-date"><strong>${m.date}</strong>${m.time} 北京时间</div><div class="match-info"><div class="match-teams">${hName}<span class="match-vs">VS</span>${aName}</div><div class="match-venue">${m.venue}${m.group?' · '+m.group+'组':''} · <span style="font-size:10px;color:var(--text-dim)">${stageLabel}</span></div></div><div class="match-actions">${predHTML}<button class="chat-card-btn" onclick="event.stopPropagation();openChatRoom(${matchDbId},'${m.home.replace(/'/g,"\\'")} vs ${m.away.replace(/'/g,"\\'")}')" title="进入聊天室">💬 聊</button><div class="match-status-row">${combinedStatus}</div></div>${predSidebarHTML}</div>`;
 	}
-	function formatMatchMinute(minute,injuryTime,status){
-	  if(status==='halftime')return '';
-	  if(status==='finished')return '';
-	  if(status==='live'){
-	    if(!minute||minute<=0)return '<span style="color:#0fa84a">0\'</span>';
-	    if(injuryTime&&injuryTime>0){
-	      const base=minute<=45?45:90;
-	      return '<span style="color:#0fa84a">'+base+'+'+injuryTime+"'</span>";
-	    }
-	    return '<span style="color:#0fa84a">'+minute+"'</span>";
+	// Unified status display — used by both match cards and live scores
+	function formatMatchStatus(matchObj,ms){
+	  var st=ms?resolveStatus(ms,matchObj):'upcoming';
+	  var statusBadge='',minuteHTML='',liveScoreStatusHTML='',liveClass='',scoreColor='';
+	  if(st==='live'){
+	    statusBadge='<span class="match-live-badge" style="color:#0fa84a"><span class="live-dot-sm" style="background:#0fa84a"></span> 直播中</span>';
+	    var min=ms.match_minute||0,inj=ms.injury_time||0;
+	    if(!min||min<=0){minuteHTML='<span style="color:#0fa84a">0\'</span>';}
+	    else if(inj&&inj>0){var base=min<=45?45:90;minuteHTML='<span style="color:#0fa84a">'+base+'+'+inj+"'</span>";}
+	    else{minuteHTML='<span style="color:#0fa84a">'+min+"'</span>";}
+	    scoreColor='color:#0fa84a';liveClass=' live';liveScoreStatusHTML=minuteHTML;
+	  }else if(st==='halftime'){
+	    statusBadge='<span class="match-live-badge"><span class="live-dot-sm"></span> 中场</span>';
+	    minuteHTML='';liveScoreStatusHTML='<span style="color:#f39c12;font-size:11px">中场</span>';
+	    scoreColor='color:#f39c12';
+	  }else if(st==='finished'){
+	    statusBadge='<span class="match-finished-badge">已结束</span>';
+	    minuteHTML='';liveScoreStatusHTML='<span style="color:var(--text-dim);font-size:11px">已结束</span>';
+	  }else{
+	    minuteHTML='';liveScoreStatusHTML='<span style="color:var(--text-dim);font-size:11px">未开始</span>';
 	  }
-	  return '<span style="color:var(--pitch)">即将开始</span>';
+	  return {status:st,statusBadge:statusBadge,minuteHTML:minuteHTML,liveScoreStatusHTML:liveScoreStatusHTML,liveClass:liveClass,scoreColor:scoreColor};
 	}
 function findTodayKey(){const now=getSimDate();const m=now.getMonth()+1,d=now.getDate();const test=m+'月'+d+'日';return ALL_MATCHES.find(m=>m.date===test)?test:null;}
 function toggleDay(dayId){document.getElementById(dayId).classList.toggle('open');const a=document.getElementById('arrow-'+dayId);if(a)a.classList.toggle('open');}
@@ -1385,21 +1397,24 @@ function scrollToToday(){
   if(!todayKey){showToast('今天没有比赛');return;}
   allDatesExpanded=false;
   var btn=document.getElementById('toggleAllBtn');if(btn)btn.textContent='展开全部';
+  // Reset filters to 'group' active (same as initial load)
   document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
   var defaultBtn=document.querySelector('.filter-btn[data-filter="group"]');
   if(defaultBtn)defaultBtn.classList.add('active');
+  // Force full re-render like page reload
   renderMatches('all',true);
+  // Small timeout for DOM to settle, then open today
   setTimeout(function(){
     var dayId='day-'+todayKey.replace(/[月日]/g,'-');
     var el=document.getElementById(dayId);
     if(el){
-      var dm=el.parentElement.querySelector('.day-matches');
-      if(dm)dm.classList.add('open');
+      el.parentElement.style.display='';
+      el.classList.add('open');
       var a=document.getElementById('arrow-'+dayId);
       if(a)a.classList.add('open');
       el.parentElement.scrollIntoView({behavior:'smooth',block:'center'});
     }
-  },150);
+  },50);
 }
 function jumpToStage(stage){
   allDatesExpanded=true;
@@ -1412,10 +1427,12 @@ function jumpToStage(stage){
   setTimeout(function(){
     var el=document.querySelector('.schedule-day');
     if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
-  },150);
+  },50);
 }
 function buildJumpMenu(){const sel=document.querySelector('.jump-select');if(!sel)return;const dates=[...new Set(ALL_MATCHES.map(m=>m.date))];const ga=sel.querySelector('optgroup[label="🏟 小组赛"]');const ka=sel.querySelector('optgroup[label="🏆 淘汰赛"]');dates.forEach(d=>{const ms=ALL_MATCHES.filter(m=>m.date===d);const isGrp=ms[0]&&ms[0].stage==='group';const opt=document.createElement('option');opt.value=d;opt.textContent=d+' ('+ms.length+'场)'; (isGrp?ga:ka).appendChild(opt);});}
-function jumpToDate(d){if(!d)return;var dayId='day-'+d.replace(/[月日]/g,'-');allDatesExpanded=true;var btn=document.getElementById('toggleAllBtn');if(btn)btn.textContent='收起全部';
+function jumpToDate(d){if(!d)return;var dayId='day-'+d.replace(/[月日]/g,'-');
+  allDatesExpanded=true;
+  var btn=document.getElementById('toggleAllBtn');if(btn)btn.textContent='收起全部';
   document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
   var defaultBtn=document.querySelector('.filter-btn[data-filter="group"]');
   if(defaultBtn)defaultBtn.classList.add('active');
@@ -1423,13 +1440,13 @@ function jumpToDate(d){if(!d)return;var dayId='day-'+d.replace(/[月日]/g,'-');
   setTimeout(function(){
     var el=document.getElementById(dayId);
     if(el){
-      var dm=el.parentElement.querySelector('.day-matches');
-      if(dm)dm.classList.add('open');
+      el.parentElement.style.display='';
+      el.classList.add('open');
       var a=document.getElementById('arrow-'+dayId);
       if(a)a.classList.add('open');
       el.parentElement.scrollIntoView({behavior:'smooth',block:'center'});
     }
-  },150);}
+  },50);}
 function renderThirdPlace(){
   const tbody=document.getElementById('thirdPlaceTbody');
   const standings=calculateGroupStandings();
@@ -1982,35 +1999,22 @@ function subscribeChat(){
 }
 
 /* ═══ LIVE SCORES ═══ */
-async function renderLiveScores(){
-  const el=document.getElementById('liveScoreList');
+function renderLiveScores(){
+  var el=document.getElementById('liveScoreList');
   if(!el)return;
-  if(!SUPABASE_READY){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim);font-size:13px">联网后可查看实时比分</div>';return;}
-  try{
-    const{data,error}=await sb.from('matches').select('id,home_team,away_team,home_score,away_score,status,stage,group_name,match_date,match_time,match_minute,injury_time').order('match_date',{ascending:true});
-    if(error)throw error;
-    // Only today's matches
-    const today=Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai'}).format(new Date()); // "2026-06-13"
-    const liveData=(data||[]).filter(m=>m.match_date===today);
-    if(liveData.length===0){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim);font-size:13px">今日暂无比分数据</div>';return;}
-    const stageCN={group:'小组赛',r32:'1/16决赛',r16:'1/8决赛',qf:'1/4决赛',sf:'半决赛','3rd':'季军赛',final:'决赛'};
-    el.innerHTML=liveData.map(m=>{
-      const st=resolveStatus(m);
-      let minuteHTML='', scoreStyle='', scoreExtraClass='';
-      if(st==='halftime'){minuteHTML='<span style="color:#f39c12;font-size:11px">中场</span>';scoreStyle='color:#f39c12';}
-      else if(st==='finished'){minuteHTML='<span style="color:var(--text-dim);font-size:11px">已结束</span>';}
-      else if(st==='live'){
-        const min=m.match_minute||0;
-        const disp=m.injury_time&&m.injury_time>0?(min<=45?'45+':'90+')+m.injury_time+"'":min+"'";
-        minuteHTML='<span style="color:#0fa84a;font-size:11px">'+disp+'</span>';
-        scoreStyle='color:#0fa84a';scoreExtraClass=' live';
-      }
-      else{minuteHTML='<span style="color:var(--text-dim);font-size:11px">未开始</span>';}
-      return`<div class="livescore-row">
-      <div class="livescore-row-stage">${stageCN[m.stage]||m.stage}${m.group_name?' · '+m.group_name+'组':''} ${minuteHTML}</div>
-      <div class="livescore-row-teams"><span>${m.home_team}</span><span class="livescore-row-score${scoreExtraClass}" style="${scoreStyle}"><span class="lsh">${m.home_score??'-'}</span><span class="lscol">:</span><span class="lsa">${m.away_score??'-'}</span></span><span>${m.away_team}</span></div>
-    </div>`}).join('');
-  }catch(e){console.error('Live scores:',e);el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim);font-size:13px">比分加载失败，请刷新重试</div>';}
+  // Use in-memory data (same source as match cards) for consistency
+  var todayKey=findTodayKey();
+  if(!todayKey){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim);font-size:13px">今日暂无比分数据</div>';return;}
+  var todayMatches=ALL_MATCHES.filter(function(m){return m.date===todayKey;});
+  if(todayMatches.length===0){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim);font-size:13px">今日暂无比分数据</div>';return;}
+  var stageCN={group:'小组赛',r32:'1/16决赛',r16:'1/8决赛',qf:'1/4决赛',sf:'半决赛','3rd':'季军赛',final:'决赛'};
+  el.innerHTML=todayMatches.map(function(m){
+    var dbId=ALL_MATCHES.indexOf(m)+1;
+    var ms=matchScores[dbId];
+    var fm=ms?formatMatchStatus(m,ms):{status:'upcoming',minuteHTML:'<span style="color:var(--text-dim);font-size:11px">未开始</span>',scoreColor:''};
+    var stageLabel=(stageCN[m.stage]||m.stage)+(m.group?' · '+m.group+'组':'');
+    return'<div class="livescore-row"><div class="livescore-row-stage">'+stageLabel+' '+fm.liveScoreStatusHTML+'</div><div class="livescore-row-teams"><span>'+m.home+'</span><span class="livescore-row-score'+fm.liveClass+'" style="'+(fm.scoreColor||'')+'"><span class="lsh">'+(ms&&ms.home_score!=null?ms.home_score:'-')+'</span><span class="lscol">:</span><span class="lsa">'+(ms&&ms.away_score!=null?ms.away_score:'-')+'</span></span><span>'+m.away+'</span></div></div>';
+  }).join('');
 }
 
 /* ═══ INIT ═══ */
