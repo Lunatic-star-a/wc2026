@@ -2133,7 +2133,7 @@ async function loadPublicChat(){
       if(!isMe&&currentUser&&!isDeleted){
         actionBtns='<button onclick="replyMessage('+m.id+',\''+(m.username||'').replace(/'/g,'\\\'')+'\',\''+(m.message||'').replace(/'/g,'\\\'').substring(0,50)+'\')">回复</button>';
       }
-      var timeStr=m.created_at?new Date(m.created_at).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}):'';
+      var timeStr='';if(m.created_at){var d=new Date(m.created_at);timeStr=(d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
       return'<div class="pchat-msg'+(isMe?' self':'')+'" data-id="'+m.id+'"><div class="pchat-msg-avatar">'+(m.username||'?')[0]+'</div><div class="pchat-msg-body">'+quoteHTML+'<div class="pchat-msg-head"><span class="pchat-msg-name">'+(m.username||'匿名')+'</span><span class="pchat-msg-time">'+timeStr+'</span></div><div class="pchat-msg-text'+(isDeleted?' deleted':'')+'">'+m.message.replace(/</g,'&lt;').replace(/>/g,'&gt;')+(actionBtns?' <span class="pchat-msg-actions">'+actionBtns+'</span>':'')+'</div></div></div>';
     }).join('');
     el.scrollTop=el.scrollHeight;
