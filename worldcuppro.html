@@ -1219,6 +1219,7 @@ function patchMatchDisplay(dbId){
   var m=ALL_MATCHES[dbId-1];
   if(!m)return;
   var fm=formatMatchStatus(m,ms);
+  var existing=userPredictions[dbId];
   // 1. Update status badge + minute in the match-status-row
   var row=card.querySelector('.match-status-row');
   if(row){
@@ -1226,35 +1227,38 @@ function patchMatchDisplay(dbId){
     if(fm.minuteHTML)combined+=' '+fm.minuteHTML;
     row.innerHTML=combined;
   }
-  // 2. Update score display
+  // 2. Update score display if it's a match-result-score span
   var scoreEl=card.querySelector('.match-result-score');
   if(scoreEl){
     scoreEl.textContent=ms.home_score+' : '+ms.away_score;
     if(fm.status==='live')scoreEl.style.color='#0fa84a';
     else if(fm.status==='finished')scoreEl.style.color='';
   }
-  // 3. Update the inline pred locked area if no result yet
+  // 3. When match goes live/finished: replace prediction display with actual score
+  //    Also create prediction sidebar if user has a prediction
   var mA=card.querySelector('.match-actions');
   if(mA){
-    var locked=mA.querySelector('.match-pred-inline.locked');
-    if(!locked&&ms.home_score!=null&&ms.away_score!=null){
-      // Match started — hide prediction inputs and show score
-      var predEl=mA.querySelector('.match-pred-inline');
-      if(predEl){predEl.outerHTML='<div class=\"match-pred-inline locked\"><span class=\"match-result-score\">'+ms.home_score+' : '+ms.away_score+'</span></div>';}
+    var predInline=mA.querySelector('.match-pred-inline');
+    if(predInline && ms.home_score!=null && ms.away_score!=null && (fm.status==='live'||fm.status==='halftime'||fm.status==='finished')){
+      var scoreHTML=ms.home_score+' : '+ms.away_score;
+      var scoreStyle=fm.status==='live'||fm.status==='halftime'?' style="color:#0fa84a"':'';
+      predInline.outerHTML='<div class="match-pred-inline locked"><span class="match-result-score"'+scoreStyle+'>'+scoreHTML+'</span></div>';
+      // 创建/更新预测侧边栏
+      if(existing&&!card.querySelector('.match-pred-wrap')){
+        var oldSidebar=card.querySelector('.match-pred-wrap');
+        if(oldSidebar)oldSidebar.remove();
+        var panelWasOpen=savedPanels&&savedPanels.has(String(dbId));
+        var sidebarHTML='<div class="match-pred-wrap"><div class="match-pred-panel'+(panelWasOpen?' open':'')+'" id="predPanel-'+dbId+'"><div class="mpp-inner"><div class="mpp-label">我的预测</div><div class="mpp-score">'+existing.home_score+' : '+existing.away_score+'</div><div class="mpp-teams">'+m.home+' vs '+m.away+'</div></div></div><div class="match-pred-tab'+(panelWasOpen?' open':'')+'" id="predTab-'+dbId+'" onclick="event.stopPropagation();togglePredSide('+dbId+')" title="查看我的预测">'+(panelWasOpen?'收起':'我的预测')+'</div></div>';
+        card.insertAdjacentHTML('beforeend',sidebarHTML);
+        card.classList.add('has-sidebar');
+      }
     }
   }
-  // 4. Add/remove .live class
-  if(fm.status==='live'||fm.status==='halftime'){
-    card.classList.add('live');
-  } else {
-    card.classList.remove('live');
-  }
-  if(fm.status==='finished'){
-    card.classList.add('finished');
-  } else {
-    card.classList.remove('finished');
-  }
-  // 5. Dispatch a custom event so live scores board can update too
+  // 4. Add/remove .live / .finished class
+  var cls=card.classList;
+  if(fm.status==='live'||fm.status==='halftime'){cls.add('live');}else{cls.remove('live');}
+  if(fm.status==='finished'){cls.add('finished');}else{cls.remove('finished');}
+  // 5. Dispatch custom event so live scores board can update too
   document.dispatchEvent(new CustomEvent('scorePatched',{detail:{dbId:dbId,ms:ms,status:fm.status}}));
 }
 /* ═══ ESPN LIVE POLLER (browser fetches scores directly — no GitHub latency) ═══ */
@@ -1486,11 +1490,31 @@ function renderMatchCard(m,idx,savedPanels){
   var fm=ms?formatMatchStatus(m,ms):{status:'upcoming',statusBadge:'',minuteHTML:''};
   var resolvedStatus=fm.status,statusBadge=fm.statusBadge,liveMinute=fm.minuteHTML;
   var scoreColor=fm.scoreColor||'';
+  /*
+    predHTML 优先级 (状态驱动):
+    - isTBD         → "待定"
+    - live/halftime → 显示实时比分 (绿色, 优先); 若无则保留预测输入框等待ESPN
+    - finished      → 显示最终比分
+    - upcoming      → 显示用户预测 (如有) 否则显示输入框
+  */
   if(isTBD){predHTML='<span style="font-size:10px;color:var(--text-dim)">待定</span>';}
-  else if(hasResult&&(resolvedStatus==='live'||resolvedStatus==='halftime')){predHTML=`<div class="match-pred-inline locked"><span class="match-result-score" style="color:#0fa84a">${ms.home_score} : ${ms.away_score}</span></div>`;}
-  else if(hasResult&&resolvedStatus==='finished'){predHTML=`<div class="match-pred-inline locked"><span class="match-result-score">${ms.home_score} : ${ms.away_score}</span></div>`;}
-  else if(existing){predHTML=`<div class="match-pred-inline locked"><span class="pred-inline-score">${existing.home_score}</span><span class="pred-inline-vs">:</span><span class="pred-inline-score">${existing.away_score}</span><span class="pred-locked-badge">✓</span></div>`;}
-  else{predHTML=`<div class="match-pred-inline"><input class="pred-inline-input" placeholder="-" maxlength="2" id="schH_${matchDbId}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onclick="event.stopPropagation()"><span class="pred-inline-vs">:</span><input class="pred-inline-input" placeholder="-" maxlength="2" id="schA_${matchDbId}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onclick="event.stopPropagation()"><button class="pred-inline-btn" onclick="event.stopPropagation();submitPrediction(${matchDbId},'${m.home.replace(/'/g,"\\'")}','${m.away.replace(/'/g,"\\'")}','sch')" title="快速预测">猜</button></div>`;}
+  else if(resolvedStatus==='live'||resolvedStatus==='halftime'){
+    if(hasResult){
+      predHTML='<div class="match-pred-inline locked"><span class="match-result-score" style="'+scoreColor+'">'+ms.home_score+' : '+ms.away_score+'</span></div>';
+    }else{
+      // ESPN 尚未推送比分 — 暂时保留用户预测或显示 "—"
+      if(existing){predHTML='<div class="match-pred-inline locked"><span class="pred-inline-score">'+existing.home_score+'</span><span class="pred-inline-vs">:</span><span class="pred-inline-score">'+existing.away_score+'</span><span class="pred-locked-badge">✓</span></div>';}
+      else{predHTML='<div class="match-pred-inline locked"><span class="match-result-score" style="'+scoreColor+'">— : —</span></div>';}
+    }
+  }
+  else if(resolvedStatus==='finished'){
+    if(hasResult){predHTML='<div class="match-pred-inline locked"><span class="match-result-score">'+ms.home_score+' : '+ms.away_score+'</span></div>';}
+    else{predHTML='<div class="match-pred-inline locked"><span class="match-result-score">— : —</span></div>';}
+  }
+  else{ // upcoming — 只显示预测，不显示ESPN初始数据
+    if(existing){predHTML='<div class="match-pred-inline locked"><span class="pred-inline-score">'+existing.home_score+'</span><span class="pred-inline-vs">:</span><span class="pred-inline-score">'+existing.away_score+'</span><span class="pred-locked-badge">✓</span></div>';}
+    else{predHTML='<div class="match-pred-inline"><input class="pred-inline-input" placeholder="-" maxlength="2" id="schH_'+matchDbId+'" oninput="this.value=this.value.replace(/[^0-9]/g,\'\').slice(0,2)" onclick="event.stopPropagation()"><span class="pred-inline-vs">:</span><input class="pred-inline-input" placeholder="-" maxlength="2" id="schA_'+matchDbId+'" oninput="this.value=this.value.replace(/[^0-9]/g,\'\').slice(0,2)" onclick="event.stopPropagation()"><button class="pred-inline-btn" onclick="event.stopPropagation();submitPrediction('+matchDbId+',\''+m.home.replace(/'/g,"\\'")+'\',\''+m.away.replace(/'/g,"\\'")+'\',\'sch\')" title="快速预测">猜</button></div>';}
+  }
   const combinedStatus=liveMinute?`${statusBadge} ${liveMinute}`:statusBadge;
   var cardStatus=resolvedStatus==='live'||resolvedStatus==='halftime'?' live':'';
   // My Prediction sidebar — only for finished/live/halftime matches where user predicted
