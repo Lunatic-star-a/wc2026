@@ -112,14 +112,14 @@ nav{position:sticky;top:0;z-index:100;background:rgba(10,14,23,0.88);
   padding:14px 10px;margin:10px 0;border:1px solid rgba(13,140,60,0.08)}
 .formation-row{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
 .formation-player{display:flex;flex-direction:column;align-items:center;
-  width:58px;text-align:center;gap:2px;transition:all 0.2s;cursor:default}
+  width:72px;text-align:center;gap:2px;transition:all 0.2s;cursor:default}
 .formation-player:hover{transform:translateY(-2px)}
 .formation-player .fp-num{font-family:var(--font-mono);font-size:13px;font-weight:700;
   width:28px;height:28px;border-radius:50%;background:rgba(13,140,60,0.2);
   display:flex;align-items:center;justify-content:center;color:var(--pitch-bright)}
-.formation-player .fp-name{font-size:9px;color:var(--text);line-height:1.1;
-  max-width:56px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.formation-player .fp-pos{font-size:7px;color:var(--text-dim)}
+.formation-player .fp-name{font-size:10px;color:var(--text);line-height:1.2;
+  max-width:72px;word-break:keep-all}
+.formation-player .fp-pos{font-size:8px;color:var(--text-dim)}
 .formation-separator{width:70%;height:1px;background:rgba(255,255,255,0.06);margin:4px 0}
 .bench-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .bench-chip{display:flex;align-items:center;gap:4px;font-size:10px;
@@ -261,48 +261,98 @@ function espnFlag(name) {
 }
 
 /* 位置 → 中文 (缩写来自 ESPN roster) */
-var POS_CN = {G:'门将','CD-L':'左中卫','CD-R':'右中卫',LB:'左后卫',RB:'右后卫',
+var POS_CN = {
+  G:'门将',GK:'门将','CD-L':'左中卫','CD-R':'右中卫',LB:'左后卫',RB:'右后卫',
   CB:'中后卫',CDM:'后腰',CM:'中场',CAM:'前腰',LM:'左中场',RM:'右中场',
-  LW:'左边锋',RW:'右边锋',ST:'前锋',LF:'左前锋',RF:'右前锋','CF':'中锋'};
+  LW:'左边锋',RW:'右边锋',ST:'前锋',LF:'左前锋',RF:'右前锋','CF':'中锋',
+  LWB:'左边翼卫',RWB:'右边翼卫',DM:'防守中场',AM:'进攻中场',
+  FW:'前锋',DF:'后卫',MF:'中场',SUB:'替补',
+  // ESPN 复合位置
+  'AM-R':'右前腰','AM-L':'左前腰','CM-R':'右中场','CM-L':'左中场',
+  'CF-R':'右中锋','CF-L':'左中锋','RM-R':'右中场','LM-L':'左中场',
+  'CD':'中后卫','F':'前锋','CD-L/R':'中后卫','CB-L':'左中卫','CB-R':'右中卫',
+  // 小写兼容
+  gk:'门将',lb:'左后卫',rb:'右后卫',cb:'中后卫',cdm:'后腰',cm:'中场',
+  cam:'前腰',lm:'左中场',rm:'右中场',lw:'左边锋',rw:'右边锋',st:'前锋',
+  cf:'中锋',lwb:'左边翼卫',rwb:'右边翼卫',fw:'前锋',df:'后卫',mf:'中场',
+  'am-r':'右前腰','am-l':'左前腰','cm-r':'右中场','cm-l':'左中场',
+  'cf-r':'右中锋','cf-l':'左中锋','cd':'中后卫','f':'前锋'
+};
+function posCN(abbr) {
+  if (!abbr) return '';
+  return POS_CN[abbr] || POS_CN[abbr.toUpperCase()] || abbr;
+}
 
 /* ═══ 球员中英文名映射 ═══ */
 var TEAM_PLAYER_CN = {"Santiago Giménez":"圣地亚哥·希门尼斯","Edson Álvarez":"埃德森·阿尔瓦雷斯","Percy Tau":"佩西·塔乌","Ronwen Williams":"朗文·威廉姆斯","Son Heung-min":"孙兴慜","Kim Min-jae":"金玟哉","Patrik Schick":"帕特里克·希克","Tomáš Souček":"托马斯·绍切克","Alphonso Davies":"阿方索·戴维斯","Jonathan David":"乔纳森·戴维","Edin Džeko":"埃丁·哲科","Miralem Pjanić":"米拉莱姆·皮亚尼奇","Akram Afif":"阿克拉姆·阿菲夫","Almoez Ali":"阿尔莫埃兹·阿里","Granit Xhaka":"格拉尼特·扎卡","Manuel Akanji":"曼努埃尔·阿坎吉","Vinícius Júnior":"维尼修斯","Rodrygo":"罗德里戈","Achraf Hakimi":"阿什拉夫·哈基米","Brahim Díaz":"卜拉欣·迪亚斯","Frantzdy Pierrot":"弗朗茨迪·皮埃罗","Duckens Nazon":"杜肯斯·纳宗","Andy Robertson":"安迪·罗伯逊","Scott McTominay":"斯科特·麦克托米奈","Christian Pulisic":"克里斯蒂安·普利西奇","Giovanni Reyna":"乔瓦尼·雷纳","Miguel Almirón":"米格尔·阿尔米隆","Julio Enciso":"胡利奥·恩西索","Mathew Ryan":"马修·瑞安","Harry Souttar":"哈里·苏塔","Hakan Çalhanoğlu":"哈坎·恰尔汗奥卢","Arda Güler":"阿尔达·居莱尔","Jamal Musiala":"贾马尔·穆西亚拉","Florian Wirtz":"弗洛里安·维尔茨","Leandro Bacuna":"莱安德罗·巴库纳","Juninho Bacuna":"儒尼尼奥·巴库纳","Franck Kessié":"弗兰克·凯西","Simon Adingra":"西蒙·阿丁格拉","Moisés Caicedo":"莫伊塞斯·凯塞多","Piero Hincapié":"皮耶罗·因卡皮耶","Virgil van Dijk":"维吉尔·范迪克","Frenkie de Jong":"弗伦基·德容","Kaoru Mitoma":"三笘薰","Takefusa Kubo":"久保建英","Alexander Isak":"亚历山大·伊萨克","Dejan Kulusevski":"德扬·库卢塞夫斯基","Ellyes Skhiri":"埃利斯·斯希里","Hannibal Mejbri":"汉尼拔·梅布里","Kevin De Bruyne":"凯文·德布劳内","Jérémy Doku":"杰雷米·多库","Mohamed Salah":"穆罕默德·萨拉赫","Omar Marmoush":"奥马尔·马尔穆什","Mehdi Taremi":"迈赫迪·塔雷米","Sardar Azmoun":"萨达尔·阿兹蒙","Chris Wood":"克里斯·伍德","Sarpreet Singh":"萨普里特·辛格","Lamine Yamal":"拉明·亚马尔","Pedri":"佩德里","Ryan Mendes":"瑞安·门德斯","Jovane Cabral":"若瓦内·卡布拉尔","Salem Al-Dawsari":"萨勒姆·多萨里","Firas Al-Buraikan":"菲拉斯·布赖坎","Federico Valverde":"费德里科·巴尔韦德","Darwin Núñez":"达尔文·努涅斯","Kylian Mbappé":"基利安·姆巴佩","Aurélien Tchouaméni":"奥雷利安·楚阿梅尼","Sadio Mané":"萨迪奥·马内","Kalidou Koulibaly":"卡利杜·库利巴利","Aymen Hussein":"艾曼·侯赛因","Ali Jasim":"阿里·贾西姆","Erling Haaland":"埃尔林·哈兰德","Martin Ødegaard":"马丁·厄德高","Lionel Messi":"利昂内尔·梅西","Julián Álvarez":"胡利安·阿尔瓦雷斯","Riyad Mahrez":"里亚德·马赫雷斯","Ismaël Bennacer":"伊斯梅尔·本纳赛尔","David Alaba":"大卫·阿拉巴","Marcel Sabitzer":"马塞尔·萨比策","Musa Al-Taamari":"穆萨·塔马里","Yazan Al-Naimat":"亚赞·奈马特","Cristiano Ronaldo":"克里斯蒂亚诺·罗纳尔多","Bruno Fernandes":"布鲁诺·费尔南德斯","Yoane Wissa":"约安·维萨","Chancel Mbemba":"尚塞尔·姆本巴","Eldor Shomurodov":"埃尔多尔·绍穆罗多夫","Jaloliddin Masharipov":"贾洛利丁·马沙里波夫","Luis Díaz":"路易斯·迪亚斯","James Rodríguez":"哈梅斯·罗德里格斯","Jude Bellingham":"裘德·贝林厄姆","Harry Kane":"哈里·凯恩","Luka Modrić":"卢卡·莫德里奇","Joško Gvardiol":"约什科·格瓦迪奥尔","Mohammed Kudus":"穆罕默德·库杜斯","Thomas Partey":"托马斯·帕尔特伊","Ismael Díaz":"伊斯梅尔·迪亚斯","José Fajardo":"何塞·法哈多"};
 
-/* 将ESPN球员名转为中文 */
-function pcn(name) { return TEAM_PLAYER_CN[name] || name; }
+/* 将ESPN球员名转为中文（长名取姓/常用部分） */
+function pcn(name) {
+  if (TEAM_PLAYER_CN[name]) return TEAM_PLAYER_CN[name];
+  // Fallback: 取姓（处理复合姓如 "Al Nadi", "van Dijk"）
+  var parts = name.split(' ');
+  if (parts.length <= 1) return name;
+  // 短连接词（Al, El, van, de, der, den, von, dos, da）后跟的姓一起取
+  var shortLinks = ['Al','El','van','de','der','den','von','dos','da','Abu','bin','ibn'];
+  var last = parts[parts.length-1];
+  if (parts.length >= 3 && shortLinks.indexOf(parts[parts.length-2]) >= 0) {
+    return parts[parts.length-2] + ' ' + last;
+  }
+  return last;
+}
 
 /* 将英文事件文字转为中文 */
 function translateEvent(ev) {
   var txt = ev.text || ev.shortText || '';
   if (!txt) return txt;
-  // 进球: "Goal! Austria 1, Jordan 0. Romano Schmid ... Assisted by Xaver Schlager."
-  // 提取Goal中的球员和助攻
-  var goalMatch = txt.match(/Goal!.*?\.\s*(.+?)\s*\(([^)]+)\)\s*(.*?)\.\s*(?:Assisted by (.+?)\.)?/);
+  var ltxt = txt.toLowerCase();
+  // 乌龙球
+  var ogMatch = txt.match(/^(.+?)\s*\(([^)]+)\)\s*Own Goal/i);
+  if (ogMatch) { return '⚽ 乌龙球: ' + pcn(ogMatch[1]) + ' (' + ogMatch[2] + ')'; }
+  // 进球: "Goal! Austria 1, Jordan 0. Scorer (Team) ... Assisted by ..."
+  var goalMatch = txt.match(/Goal!.*?\.?\s*(.+?)\s*\(([^)]+)\)\s*(.*?)\.?\s*(?:Assisted by (.+?)\.?)?$/i);
   if (goalMatch) {
     var scorer = goalMatch[1], team = goalMatch[2], rest = goalMatch[3], assist = goalMatch[4];
     var cn = pcn(scorer);
     var acn = assist ? pcn(assist.trim()) : '';
-    return '⚽ ' + cn + ' (' + team + ') 进球' + (acn ? ', 助攻: ' + acn : '') + rest;
+    return '⚽ ' + cn + ' (' + team + ') 进球' + (acn ? ', 助攻: ' + acn : '') + (rest && rest !== '.' ? ' ' + rest : '');
   }
   // 点球
-  var penMatch = txt.match(/(.+?)\s*\(([^)]+)\)\s*Penalty\s*-\s*(Scored|Missed)/);
-  if (penMatch) { var pn=pcn(penMatch[1]), pt=penMatch[2], act=penMatch[3]==='Scored'?'命中':'罚失'; return '🎯 ' + pn + ' (' + pt + ') 点球' + act; }
+  var penMatch = txt.match(/(.+?)\s*\(([^)]+)\)\s*Penalty\s*[-–]\s*(Scored|Missed)/i);
+  if (penMatch) {
+    var pn = pcn(penMatch[1]), pt = penMatch[2], act = penMatch[3].toLowerCase() === 'scored' ? '命中' : '罚失';
+    return '🎯 ' + pn + ' (' + pt + ') 点球' + act;
+  }
   // 换人: "Substitution, Austria. Marko Arnautovic replaces Sasa Kalajdzic."
-  var subMatch = txt.match(/Substitution,\s*(.+?)\.\s*(.+?)\s*replaces\s*(.+?)\./);
-  if (subMatch) { var team=subMatch[1], inP=pcn(subMatch[2]), outP=pcn(subMatch[3]); return '🔄 ' + team + ' 换人: ' + inP + ' ↑ ' + outP + ' ↓'; }
+  // 注意: 可能有 "because of an injury" 后缀
+  var subMatch = txt.match(/Substitution,\s*(.+?)\.\s*(.+?)\s+replaces\s+(.+?)(?:\s+because\s+of\s+an\s+injury)?\.?$/i);
+  if (subMatch) {
+    var team = subMatch[1], inP = pcn(subMatch[2]), outP = pcn(subMatch[3]);
+    return '🔄 ' + team + ' 换人: ' + inP + ' ↑ ' + outP + ' ↓';
+  }
   // 黄牌
-  var ycMatch = txt.match(/(.+?)\s*\(([^)]+)\)\s*is shown the yellow card/);
+  var ycMatch = txt.match(/(.+?)\s*\(([^)]+)\)\s*is shown the yellow card/i);
   if (ycMatch) { return '🟨 黄牌: ' + pcn(ycMatch[1]) + ' (' + ycMatch[2] + ')'; }
+  // 第二张黄牌 = 红牌
+  var rc2Match = txt.match(/(.+?)\s*\(([^)]+)\)\s*(?:is shown the |receives a )?second yellow card/i);
+  if (rc2Match) { return '🟥 两黄变红: ' + pcn(rc2Match[1]) + ' (' + rc2Match[2] + ')'; }
   // 红牌
-  var rcMatch = txt.match(/(.+?)\s*\(([^)]+)\)\s*is shown the red card/);
+  var rcMatch = txt.match(/(.+?)\s*\(([^)]+)\)\s*is shown the red card/i);
   if (rcMatch) { return '🟥 红牌: ' + pcn(rcMatch[1]) + ' (' + rcMatch[2] + ')'; }
-  // VAR
-  var varMatch = txt.match(/(.+?)\s*\(([^)]+)\)\s*VAR\s*-\s*(.+)/);
+  // VAR 判罚
+  var varMatch = txt.match(/(.+?)\s*\(([^)]+)\)\s*VAR\s*[-–]\s*(.+)/i);
   if (varMatch) { return '📺 VAR: ' + pcn(varMatch[1]) + ' (' + varMatch[2] + ') — ' + varMatch[3]; }
-  // 直接对球员名进行替换
+  // 中场 / 结束 (保留英文)
+  if (/halftime|half.time/i.test(txt)) return '⏸️ 中场休息';
+  if (/end.*regular.*time|full.time|final.whistle/i.test(txt)) return '⏹️ 常规时间结束';
+  // Fallback: 逐词替换球员名和队名
   var translated = txt;
-  for (var k in TEAM_PLAYER_CN) {
-    if (txt.indexOf(k) >= 0) translated = translated.replace(new RegExp(k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'g'), TEAM_PLAYER_CN[k]);
+  // 先替换球员名（按长度降序避免部分匹配）
+  var names = Object.keys(TEAM_PLAYER_CN).sort(function(a,b){return b.length-a.length;});
+  for (var ni = 0; ni < names.length; ni++) {
+    if (txt.indexOf(names[ni]) >= 0) {
+      translated = translated.split(names[ni]).join(TEAM_PLAYER_CN[names[ni]]);
+    }
   }
   if (translated !== txt) return translated;
   return txt;
@@ -447,8 +497,15 @@ function renderContent(data) {
       var isPct = isPctRaw[key] || isPctDirect[key];
       var hDisp = hN, aDisp = aN;
       if (isPctRaw[key]) { hDisp = hN * 100; aDisp = aN * 100; } // 0-1 → 0-100
-      var hp = isPctDirect[key] ? hN : (isPctRaw[key] ? hDisp : (hN / tot * 100));
-      var ap = isPctDirect[key] ? aN : (isPctRaw[key] ? aDisp : (aN / tot * 100));
+      // 条形宽度: possession 直接用百分比(总和=100); passPct等用占比(防止两柱之和>100%)
+      var hp, ap;
+      if (isPctDirect[key]) {
+        hp = hN; ap = aN;
+      } else if (isPctRaw[key]) {
+        hp = hN / tot * 100; ap = aN / tot * 100;
+      } else {
+        hp = hN / tot * 100; ap = aN / tot * 100;
+      }
       var hd = isPct ? (hDisp.toFixed(1) + '%') : (hN > 999 ? (hN/1000).toFixed(1) + 'k' : '' + hN);
       var ad = isPct ? (aDisp.toFixed(1) + '%') : (aN > 999 ? (aN/1000).toFixed(1) + 'k' : '' + aN);
 
@@ -514,10 +571,10 @@ function renderContent(data) {
             var p = field[pi];
             var nameCN = pcn(p.athlete.displayName);
             html += '<div class="formation-player" title="' + p.athlete.displayName
-              + ' · ' + (POS_CN[p.position.abbreviation] || p.position.displayName) + '">'
+              + ' · ' + (posCN(p.position.abbreviation)) + '">'
               + '<span class="fp-num">' + (p.jersey || '?') + '</span>'
               + '<span class="fp-name">' + nameCN + '</span>'
-              + '<span class="fp-pos">' + (POS_CN[p.position.abbreviation] || p.position.abbreviation) + '</span>'
+              + '<span class="fp-pos">' + (posCN(p.position.abbreviation)) + '</span>'
               + '</div>';
           }
         }
@@ -530,7 +587,7 @@ function renderContent(data) {
       html += '<div class="formation-player" title="' + gk.athlete.displayName + ' · 门将">'
         + '<span class="fp-num">' + (gk.jersey || '?') + '</span>'
         + '<span class="fp-name">' + pcn(gk.athlete.displayName) + '</span>'
-        + '<span class="fp-pos">GK</span></div>';
+        + '<span class="fp-pos">' + posCN('GK') + '</span></div>';
       html += '</div>';
 
       html += '</div>'; // formation-grid
@@ -587,15 +644,26 @@ function renderContent(data) {
 
   /* ─── 全场最佳 (仅已结束) ─── */
   if (done) {
-    var motm = s.manOfTheMatch;
+    // ESPN API: manOfTheMatch 可能在多个路径
+    var motm = s.manOfTheMatch || (s.header && s.header.manOfTheMatch)
+      || (s.header && s.header.competitions && s.header.competitions[0]
+        && s.header.competitions[0].manOfTheMatch)
+      || (s.boxscore && s.boxscore.manOfTheMatch)
+      || (s.gameInfo && s.gameInfo.manOfTheMatch);
+    // 也检查 competitions[0] 下的 MOM
+    if (!motm && comp && comp.manOfTheMatch) motm = comp.manOfTheMatch;
     if (motm) {
+      var motmName = motm.displayName || motm.name || '';
+      var motmCN = pcn(motmName);
+      var motmTeam = motm.team ? tcn(motm.team.displayName || motm.team.name || '') : '';
       html += '<section class="stats-card fade-in" style="animation-delay:0.25s"><h3>⭐ 全场最佳球员</h3>'
         + '<div style="display:flex;align-items:center;gap:14px;padding:14px">'
         + '<span style="font-size:44px">⭐</span>'
         + '<div><div style="font-size:20px;font-weight:700;color:var(--gold)">'
-        + motm.displayName + '</div>'
+        + motmCN + (motmTeam ? ' <span style="font-size:13px;color:var(--text-dim);font-weight:400">(' + motmTeam + ')</span>' : '')
+        + '</div>'
         + '<div style="font-size:11px;color:var(--text-dim);margin-top:2px">'
-        + 'Man of the Match</div></div></div></section>';
+        + '本场最佳球员</div></div></div></section>';
     }
   }
 
@@ -628,6 +696,12 @@ async function selectMatch(eventId) {
   }
 }
 
+/* ─── URL 参数解析 ─── */
+function getUrlParam(name) {
+  var m = location.search.match(new RegExp('[?&]' + name + '=([^&]*)'));
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
 async function init() {
   try { allEvents = await fetchMatches(); } catch(e) { allEvents = []; }
 
@@ -638,13 +712,28 @@ async function init() {
     return;
   }
 
-  // 默认选正在进行的，否则第一场
+  // 检查 URL 参数 ?h=xxx&a=xxx 来定向比赛
+  var paramH = getUrlParam('h'), paramA = getUrlParam('a');
   var defId = allEvents[0].id;
-  for (var i = 0; i < allEvents.length; i++) {
-    var st = allEvents[i].competitions[0].status.type.name;
-    if (st.indexOf('IN_PROGRESS') >= 0 || st.indexOf('HALF') >= 0
-      || st.indexOf('FIRST_HALF') >= 0 || st.indexOf('SECOND_HALF') >= 0) {
-      defId = allEvents[i].id; break;
+
+  if (paramH && paramA) {
+    // 匹配 ESPN events 中的主客队（用 tcn 翻译后比对）
+    for (var i = 0; i < allEvents.length; i++) {
+      var c = allEvents[i].competitions[0];
+      var hn = tcn(c.competitors[0].team.displayName);
+      var an = tcn(c.competitors[1].team.displayName);
+      if (hn === paramH && an === paramA) { defId = allEvents[i].id; break; }
+      // 也尝试反过来匹配（ESPN 可能主客顺序不同）
+      if (hn === paramA && an === paramH) { defId = allEvents[i].id; break; }
+    }
+  } else {
+    // 默认选正在进行的，否则第一场
+    for (var i = 0; i < allEvents.length; i++) {
+      var st = allEvents[i].competitions[0].status.type.name;
+      if (st.indexOf('IN_PROGRESS') >= 0 || st.indexOf('HALF') >= 0
+        || st.indexOf('FIRST_HALF') >= 0 || st.indexOf('SECOND_HALF') >= 0) {
+        defId = allEvents[i].id; break;
+      }
     }
   }
 
