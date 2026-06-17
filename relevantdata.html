@@ -106,20 +106,28 @@ nav{position:sticky;top:0;z-index:100;background:rgba(10,14,23,0.88);
   color:var(--text);margin-bottom:6px;display:flex;align-items:center;gap:6px;}
 .lineup-col h4 .fm{font-family:var(--font-mono);font-size:10px;color:var(--text-dim);
   background:rgba(255,255,255,0.05);padding:2px 8px;border-radius:20px;}
-.lineup-list{display:flex;flex-wrap:wrap;gap:5px}
-.player-chip{display:flex;align-items:center;gap:5px;
-  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);
-  border-radius:20px;padding:5px 10px 5px 5px;font-size:11px;
-  transition:all 0.2s;}
-.player-chip:hover{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.12);}
-.player-chip .num{font-family:var(--font-mono);font-size:10px;font-weight:700;
-  width:22px;height:22px;border-radius:50%;background:rgba(13,140,60,0.2);
+/* ═══ 阵容 - 阵型网格 ═══ */
+.formation-grid{display:flex;flex-direction:column;align-items:center;
+  gap:10px;background:rgba(13,140,60,0.04);border-radius:var(--radius);
+  padding:14px 10px;margin:10px 0;border:1px solid rgba(13,140,60,0.08)}
+.formation-row{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.formation-player{display:flex;flex-direction:column;align-items:center;
+  width:58px;text-align:center;gap:2px;transition:all 0.2s;cursor:default}
+.formation-player:hover{transform:translateY(-2px)}
+.formation-player .fp-num{font-family:var(--font-mono);font-size:13px;font-weight:700;
+  width:28px;height:28px;border-radius:50%;background:rgba(13,140,60,0.2);
   display:flex;align-items:center;justify-content:center;color:var(--pitch-bright)}
-.player-chip .pname{color:var(--text);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.player-chip.sub{opacity:0.55}
-.bench-section{margin-top:10px;border-top:1px solid rgba(255,255,255,0.04);padding-top:10px}
-.bench-section .bench-label{font-size:10px;color:var(--text-dim);text-transform:uppercase;
-  letter-spacing:1px;margin-bottom:6px}
+.formation-player .fp-name{font-size:9px;color:var(--text);line-height:1.1;
+  max-width:56px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.formation-player .fp-pos{font-size:7px;color:var(--text-dim)}
+.formation-separator{width:70%;height:1px;background:rgba(255,255,255,0.06);margin:4px 0}
+.bench-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.bench-chip{display:flex;align-items:center;gap:4px;font-size:10px;
+  color:var(--text-dim);background:rgba(255,255,255,0.03);padding:3px 8px;
+  border-radius:20px;border:1px solid rgba(255,255,255,0.04)}
+.bench-chip .bc-num{font-family:var(--font-mono);font-weight:700;
+  color:var(--text-dim);width:18px;height:18px;border-radius:50%;
+  background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;font-size:9px}
 
 /* ═══ 事件时间线 ═══ */
 .event-list{position:relative;padding-left:28px}
@@ -256,6 +264,49 @@ function espnFlag(name) {
 var POS_CN = {G:'门将','CD-L':'左中卫','CD-R':'右中卫',LB:'左后卫',RB:'右后卫',
   CB:'中后卫',CDM:'后腰',CM:'中场',CAM:'前腰',LM:'左中场',RM:'右中场',
   LW:'左边锋',RW:'右边锋',ST:'前锋',LF:'左前锋',RF:'右前锋','CF':'中锋'};
+
+/* ═══ 球员中英文名映射 ═══ */
+var TEAM_PLAYER_CN = {"Santiago Giménez":"圣地亚哥·希门尼斯","Edson Álvarez":"埃德森·阿尔瓦雷斯","Percy Tau":"佩西·塔乌","Ronwen Williams":"朗文·威廉姆斯","Son Heung-min":"孙兴慜","Kim Min-jae":"金玟哉","Patrik Schick":"帕特里克·希克","Tomáš Souček":"托马斯·绍切克","Alphonso Davies":"阿方索·戴维斯","Jonathan David":"乔纳森·戴维","Edin Džeko":"埃丁·哲科","Miralem Pjanić":"米拉莱姆·皮亚尼奇","Akram Afif":"阿克拉姆·阿菲夫","Almoez Ali":"阿尔莫埃兹·阿里","Granit Xhaka":"格拉尼特·扎卡","Manuel Akanji":"曼努埃尔·阿坎吉","Vinícius Júnior":"维尼修斯","Rodrygo":"罗德里戈","Achraf Hakimi":"阿什拉夫·哈基米","Brahim Díaz":"卜拉欣·迪亚斯","Frantzdy Pierrot":"弗朗茨迪·皮埃罗","Duckens Nazon":"杜肯斯·纳宗","Andy Robertson":"安迪·罗伯逊","Scott McTominay":"斯科特·麦克托米奈","Christian Pulisic":"克里斯蒂安·普利西奇","Giovanni Reyna":"乔瓦尼·雷纳","Miguel Almirón":"米格尔·阿尔米隆","Julio Enciso":"胡利奥·恩西索","Mathew Ryan":"马修·瑞安","Harry Souttar":"哈里·苏塔","Hakan Çalhanoğlu":"哈坎·恰尔汗奥卢","Arda Güler":"阿尔达·居莱尔","Jamal Musiala":"贾马尔·穆西亚拉","Florian Wirtz":"弗洛里安·维尔茨","Leandro Bacuna":"莱安德罗·巴库纳","Juninho Bacuna":"儒尼尼奥·巴库纳","Franck Kessié":"弗兰克·凯西","Simon Adingra":"西蒙·阿丁格拉","Moisés Caicedo":"莫伊塞斯·凯塞多","Piero Hincapié":"皮耶罗·因卡皮耶","Virgil van Dijk":"维吉尔·范迪克","Frenkie de Jong":"弗伦基·德容","Kaoru Mitoma":"三笘薰","Takefusa Kubo":"久保建英","Alexander Isak":"亚历山大·伊萨克","Dejan Kulusevski":"德扬·库卢塞夫斯基","Ellyes Skhiri":"埃利斯·斯希里","Hannibal Mejbri":"汉尼拔·梅布里","Kevin De Bruyne":"凯文·德布劳内","Jérémy Doku":"杰雷米·多库","Mohamed Salah":"穆罕默德·萨拉赫","Omar Marmoush":"奥马尔·马尔穆什","Mehdi Taremi":"迈赫迪·塔雷米","Sardar Azmoun":"萨达尔·阿兹蒙","Chris Wood":"克里斯·伍德","Sarpreet Singh":"萨普里特·辛格","Lamine Yamal":"拉明·亚马尔","Pedri":"佩德里","Ryan Mendes":"瑞安·门德斯","Jovane Cabral":"若瓦内·卡布拉尔","Salem Al-Dawsari":"萨勒姆·多萨里","Firas Al-Buraikan":"菲拉斯·布赖坎","Federico Valverde":"费德里科·巴尔韦德","Darwin Núñez":"达尔文·努涅斯","Kylian Mbappé":"基利安·姆巴佩","Aurélien Tchouaméni":"奥雷利安·楚阿梅尼","Sadio Mané":"萨迪奥·马内","Kalidou Koulibaly":"卡利杜·库利巴利","Aymen Hussein":"艾曼·侯赛因","Ali Jasim":"阿里·贾西姆","Erling Haaland":"埃尔林·哈兰德","Martin Ødegaard":"马丁·厄德高","Lionel Messi":"利昂内尔·梅西","Julián Álvarez":"胡利安·阿尔瓦雷斯","Riyad Mahrez":"里亚德·马赫雷斯","Ismaël Bennacer":"伊斯梅尔·本纳赛尔","David Alaba":"大卫·阿拉巴","Marcel Sabitzer":"马塞尔·萨比策","Musa Al-Taamari":"穆萨·塔马里","Yazan Al-Naimat":"亚赞·奈马特","Cristiano Ronaldo":"克里斯蒂亚诺·罗纳尔多","Bruno Fernandes":"布鲁诺·费尔南德斯","Yoane Wissa":"约安·维萨","Chancel Mbemba":"尚塞尔·姆本巴","Eldor Shomurodov":"埃尔多尔·绍穆罗多夫","Jaloliddin Masharipov":"贾洛利丁·马沙里波夫","Luis Díaz":"路易斯·迪亚斯","James Rodríguez":"哈梅斯·罗德里格斯","Jude Bellingham":"裘德·贝林厄姆","Harry Kane":"哈里·凯恩","Luka Modrić":"卢卡·莫德里奇","Joško Gvardiol":"约什科·格瓦迪奥尔","Mohammed Kudus":"穆罕默德·库杜斯","Thomas Partey":"托马斯·帕尔特伊","Ismael Díaz":"伊斯梅尔·迪亚斯","José Fajardo":"何塞·法哈多"};
+
+/* 将ESPN球员名转为中文 */
+function pcn(name) { return TEAM_PLAYER_CN[name] || name; }
+
+/* 将英文事件文字转为中文 */
+function translateEvent(ev) {
+  var txt = ev.text || ev.shortText || '';
+  if (!txt) return txt;
+  // 进球: "Goal! Austria 1, Jordan 0. Romano Schmid ... Assisted by Xaver Schlager."
+  // 提取Goal中的球员和助攻
+  var goalMatch = txt.match(/Goal!.*?\.\s*(.+?)\s*\(([^)]+)\)\s*(.*?)\.\s*(?:Assisted by (.+?)\.)?/);
+  if (goalMatch) {
+    var scorer = goalMatch[1], team = goalMatch[2], rest = goalMatch[3], assist = goalMatch[4];
+    var cn = pcn(scorer);
+    var acn = assist ? pcn(assist.trim()) : '';
+    return '⚽ ' + cn + ' (' + team + ') 进球' + (acn ? ', 助攻: ' + acn : '') + rest;
+  }
+  // 点球
+  var penMatch = txt.match(/(.+?)\s*\(([^)]+)\)\s*Penalty\s*-\s*(Scored|Missed)/);
+  if (penMatch) { var pn=pcn(penMatch[1]), pt=penMatch[2], act=penMatch[3]==='Scored'?'命中':'罚失'; return '🎯 ' + pn + ' (' + pt + ') 点球' + act; }
+  // 换人: "Substitution, Austria. Marko Arnautovic replaces Sasa Kalajdzic."
+  var subMatch = txt.match(/Substitution,\s*(.+?)\.\s*(.+?)\s*replaces\s*(.+?)\./);
+  if (subMatch) { var team=subMatch[1], inP=pcn(subMatch[2]), outP=pcn(subMatch[3]); return '🔄 ' + team + ' 换人: ' + inP + ' ↑ ' + outP + ' ↓'; }
+  // 黄牌
+  var ycMatch = txt.match(/(.+?)\s*\(([^)]+)\)\s*is shown the yellow card/);
+  if (ycMatch) { return '🟨 黄牌: ' + pcn(ycMatch[1]) + ' (' + ycMatch[2] + ')'; }
+  // 红牌
+  var rcMatch = txt.match(/(.+?)\s*\(([^)]+)\)\s*is shown the red card/);
+  if (rcMatch) { return '🟥 红牌: ' + pcn(rcMatch[1]) + ' (' + rcMatch[2] + ')'; }
+  // VAR
+  var varMatch = txt.match(/(.+?)\s*\(([^)]+)\)\s*VAR\s*-\s*(.+)/);
+  if (varMatch) { return '📺 VAR: ' + pcn(varMatch[1]) + ' (' + varMatch[2] + ') — ' + varMatch[3]; }
+  // 直接对球员名进行替换
+  var translated = txt;
+  for (var k in TEAM_PLAYER_CN) {
+    if (txt.indexOf(k) >= 0) translated = translated.replace(new RegExp(k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'g'), TEAM_PLAYER_CN[k]);
+  }
+  if (translated !== txt) return translated;
+  return txt;
+}
 
 /* ─── 日期格式化 ─── */
 function fmtDate(iso) {
@@ -426,23 +477,72 @@ function renderContent(data) {
       var subs = (t.r.roster || []).filter(function(p) { return !p.starter; });
 
       html += '<div class="lineup-col"><h4>' + t.flag + ' ' + t.name
-        + ' <span class="fm">' + t.fm + '</span></h4>'
-        + '<div class="lineup-list">'
-        + starters.map(function(p) {
-          return '<div class="player-chip">'
-            + '<span class="num">' + (p.jersey || '?') + '</span>'
-            + '<span class="pname" title="' + p.athlete.displayName + ' · '
-            + (POS_CN[p.position.abbreviation] || p.position.displayName) + '">'
-            + p.athlete.displayName + '</span></div>';
-        }).join('') + '</div>';
+        + ' <span class="fm">' + t.fm + '</span></h4>';
 
+      // ─── 阵型网格 ───
+      // ESPN roster顺序: GK → DEF(4) → MID(3/4) → FWD(2/3) — 取决于阵型
+      // 展示顺序从上到下: FWD → MID → DEF → GK (进攻到防守)
+      var fmParts = (t.fm || '4-4-2').split('-').map(function(n) { return parseInt(n) || 0; });
+      // fmParts = [4, 2, 3, 1] for "4-2-3-1"
+      // 跳过 GK (index 0), field players = starters[1..10]
+      var gk = starters[0];
+
+      html += '<div class="formation-grid">';
+
+      // ROWS from attack to defense (reversed fmParts): [ST, AM, DM, DEF]
+      // "4-2-3-1" → show: ST(1), AM(3), DM(2), DEF(4), GK(1)
+      var showOrder = fmParts.slice().reverse(); // [1, 3, 2, 4]
+      // Player assignment: skip GK, use remaining orderly
+      // Field players in roster order: DEF(4) → MID → FWD
+      // 但showOrder要求: FWD(1) → AM(3) → DM(2) → DEF(4)
+      // 所以field players需要反过来从最后一个取
+      var field = starters.slice(1); // all except GK
+      var fi = 0; // forward index for field players (use forward for attack rows)
+
+      for (var ri = 0; ri < showOrder.length; ri++) {
+        var cnt = showOrder[ri];
+        html += '<div class="formation-row">';
+        // 对于进攻行(ri=0, FWD): 取field最后cnt个
+        // 对于AM行(ri=1): 取field倒数[cnt+offset]个
+        // 简单方法: 从field数组末尾向前取
+        var usedSoFar = 0;
+        for (var prev = 0; prev < ri; prev++) usedSoFar += showOrder[prev];
+        var startFrom = field.length - usedSoFar - cnt;
+        for (var ci = 0; ci < cnt; ci++) {
+          var pi = startFrom + ci;
+          if (pi >= 0 && pi < field.length) {
+            var p = field[pi];
+            var nameCN = pcn(p.athlete.displayName);
+            html += '<div class="formation-player" title="' + p.athlete.displayName
+              + ' · ' + (POS_CN[p.position.abbreviation] || p.position.displayName) + '">'
+              + '<span class="fp-num">' + (p.jersey || '?') + '</span>'
+              + '<span class="fp-name">' + nameCN + '</span>'
+              + '<span class="fp-pos">' + (POS_CN[p.position.abbreviation] || p.position.abbreviation) + '</span>'
+              + '</div>';
+          }
+        }
+        html += '</div>';
+        if (ri < showOrder.length - 1) html += '<div class="formation-separator"></div>';
+      }
+
+      // GK行 (最底部)
+      html += '<div class="formation-row">';
+      html += '<div class="formation-player" title="' + gk.athlete.displayName + ' · 门将">'
+        + '<span class="fp-num">' + (gk.jersey || '?') + '</span>'
+        + '<span class="fp-name">' + pcn(gk.athlete.displayName) + '</span>'
+        + '<span class="fp-pos">GK</span></div>';
+      html += '</div>';
+
+      html += '</div>'; // formation-grid
+
+      // ─── 替补 ───
       if (subs.length > 0) {
         html += '<div class="bench-section"><div class="bench-label">🔄 替补</div>'
-          + '<div class="lineup-list">'
+          + '<div class="bench-grid">'
           + subs.map(function(p) {
-            return '<div class="player-chip sub"><span class="num">'
-              + (p.jersey || '?') + '</span><span class="pname">'
-              + p.athlete.displayName + '</span></div>';
+            return '<div class="bench-chip"><span class="bc-num">'
+              + (p.jersey || '?') + '</span><span>'
+              + pcn(p.athlete.displayName) + '</span></div>';
           }).join('') + '</div></div>';
       }
       html += '</div>';
@@ -475,7 +575,7 @@ function renderContent(data) {
       var cls = isGoal ? 'goal' : (isRed ? 'card-r' : (isYel ? 'card-y' : (isSub ? 'sub' : '')));
       var icon = isGoal ? '⚽' : (isRed ? '🟥' : (isYel ? '🟨' : (isSub ? '🔄' : '●')));
       var cText = ev.clock && ev.clock.displayValue ? ev.clock.displayValue : '';
-      var txt = ev.text || ev.shortText || '';
+      var txt = translateEvent(ev);
 
       html += '<div class="event-item ' + cls + '">'
         + '<span class="event-time">' + cText + '</span>'
