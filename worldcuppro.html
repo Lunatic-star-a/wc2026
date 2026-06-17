@@ -379,8 +379,8 @@ footer{text-align:center;padding:60px 0;border-top:1px solid rgba(255,255,255,0.
 .livescore-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:linear-gradient(135deg,rgba(13,140,60,0.2),rgba(13,140,60,0.05));border-bottom:1px solid rgba(255,255,255,0.06)}
 .livescore-title{font-family:var(--font-display);font-size:16px;color:#fff;letter-spacing:1px}
 .livescore-status{font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:6px}
-.live-dot{width:8px;height:8px;border-radius:50%;background:var(--accent-red);animation:livePulse 1.5s ease infinite}
-@keyframes livePulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--accent-red);animation:livePulseOpacity 1.5s ease infinite}
+@keyframes livePulseOpacity{0%,100%{opacity:1}50%{opacity:0.3}}
 .livescore-embed{background:rgba(0,0,0,0.2);padding:8px;max-height:500px;overflow-y:auto}
 .livescore-row{display:flex;flex-direction:column;align-items:center;padding:22px 16px;border-bottom:1px solid rgba(255,255,255,0.03);gap:8px}
 .livescore-row:hover{background:rgba(255,255,255,0.02)}
@@ -598,7 +598,7 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   .public-chat-container{height:400px}
   .pchat-msg-body{max-width:85%}
   .match-pred-tab{width:20px;height:40px;font-size:9px;letter-spacing:0}
-  .watch-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+  .watch-grid{gap:12px}
   .watch-card{padding:16px}
   .watch-card h4{font-size:17px}
   .watch-card p{font-size:11px}
@@ -942,11 +942,11 @@ const GROUPS=[
   {name:'A',teams:[
     {name:'墨西哥',en:'Mexico',cc:'mx',conf:'CONCACAF',rank:15,apps:18,best:'八强(1970,1986)',players:[{n:'Santiago Giménez',age:24,club:'AC Milan',num:9,pos:'ST',val:'€50M'},{n:'Edson Álvarez',age:28,club:'West Ham',num:4,pos:'CDM',val:'€35M'}]},
     {name:'南非',en:'South Africa',cc:'za',conf:'CAF',rank:61,apps:3,best:'小组赛',players:[{n:'Percy Tau',age:31,club:'Al Ahly',num:10,pos:'FW',val:'€3M'},{n:'Ronwen Williams',age:33,club:'Mamelodi Sundowns',num:1,pos:'GK',val:'€2M'}]},
-    {name:'韩国',en:'South Korea',cc:'kr',conf:'AFC',rank:22,apps:12,best:'四强(2002)',players:[{n:'Son Heung-min',age:33,club:'LAFC',num:7,pos:'LW',val:'€45M'},{n:'Kim Min-jae',age:29,club:'Bayern Munich',num:4,pos:'CB',val:'€55M'}]},
+    {name:'韩国',en:'South Korea',cc:'kr',conf:'AFC',rank:22,apps:12,best:'四强(2002)',players:[{n:'Son Heung-min',age:33,club:'Tottenham',num:7,pos:'LW',val:'€45M'},{n:'Kim Min-jae',age:29,club:'Bayern Munich',num:4,pos:'CB',val:'€55M'}]},
     {name:'捷克',en:'Czech Republic',cc:'cz',conf:'UEFA',rank:38,apps:9,best:'亚军(1934,1962)',players:[{n:'Patrik Schick',age:29,club:'Bayer Leverkusen',num:10,pos:'ST',val:'€35M'},{n:'Tomáš Souček',age:30,club:'West Ham',num:28,pos:'CM',val:'€25M'}]}
   ]},
   {name:'B',teams:[
-    {name:'加拿大',en:'Canada',cc:'ca',conf:'CONCACAF',rank:35,apps:3,best:'小组赛',players:[{n:'Alphonso Davies',age:25,club:'Bayern Munich',num:19,pos:'LB',val:'€50M'},{n:'Jonathan David',age:26,club:'Juventus',num:20,pos:'ST',val:'€55M'}]},
+    {name:'加拿大',en:'Canada',cc:'ca',conf:'CONCACAF',rank:35,apps:3,best:'小组赛',players:[{n:'Alphonso Davies',age:25,club:'Bayern Munich',num:19,pos:'LB',val:'€50M'},{n:'Jonathan David',age:26,club:'Lille',num:20,pos:'ST',val:'€55M'}]},
     {name:'波黑',en:'Bosnia and Herzegovina',cc:'ba',conf:'UEFA',rank:62,apps:1,best:'小组赛(2014)',players:[{n:'Edin Džeko',age:39,club:'Fenerbahçe',num:11,pos:'ST',val:'€2M'},{n:'Miralem Pjanić',age:35,club:'Al Sharjah',num:10,pos:'CM',val:'€5M'}]},
     {name:'卡塔尔',en:'Qatar',cc:'qa',conf:'AFC',rank:48,apps:2,best:'小组赛',players:[{n:'Akram Afif',age:29,club:'Al Sadd',num:11,pos:'LW',val:'€8M'},{n:'Almoez Ali',age:29,club:'Al Duhail',num:19,pos:'ST',val:'€5M'}]},
     {name:'瑞士',en:'Switzerland',cc:'ch',conf:'UEFA',rank:19,apps:13,best:'八强(1934,1938,1954)',players:[{n:'Granit Xhaka',age:33,club:'Bayer Leverkusen',num:10,pos:'CM',val:'€20M'},{n:'Manuel Akanji',age:30,club:'Man City',num:25,pos:'CB',val:'€45M'}]}
@@ -958,13 +958,13 @@ const GROUPS=[
     {name:'苏格兰',en:'Scotland',cc:'gb-sct',conf:'UEFA',rank:28,apps:9,best:'小组赛',players:[{n:'Andy Robertson',age:31,club:'Liverpool',num:3,pos:'LB',val:'€30M'},{n:'Scott McTominay',age:29,club:'Napoli',num:39,pos:'CM',val:'€35M'}]}
   ]},
   {name:'D',teams:[
-    {name:'美国',en:'United States',cc:'us',conf:'CONCACAF',rank:13,apps:12,best:'季军(1930)',players:[{n:'Christian Pulisic',age:27,club:'AC Milan',num:11,pos:'LW',val:'€45M'},{n:'Giovanni Reyna',age:23,club:'Borussia Mönchengladbach',num:7,pos:'AM',val:'€25M'}]},
+    {name:'美国',en:'United States',cc:'us',conf:'CONCACAF',rank:13,apps:12,best:'季军(1930)',players:[{n:'Christian Pulisic',age:27,club:'AC Milan',num:11,pos:'LW',val:'€45M'},{n:'Giovanni Reyna',age:23,club:'Borussia Dortmund',num:7,pos:'AM',val:'€25M'}]},
     {name:'巴拉圭',en:'Paraguay',cc:'py',conf:'CONMEBOL',rank:56,apps:8,best:'八强(2010)',players:[{n:'Miguel Almirón',age:31,club:'Newcastle',num:24,pos:'RW',val:'€20M'},{n:'Julio Enciso',age:22,club:'Brighton',num:19,pos:'FW',val:'€25M'}]},
     {name:'澳大利亚',en:'Australia',cc:'au',conf:'AFC',rank:26,apps:7,best:'十六强(2006,2022)',players:[{n:'Mathew Ryan',age:33,club:'AZ Alkmaar',num:1,pos:'GK',val:'€3M'},{n:'Harry Souttar',age:27,club:'Leicester City',num:19,pos:'CB',val:'€10M'}]},
     {name:'土耳其',en:'Turkey',cc:'tr',conf:'UEFA',rank:32,apps:3,best:'季军(2002)',players:[{n:'Hakan Çalhanoğlu',age:31,club:'Inter Milan',num:20,pos:'CM',val:'€40M'},{n:'Arda Güler',age:20,club:'Real Madrid',num:15,pos:'AM',val:'€55M'}]}
   ]},
   {name:'E',teams:[
-    {name:'德国',en:'Germany',cc:'de',conf:'UEFA',rank:5,apps:21,best:'冠军(1954,1974,1990,2014)',players:[{n:'Jamal Musiala',age:22,club:'Bayern Munich',num:42,pos:'AM',val:'€140M'},{n:'Florian Wirtz',age:22,club:'Liverpool',num:10,pos:'AM',val:'€130M'}]},
+    {name:'德国',en:'Germany',cc:'de',conf:'UEFA',rank:5,apps:21,best:'冠军(1954,1974,1990,2014)',players:[{n:'Jamal Musiala',age:22,club:'Bayern Munich',num:42,pos:'AM',val:'€140M'},{n:'Florian Wirtz',age:22,club:'Bayer Leverkusen',num:10,pos:'AM',val:'€130M'}]},
     {name:'库拉索',en:'Curaçao',cc:'cw',conf:'CONCACAF',rank:91,apps:0,best:'首次参赛',players:[{n:'Leandro Bacuna',age:34,club:'FC Groningen',num:10,pos:'CM',val:'€800K'},{n:'Juninho Bacuna',age:28,club:'Birmingham City',num:20,pos:'CM',val:'€3M'}]},
     {name:'科特迪瓦',en:'Ivory Coast',cc:'ci',conf:'CAF',rank:41,apps:4,best:'小组赛',players:[{n:'Franck Kessié',age:29,club:'Al Ahli',num:79,pos:'CM',val:'€25M'},{n:'Simon Adingra',age:24,club:'Brighton',num:24,pos:'LW',val:'€30M'}]},
     {name:'厄瓜多尔',en:'Ecuador',cc:'ec',conf:'CONMEBOL',rank:31,apps:5,best:'十六强(2006)',players:[{n:'Moisés Caicedo',age:24,club:'Chelsea',num:25,pos:'CDM',val:'€90M'},{n:'Piero Hincapié',age:23,club:'Bayer Leverkusen',num:3,pos:'CB',val:'€40M'}]}
@@ -972,11 +972,11 @@ const GROUPS=[
   {name:'F',teams:[
     {name:'荷兰',en:'Netherlands',cc:'nl',conf:'UEFA',rank:7,apps:12,best:'亚军(1974,1978,2010)',players:[{n:'Virgil van Dijk',age:34,club:'Liverpool',num:4,pos:'CB',val:'€30M'},{n:'Frenkie de Jong',age:28,club:'Barcelona',num:21,pos:'CM',val:'€60M'}]},
     {name:'日本',en:'Japan',cc:'jp',conf:'AFC',rank:16,apps:8,best:'十六强(2002,2010,2018,2022)',players:[{n:'Kaoru Mitoma',age:28,club:'Brighton',num:22,pos:'LW',val:'€45M'},{n:'Takefusa Kubo',age:24,club:'Real Sociedad',num:10,pos:'RW',val:'€50M'}]},
-    {name:'瑞典',en:'Sweden',cc:'se',conf:'UEFA',rank:25,apps:12,best:'亚军(1958)',players:[{n:'Alexander Isak',age:26,club:'Newcastle',num:14,pos:'ST',val:'€85M'},{n:'Dejan Kulusevski',age:25,club:'Tottenham',num:21,pos:'RW',val:'€55M'}]},
+    {name:'瑞典',en:'Sweden',cc:'se',conf:'UEFA',rank:25,apps:12,best:'亚军(1958)',players:[{n:'Alexander Isak',age:26,club:'Liverpool',num:14,pos:'ST',val:'€85M'},{n:'Dejan Kulusevski',age:25,club:'Tottenham',num:21,pos:'RW',val:'€55M'}]},
     {name:'突尼斯',en:'Tunisia',cc:'tn',conf:'CAF',rank:45,apps:7,best:'小组赛',players:[{n:'Ellyes Skhiri',age:29,club:'Frankfurt',num:15,pos:'CM',val:'€15M'},{n:'Hannibal Mejbri',age:23,club:'Burnley',num:10,pos:'AM',val:'€10M'}]}
   ]},
   {name:'G',teams:[
-    {name:'比利时',en:'Belgium',cc:'be',conf:'UEFA',rank:8,apps:15,best:'季军(2018)',players:[{n:'Kevin De Bruyne',age:34,club:'Napoli',num:17,pos:'CM',val:'€50M'},{n:'Jérémy Doku',age:23,club:'Man City',num:11,pos:'RW',val:'€55M'}]},
+    {name:'比利时',en:'Belgium',cc:'be',conf:'UEFA',rank:8,apps:15,best:'季军(2018)',players:[{n:'Kevin De Bruyne',age:34,club:'Man City',num:17,pos:'CM',val:'€50M'},{n:'Jérémy Doku',age:23,club:'Man City',num:11,pos:'RW',val:'€55M'}]},
     {name:'埃及',en:'Egypt',cc:'eg',conf:'CAF',rank:34,apps:4,best:'小组赛',players:[{n:'Mohamed Salah',age:33,club:'Liverpool',num:11,pos:'RW',val:'€55M'},{n:'Omar Marmoush',age:26,club:'Man City',num:7,pos:'ST',val:'€60M'}]},
     {name:'伊朗',en:'Iran',cc:'ir',conf:'AFC',rank:20,apps:7,best:'小组赛',players:[{n:'Mehdi Taremi',age:33,club:'Inter Milan',num:99,pos:'ST',val:'€10M'},{n:'Sardar Azmoun',age:30,club:'Shabab Al Ahli',num:20,pos:'ST',val:'€8M'}]},
     {name:'新西兰',en:'New Zealand',cc:'nz',conf:'OFC',rank:94,apps:3,best:'小组赛',players:[{n:'Chris Wood',age:34,club:'Nottm Forest',num:9,pos:'ST',val:'€5M'},{n:'Sarpreet Singh',age:26,club:'Union Berlin',num:10,pos:'AM',val:'€1M'}]}
@@ -1007,7 +1007,7 @@ const GROUPS=[
   ]},
   {name:'L',teams:[
     {name:'英格兰',en:'England',cc:'gb-eng',conf:'UEFA',rank:10,apps:17,best:'冠军(1966)',players:[{n:'Jude Bellingham',age:22,club:'Real Madrid',num:10,pos:'AM',val:'€180M'},{n:'Harry Kane',age:32,club:'Bayern Munich',num:9,pos:'ST',val:'€100M'}]},
-    {name:'克罗地亚',en:'Croatia',cc:'hr',conf:'UEFA',rank:11,apps:7,best:'亚军(2018)',players:[{n:'Luka Modrić',age:40,club:'AC Milan',num:10,pos:'CM',val:'€6M'},{n:'Joško Gvardiol',age:24,club:'Man City',num:4,pos:'CB',val:'€75M'}]},
+    {name:'克罗地亚',en:'Croatia',cc:'hr',conf:'UEFA',rank:11,apps:7,best:'亚军(2018)',players:[{n:'Luka Modrić',age:40,club:'Real Madrid',num:10,pos:'CM',val:'€6M'},{n:'Joško Gvardiol',age:24,club:'Man City',num:4,pos:'CB',val:'€75M'}]},
     {name:'加纳',en:'Ghana',cc:'gh',conf:'CAF',rank:66,apps:5,best:'八强(2010)',players:[{n:'Mohammed Kudus',age:25,club:'West Ham',num:14,pos:'AM',val:'€40M'},{n:'Thomas Partey',age:32,club:'Arsenal',num:5,pos:'CDM',val:'€18M'}]},
     {name:'巴拿马',en:'Panama',cc:'pa',conf:'CONCACAF',rank:43,apps:2,best:'小组赛(2018)',players:[{n:'Ismael Díaz',age:28,club:'Universidad Católica',num:10,pos:'FW',val:'€2M'},{n:'José Fajardo',age:31,club:'Independiente',num:9,pos:'ST',val:'€1M'}]}
   ]}
@@ -1087,8 +1087,6 @@ const ALL_MATCHES=RAW_MATCHES.map(formatMatch);
 let currentUser=null,authMode='login',matchScores={1:{home_score:2,away_score:0,status:'finished',match_minute:90,injury_time:8},2:{home_score:2,away_score:1,status:'finished',match_minute:90,injury_time:7}},userPredictions={};
 
 function getSimDate(){const p=new URLSearchParams(location.search);const d=p.get('date');if(d){const parts=d.split('.');if(parts.length===2)return new Date(2026,parseInt(parts[0])-1,parseInt(parts[1]));}return new Date();}
-function isTodayMatch(m){const now=getSimDate();const mDate=new Date(2026,m.date.split('月')[0]-1,parseInt(m.date.split('月')[1]));return mDate.toDateString()===now.toDateString();
-}
 
 /* ═══ AUTH ═══ */
 function toggleMobileMenu(){document.getElementById('mobileMenu').classList.toggle('open');}
@@ -1207,7 +1205,7 @@ function resolveStatus(s,matchObj){
   if(s.match_minute>=45)return'halftime';
   return s.home_score!=null?'finished':st;
 }
-var _lastScoresHash='',_predVersion=0,_lastRenderKey='',_scrollTargetDayId='';
+var _lastScoresHash='',_predVersion=0,_lastRenderKey='',_scrollTargetDayId='',_lastESPNHash='';
 function _scoresHash(){var a=[];for(var i=1;i<=104;i++){var m=matchScores[i];if(m&&m.home_score!=null)a.push(i+':'+m.home_score+'-'+m.away_score+':'+m.status+':'+m.match_minute+':'+m.injury_time);}return a.join('|');}
 function _renderKey(filter){return (filter||'all')+'|'+_scoresHash()+'|'+_predVersion+'|'+(allDatesExpanded?'1':'0')+'|'+_scrollTargetDayId;}
 /* ═══ INCREMENTAL DOM PATCH (no full re-render on score update) ═══ */
@@ -1241,7 +1239,7 @@ function patchMatchDisplay(dbId){
     var predInline=mA.querySelector('.match-pred-inline');
     if(predInline && ms.home_score!=null && ms.away_score!=null && (fm.status==='live'||fm.status==='halftime'||fm.status==='finished')){
       var scoreHTML=ms.home_score+' : '+ms.away_score;
-      var scoreStyle=fm.status==='live'||fm.status==='halftime'?' style="color:#0fa84a"':'';
+      var scoreStyle=fm.scoreColor?' style="'+fm.scoreColor+'"':'';
       predInline.outerHTML='<div class="match-pred-inline locked"><span class="match-result-score"'+scoreStyle+'>'+scoreHTML+'</span></div>';
       // 创建/更新预测侧边栏
       if(existing&&!card.querySelector('.match-pred-wrap')){
@@ -1263,7 +1261,7 @@ function patchMatchDisplay(dbId){
 }
 /* ═══ ESPN LIVE POLLER (browser fetches scores directly — no GitHub latency) ═══ */
 var ESPN_TEAM_CN={"mexico":"墨西哥","south africa":"南非","south korea":"韩国","czechia":"捷克","czech republic":"捷克","canada":"加拿大","bosnia and herzegovina":"波黑","bosnia":"波黑","united states":"美国","usa":"美国","paraguay":"巴拉圭","qatar":"卡塔尔","switzerland":"瑞士","brazil":"巴西","morocco":"摩洛哥","haiti":"海地","scotland":"苏格兰","australia":"澳大利亚","turkey":"土耳其","türkiye":"土耳其","germany":"德国","curacao":"库拉索","curaçao":"库拉索","netherlands":"荷兰","japan":"日本","sweden":"瑞典","tunisia":"突尼斯","ivory coast":"科特迪瓦","cote d'ivoire":"科特迪瓦","ecuador":"厄瓜多尔","spain":"西班牙","cape verde":"佛得角","belgium":"比利时","egypt":"埃及","saudi arabia":"沙特","uruguay":"乌拉圭","iran":"伊朗","new zealand":"新西兰","france":"法国","senegal":"塞内加尔","iraq":"伊拉克","norway":"挪威","argentina":"阿根廷","algeria":"阿尔及利亚","austria":"奥地利","jordan":"约旦","portugal":"葡萄牙","dr congo":"刚果(金)","congo":"刚果(金)","uzbekistan":"乌兹别克斯坦","colombia":"哥伦比亚","england":"英格兰","croatia":"克罗地亚","ghana":"加纳","panama":"巴拿马"};
-var _pollTimer=null,_fastPollUntil=0,_lastESPNMinute={},_lastESPNFreeze={},_lastPollDone=0;
+var _pollTimer=null,_fastPollUntil=0,_lastPollDone=0;
 async function _pollESPN(){
   try{
     var fmt=Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai'});
@@ -1344,10 +1342,7 @@ async function _pollESPN(){
           dbSt='halftime'; // 拒绝降级
         }
       }
-      // 清理旧版冻结检测用的全局变量（不再需要）
-      delete _lastESPNMinute[dbId];
-      delete _lastESPNFreeze[dbId];
-      var oldHash=dbId+':'+(old.home_score||'')+'-'+(old.away_score||'')+':'+(old.status||'')+':'+(old.match_minute||'')+':'+(old.injury_time||'');
+      var oldHash=dbId+':'+(old.home_score!=null?old.home_score:'')+'-'+(old.away_score!=null?old.away_score:'')+':'+(old.status||'')+':'+(old.match_minute!=null?old.match_minute:'')+':'+(old.injury_time!=null?old.injury_time:'');
       var newHash=dbId+':'+hs+'-'+as+':'+dbSt+':'+min+':'+inj;
       if(oldHash===newHash)continue;
       matchScores[dbId]={home_score:hs,away_score:as,status:dbSt,match_minute:min,injury_time:inj};
@@ -1555,8 +1550,6 @@ let allDatesExpanded=false;
 function showOnlyToday(expandMatches){const todayKey=findTodayKey();const firstKey=ALL_MATCHES[0]?.date;const showKey=todayKey||firstKey;document.querySelectorAll('.schedule-day').forEach(s=>{const hdr=s.querySelector('.day-header-text');if(!hdr)return;const txt=hdr.textContent;if(txt.includes(showKey)){s.style.display='';if(expandMatches){const dm=s.querySelector('.day-matches');if(dm)dm.classList.add('open');const arr=s.querySelector('.day-arrow');if(arr)arr.classList.add('open');}}else{s.style.display='none';}});}
 function showAllDates(){document.querySelectorAll('.schedule-day').forEach(s=>{s.style.display='';const dm=s.querySelector('.day-matches');if(dm)dm.classList.remove('open');const arr=s.querySelector('.day-arrow');if(arr)arr.classList.remove('open');});}
 function toggleAllDates(){allDatesExpanded=!allDatesExpanded;const btn=document.getElementById('toggleAllBtn');if(allDatesExpanded){btn.textContent='收起全部';}else{btn.textContent='展开全部';}renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');observeReveals();}
-function expandAll(){allDatesExpanded=true;const btn=document.getElementById('toggleAllBtn');if(btn)btn.textContent='收起全部';renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');observeReveals();}
-function collapseAll(){allDatesExpanded=false;const btn=document.getElementById('toggleAllBtn');if(btn)btn.textContent='展开全部';renderMatches(document.querySelector('.filter-btn.active')?.dataset?.filter||'all');observeReveals();}
 function scrollToToday(){
   var todayKey=findTodayKey();
   if(!todayKey){showToast('今天没有比赛');return;}
@@ -1599,7 +1592,7 @@ function renderThirdPlace(){
     const st=standings[g.name];
     if(!st)return;
     const sorted=Object.values(st).sort((a,b)=>b.PTS-a.PTS||b.GD-a.GD||b.GF-a.GF||a.team.name.localeCompare(b.team.name,'zh'));
-    if(sorted.length>=3){const t=sorted[2];thirds.push({team:t.team,group:g.name,P:t.P,GD:t.GD,PTS:t.PTS});}
+    if(sorted.length>=3){const t=sorted[2];thirds.push({team:t.team,group:g.name,P:t.P,GD:t.GD,GF:t.GF,PTS:t.PTS});}
   });
   thirds.sort((a,b)=>b.PTS-a.PTS||b.GD-a.GD||b.GF-a.GF||a.team.name.localeCompare(b.team.name,'zh'));
   if(thirds.length===0){
@@ -1864,7 +1857,7 @@ async function openPredHistory(){
 }
 /* ═══ TEAM PAGE (renders in modal overlay — no popups) ═══ */
 var TEAM_PLAYER_CN={"Santiago Giménez":"圣地亚哥·希门尼斯","Edson Álvarez":"埃德森·阿尔瓦雷斯","Percy Tau":"佩西·塔乌","Ronwen Williams":"朗文·威廉姆斯","Son Heung-min":"孙兴慜","Kim Min-jae":"金玟哉","Patrik Schick":"帕特里克·希克","Tomáš Souček":"托马斯·绍切克","Alphonso Davies":"阿方索·戴维斯","Jonathan David":"乔纳森·戴维","Edin Džeko":"埃丁·哲科","Miralem Pjanić":"米拉莱姆·皮亚尼奇","Akram Afif":"阿克拉姆·阿菲夫","Almoez Ali":"阿尔莫埃兹·阿里","Granit Xhaka":"格拉尼特·扎卡","Manuel Akanji":"曼努埃尔·阿坎吉","Vinícius Júnior":"维尼修斯","Rodrygo":"罗德里戈","Achraf Hakimi":"阿什拉夫·哈基米","Brahim Díaz":"卜拉欣·迪亚斯","Frantzdy Pierrot":"弗朗茨迪·皮埃罗","Duckens Nazon":"杜肯斯·纳宗","Andy Robertson":"安迪·罗伯逊","Scott McTominay":"斯科特·麦克托米奈","Christian Pulisic":"克里斯蒂安·普利西奇","Giovanni Reyna":"乔瓦尼·雷纳","Miguel Almirón":"米格尔·阿尔米隆","Julio Enciso":"胡利奥·恩西索","Mathew Ryan":"马修·瑞安","Harry Souttar":"哈里·苏塔","Hakan Çalhanoğlu":"哈坎·恰尔汗奥卢","Arda Güler":"阿尔达·居莱尔","Jamal Musiala":"贾马尔·穆西亚拉","Florian Wirtz":"弗洛里安·维尔茨","Leandro Bacuna":"莱安德罗·巴库纳","Juninho Bacuna":"儒尼尼奥·巴库纳","Franck Kessié":"弗兰克·凯西","Simon Adingra":"西蒙·阿丁格拉","Moisés Caicedo":"莫伊塞斯·凯塞多","Piero Hincapié":"皮耶罗·因卡皮耶","Virgil van Dijk":"维吉尔·范迪克","Frenkie de Jong":"弗伦基·德容","Kaoru Mitoma":"三笘薰","Takefusa Kubo":"久保建英","Alexander Isak":"亚历山大·伊萨克","Dejan Kulusevski":"德扬·库卢塞夫斯基","Ellyes Skhiri":"埃利斯·斯希里","Hannibal Mejbri":"汉尼拔·梅布里","Kevin De Bruyne":"凯文·德布劳内","Jérémy Doku":"杰雷米·多库","Mohamed Salah":"穆罕默德·萨拉赫","Omar Marmoush":"奥马尔·马尔穆什","Mehdi Taremi":"迈赫迪·塔雷米","Sardar Azmoun":"萨达尔·阿兹蒙","Chris Wood":"克里斯·伍德","Sarpreet Singh":"萨普里特·辛格","Lamine Yamal":"拉明·亚马尔","Pedri":"佩德里","Ryan Mendes":"瑞安·门德斯","Jovane Cabral":"若瓦内·卡布拉尔","Salem Al-Dawsari":"萨勒姆·多萨里","Firas Al-Buraikan":"菲拉斯·布赖坎","Federico Valverde":"费德里科·巴尔韦德","Darwin Núñez":"达尔文·努涅斯","Kylian Mbappé":"基利安·姆巴佩","Aurélien Tchouaméni":"奥雷利安·楚阿梅尼","Sadio Mané":"萨迪奥·马内","Kalidou Koulibaly":"卡利杜·库利巴利","Aymen Hussein":"艾曼·侯赛因","Ali Jasim":"阿里·贾西姆","Erling Haaland":"埃尔林·哈兰德","Martin Ødegaard":"马丁·厄德高","Lionel Messi":"利昂内尔·梅西","Julián Álvarez":"胡利安·阿尔瓦雷斯","Riyad Mahrez":"里亚德·马赫雷斯","Ismaël Bennacer":"伊斯梅尔·本纳赛尔","David Alaba":"大卫·阿拉巴","Marcel Sabitzer":"马塞尔·萨比策","Musa Al-Taamari":"穆萨·塔马里","Yazan Al-Naimat":"亚赞·奈马特","Cristiano Ronaldo":"克里斯蒂亚诺·罗纳尔多","Bruno Fernandes":"布鲁诺·费尔南德斯","Yoane Wissa":"约安·维萨","Chancel Mbemba":"尚塞尔·姆本巴","Eldor Shomurodov":"埃尔多尔·绍穆罗多夫","Jaloliddin Masharipov":"贾洛利丁·马沙里波夫","Luis Díaz":"路易斯·迪亚斯","James Rodríguez":"哈梅斯·罗德里格斯","Jude Bellingham":"裘德·贝林厄姆","Harry Kane":"哈里·凯恩","Luka Modrić":"卢卡·莫德里奇","Joško Gvardiol":"约什科·格瓦迪奥尔","Mohammed Kudus":"穆罕默德·库杜斯","Thomas Partey":"托马斯·帕尔特伊","Ismael Díaz":"伊斯梅尔·迪亚斯","José Fajardo":"何塞·法哈多"};
-var TEAM_CLUB_CN={"Inter Miami":"迈阿密国际","Atlético Madrid":"马德里竞技","West Ham":"西汉姆联","AC Milan":"AC米兰","Al Ahly":"开罗国民","Mamelodi Sundowns":"马梅洛迪日落","Tottenham":"托特纳姆热刺","Bayern Munich":"拜仁慕尼黑","Bayer Leverkusen":"勒沃库森","Al Sadd":"萨德","Al Duhail":"杜海勒","Al Sharjah":"沙迦","Fenerbahçe":"费内巴切","Lille":"里尔","PSG":"巴黎圣日耳曼","Real Madrid":"皇家马德里","Barcelona":"巴塞罗那","Liverpool":"利物浦","Man City":"曼城","Arsenal":"阿森纳","Chelsea":"切尔西","Man United":"曼联","Newcastle":"纽卡斯尔联","Brighton":"布莱顿","B. Dortmund":"多特蒙德","Borussia Mönchengladbach":"门兴格拉德巴赫","Inter Milan":"国际米兰","Napoli":"那不勒斯","Roma":"罗马","Al Nassr":"利雅得胜利","Al Hilal":"利雅得新月","Al Ahli":"吉达国民","Al Shorta":"巴格达警察","Como":"科莫","Real Sociedad":"皇家社会","Frankfurt":"法兰克福","Burnley":"伯恩利","Maccabi Haifa":"海法马卡比","Kayserispor":"开塞利体育","LAFC":"洛杉矶FC","Juventus":"尤文图斯","AZ Alkmaar":"阿尔克马尔","Leicester City":"莱斯特城","FC Groningen":"格罗宁根","Birmingham City":"伯明翰城","Union Berlin":"柏林联合","Nottm Forest":"诺丁汉森林","Sporting CP":"葡萄牙体育","Fatih Karagümrük":"卡拉古姆鲁克","Shabab Al Ahli":"迪拜青年国民","Montpellier":"蒙彼利埃","Brentford":"布伦特福德","Marseille":"马赛","Esteghlal":"德黑兰独立","Rayo Vallecano":"巴列卡诺","Universidad Católica":"天主教大学","Independiente":"独立队"};
+var TEAM_CLUB_CN={"Inter Miami":"迈阿密国际","Atlético Madrid":"马德里竞技","West Ham":"西汉姆联","AC Milan":"AC米兰","Al Ahly":"开罗国民","Mamelodi Sundowns":"马梅洛迪日落","Tottenham":"托特纳姆热刺","Bayern Munich":"拜仁慕尼黑","Bayer Leverkusen":"勒沃库森","Al Sadd":"萨德","Al Duhail":"杜海勒","Al Sharjah":"沙迦","Fenerbahçe":"费内巴切","Lille":"里尔","PSG":"巴黎圣日耳曼","Real Madrid":"皇家马德里","Barcelona":"巴塞罗那","Liverpool":"利物浦","Man City":"曼城","Arsenal":"阿森纳","Chelsea":"切尔西","Man United":"曼联","Newcastle":"纽卡斯尔联","Brighton":"布莱顿","B. Dortmund":"多特蒙德","Borussia Dortmund":"多特蒙德","Borussia Mönchengladbach":"门兴格拉德巴赫","Inter Milan":"国际米兰","Napoli":"那不勒斯","Lille":"里尔","Roma":"罗马","Al Nassr":"利雅得胜利","Al Hilal":"利雅得新月","Al Ahli":"吉达国民","Al Shorta":"巴格达警察","Como":"科莫","Real Sociedad":"皇家社会","Frankfurt":"法兰克福","Burnley":"伯恩利","Maccabi Haifa":"海法马卡比","Kayserispor":"开塞利体育","LAFC":"洛杉矶FC","Juventus":"尤文图斯","AZ Alkmaar":"阿尔克马尔","Leicester City":"莱斯特城","FC Groningen":"格罗宁根","Birmingham City":"伯明翰城","Union Berlin":"柏林联合","Nottm Forest":"诺丁汉森林","Sporting CP":"葡萄牙体育","Fatih Karagümrük":"卡拉古姆鲁克","Shabab Al Ahli":"迪拜青年国民","Montpellier":"蒙彼利埃","Brentford":"布伦特福德","Marseille":"马赛","Esteghlal":"德黑兰独立","Rayo Vallecano":"巴列卡诺","Universidad Católica":"天主教大学","Independiente":"独立队"};
 function openTeamPage(teamName){
   var info=TEAM_INFO[teamName];if(!info)return;
   var posCN={GK:'门将',CB:'中后卫',RB:'右后卫',LB:'左后卫',CDM:'防守型中场',CM:'中前卫',AM:'攻击型中场',LW:'左边锋',RW:'右边锋',ST:'中锋',FW:'前锋'};
@@ -1922,7 +1915,8 @@ function setupRealtimeSubscriptions(){
     if(payload.new&&payload.new.home_score!=null){
       var old=matchScores[payload.new.id];
       if(old&&old.home_score===payload.new.home_score&&old.away_score===payload.new.away_score&&old.status===payload.new.status&&old.match_minute===payload.new.match_minute&&old.injury_time===payload.new.injury_time)return;
-      matchScores[payload.new.id]={home_score:payload.new.home_score,away_score:payload.new.away_score,status:payload.new.status,match_minute:payload.new.match_minute,injury_time:payload.new.injury_time};
+      var resolvedSt=resolveStatus(payload.new,ALL_MATCHES[(payload.new.id||0)-1]||null);
+      matchScores[payload.new.id]={home_score:payload.new.home_score,away_score:payload.new.away_score,status:resolvedSt,match_minute:payload.new.match_minute,injury_time:payload.new.injury_time};
     }
     if(_rtDebounce)clearTimeout(_rtDebounce);
     _rtDebounce=setTimeout(function(){
@@ -2054,7 +2048,7 @@ function buildSearchIndex(){
   const idx=[];
   Object.values(TEAM_INFO).forEach(t=>{
     idx.push({type:'team',icon:'🏴',name:t.name,sub:t.en+' · '+t.conf+' · 排名#'+t.rank,keywords:[t.name,t.en,t.conf,'FIFA'],act:'team',data:t.name});
-    t.players.forEach((p,pi)=>{idx.push({type:'player',icon:'👤',name:p.n,sub:t.name+' · '+p.club+' · '+p.pos,keywords:[p.n,t.name,p.club,p.pos],act:'player',data:{team:t.name,idx:pi}});});
+    t.players.forEach((p,pi)=>{var pcn=TEAM_PLAYER_CN[p.n]||'';idx.push({type:'player',icon:'👤',name:pcn||p.n,sub:t.name+' · '+p.club+' · '+p.pos,keywords:[p.n,t.name,p.club,p.pos,pcn].filter(Boolean),act:'player',data:{team:t.name,idx:pi}});});
   });
   ALL_MATCHES.forEach((m,i)=>{
     const venue=m.venue,group=m.group||'',date=m.date;
@@ -2293,7 +2287,7 @@ function init(){
   allDatesExpanded=false;
   var tbtn=document.getElementById('toggleAllBtn');if(tbtn)tbtn.textContent='展开全部';
   getSearchIdx();
-  renderGroupsWithStandings();renderThirdPlace();renderMatches();renderBracket();renderPredictions();renderLeaderboard();renderLiveScores();
+  renderGroupsWithStandings();renderThirdPlace();renderMatches();renderPredictions();renderLeaderboard();renderLiveScores();
   _lastScoresHash=_scoresHash(); // Lock initial hash so loadMatchScores won't duplicate renderMatches
   buildJumpMenu();
   createParticles();observeReveals();setupFilters();setupSmoothScroll();setupKeyboard();setupRealtimeSubscriptions();
