@@ -717,6 +717,81 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
   .toast-container{top:60px}
   .toast{font-size:11px;padding:8px 14px}
 }
+/* ═══ Match Data Modal ═══ */
+.data-stats-card{margin-bottom:14px}
+.data-stats-card h3{font-family:var(--font-display);font-size:15px;letter-spacing:1px;color:var(--gold);margin-bottom:14px;text-transform:uppercase}
+.data-stats-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+.data-stats-val-h{text-align:right;font-family:var(--font-mono);font-size:14px;font-weight:700}
+.data-stats-val-a{text-align:left;font-family:var(--font-mono);font-size:14px;font-weight:700}
+.data-stats-vs{font-family:var(--font-mono);font-size:10px;color:var(--text-dim);padding:0 6px;text-align:center;min-width:30px}
+.data-stats-bar-wrap{position:relative;height:6px;background:rgba(255,255,255,0.05);border-radius:3px;grid-column:1/-1}
+.data-stats-bar-h{position:absolute;left:0;top:0;height:100%;background:var(--pitch);border-radius:3px;transition:width 0.6s ease}
+.data-stats-bar-a{position:absolute;right:0;top:0;height:100%;background:var(--gold);border-radius:3px;transition:width 0.6s ease}
+/* Match data header */
+.match-data-header{text-align:center;padding:24px 20px 16px;background:linear-gradient(135deg,rgba(13,140,60,0.2),rgba(13,140,60,0.05))}
+.match-data-teams-row{display:flex;align-items:center;justify-content:center;gap:16px;padding:8px 0}
+.data-team-col{flex:1;text-align:center}
+.data-team-col .flag{font-size:36px;display:block}
+.data-team-col .name{font-size:14px;font-weight:600;margin-top:4px;color:var(--text)}
+.data-score-col{flex:0 0 auto;text-align:center}
+.data-score-box{font-family:var(--font-mono);font-size:36px;font-weight:700;color:var(--gold);padding:6px 16px;background:rgba(212,168,67,0.1);border-radius:8px;border:2px solid rgba(212,168,67,0.3);min-width:80px}
+.data-score-box.live{border-color:var(--pitch-bright);animation:scoreBreath 1.5s ease-in-out infinite}
+.data-match-meta{display:flex;justify-content:center;gap:20px;margin-top:10px;font-size:11px;color:var(--text-dim);flex-wrap:wrap}
+/* Formation grid */
+.data-lineups-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.data-lineup-col{background:var(--slate);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);padding:16px}
+.data-lineup-col h4{font-family:var(--font-display);font-size:13px;letter-spacing:1px;color:var(--text);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.data-lineup-col h4 .fm{font-family:var(--font-mono);font-size:10px;color:var(--text-dim);background:rgba(255,255,255,0.05);padding:2px 8px;border-radius:20px}
+.data-formation-grid{display:flex;flex-direction:column;align-items:center;gap:10px;background:rgba(13,140,60,0.04);border-radius:var(--radius);padding:14px 8px;margin:10px 0;border:1px solid rgba(13,140,60,0.08)}
+.data-formation-row{display:flex;justify-content:center;gap:4px;flex-wrap:nowrap}
+.data-formation-player{display:flex;flex-direction:column;align-items:center;width:58px;min-width:0;text-align:center;gap:2px;transition:all 0.2s;cursor:default}
+.data-formation-player:hover{transform:translateY(-2px)}
+.data-fp-num{font-family:var(--font-mono);font-size:13px;font-weight:700;width:28px;height:28px;border-radius:50%;background:rgba(13,140,60,0.2);display:flex;align-items:center;justify-content:center;color:var(--pitch-bright);flex-shrink:0}
+.data-fp-name{font-size:9px;color:var(--text);line-height:1.2;max-width:58px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.data-formation-separator{width:70%;height:1px;background:rgba(255,255,255,0.06);margin:4px 0}
+/* Bench */
+.data-bench-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.data-bench-chip{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text-dim);background:rgba(255,255,255,0.03);padding:3px 8px;border-radius:20px;border:1px solid rgba(255,255,255,0.04)}
+.data-bench-chip .bc-num{font-family:var(--font-mono);font-weight:700;color:var(--text-dim);width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;font-size:9px}
+/* Event timeline */
+.data-event-list{position:relative;padding-left:28px}
+.data-event-list::before{content:'';position:absolute;left:10px;top:0;bottom:0;width:1px;background:rgba(255,255,255,0.06)}
+.data-event-item{position:relative;padding:8px 0;display:flex;align-items:flex-start;gap:10px}
+.data-event-item::before{content:'';position:absolute;left:-22px;top:14px;width:7px;height:7px;border-radius:50%;background:var(--text-dim)}
+.data-event-item.goal::before{background:var(--gold);box-shadow:0 0 6px var(--glow-gold)}
+.data-event-item.card-y::before{background:#f0c040}
+.data-event-item.card-r::before{background:#e03030}
+.data-event-item.sub::before{background:var(--pitch)}
+.data-event-item.penalty::before{background:#ff8c00}
+.data-event-time{font-family:var(--font-mono);font-size:10px;color:var(--text-dim);min-width:40px;text-align:right}
+.data-event-icon{font-size:13px;min-width:20px;text-align:center}
+.data-event-text{font-size:12px;color:var(--text);flex:1;line-height:1.4}
+/* MOTM */
+.data-motm{display:flex;align-items:center;gap:14px;padding:14px}
+.data-motm-star{font-size:44px}
+.data-motm-name{font-size:20px;font-weight:700;color:var(--gold)}
+/* Loading state in modal */
+.data-loading{text-align:center;padding:50px}
+.data-loading-spinner{width:32px;height:32px;border:3px solid rgba(255,255,255,0.1);border-top-color:var(--pitch);border-radius:50%;margin:0 auto 14px;animation:spin 0.8s linear infinite}
+.data-empty{text-align:center;padding:40px 20px;color:var(--text-dim)}
+@keyframes scoreBreath{0%,100%{box-shadow:0 0 0 0 rgba(13,140,60,0.3)}50%{box-shadow:0 0 0 8px rgba(13,140,60,0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* Responsive overrides for match data modal */
+@media(max-width:768px){
+  .data-lineups-grid{grid-template-columns:1fr}
+  .match-data-teams-row{gap:10px}
+  .data-score-box{font-size:28px;padding:4px 12px;min-width:60px}
+  .data-formation-player{width:48px}
+  .data-fp-name{font-size:8px;max-width:48px}
+  .data-formation-row{gap:2px}
+  .data-fp-num{width:24px;height:24px;font-size:11px}
+}
+@media(max-width:480px){
+  .data-formation-player{width:40px}
+  .data-fp-name{font-size:7px;max-width:40px}
+  .data-formation-row{gap:1px}
+  .data-fp-num{width:20px;height:20px;font-size:10px}
+}
 </style>
 </head>
 <body>
@@ -735,7 +810,6 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
       <li><a href="#schedule">赛程</a></li>
       <li><a href="#predict">预测</a></li>
       <li><a href="#livescore">实时比分</a></li>
-      <li><a href="relevantdata.html">比赛数据</a></li>
       <li><a href="#watch">观赛导航</a></li>
       <li><a href="#publicChatSection">聊天室</a></li>
     </ul>
@@ -756,7 +830,6 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
     <a href="#schedule" onclick="toggleMobileMenu()">赛程</a>
     <a href="#predict" onclick="toggleMobileMenu()">预测</a>
     <a href="#livescore" onclick="toggleMobileMenu()">实时比分</a>
-    <a href="relevantdata.html" onclick="toggleMobileMenu()">比赛数据</a>
     <a href="#watch" onclick="toggleMobileMenu()">观赛导航</a>
     <a href="#publicChatSection" onclick="toggleMobileMenu()">聊天室</a>
   </div>
@@ -779,6 +852,7 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
 <div class="modal-overlay" id="teamOverlay" onclick="closeTeamModal(event)"><div class="team-modal" id="teamModal" onclick="event.stopPropagation()"></div></div>
 <div class="modal-overlay" id="predHistOverlay" onclick="closePredHistory(event)"><div class="team-modal" id="predHistModal" onclick="event.stopPropagation()"></div></div>
 <div class="player-card-overlay" id="playerCardOverlay" onclick="closePlayerCard()"><div class="player-card" id="playerCard" onclick="event.stopPropagation()"></div></div>
+<div class="modal-overlay" id="dataOverlay" onclick="closeMatchData(event)"><div class="team-modal" id="matchDataModal" onclick="event.stopPropagation()"></div></div>
 <div class="toast-container" id="toastContainer"></div>
 <main>
   <section class="hero">
@@ -1253,8 +1327,7 @@ function patchMatchDisplay(dbId){
     // 注入比赛数据链接 (比赛开始后)
     var isTBD=m.home.includes('胜者')||m.home.includes('第一')||m.home.includes('第二')||m.home.includes('第三')||m.home==='待定';
     if(!isTBD&&!mA.querySelector('.match-data-link')&&(fm.status==='live'||fm.status==='halftime'||fm.status==='finished')){
-      var dlHref='relevantdata.html?h='+encodeURIComponent(m.home)+'&a='+encodeURIComponent(m.away);
-      var dl='<a class="match-data-link dynamic" href="'+dlHref+'" onclick="event.stopPropagation()" title="查看比赛数据">📊 数据</a>';
+      var dl='<a class="match-data-link dynamic" href="javascript:void(0)" onclick="event.stopPropagation();openMatchData('+dbId+')" title="查看比赛数据">📊 数据</a>';
       var chatBtn=mA.querySelector('.chat-card-btn');
       if(chatBtn) chatBtn.insertAdjacentHTML('afterend', dl);
       var md=card.querySelector('.match-date');
@@ -1286,6 +1359,19 @@ function patchMatchDisplay(dbId){
 /* ═══ ESPN LIVE POLLER (browser fetches scores directly — no GitHub latency) ═══ */
 var ESPN_TEAM_CN={"mexico":"墨西哥","south africa":"南非","south korea":"韩国","czechia":"捷克","czech republic":"捷克","canada":"加拿大","bosnia and herzegovina":"波黑","bosnia":"波黑","united states":"美国","usa":"美国","paraguay":"巴拉圭","qatar":"卡塔尔","switzerland":"瑞士","brazil":"巴西","morocco":"摩洛哥","haiti":"海地","scotland":"苏格兰","australia":"澳大利亚","turkey":"土耳其","türkiye":"土耳其","germany":"德国","curacao":"库拉索","curaçao":"库拉索","netherlands":"荷兰","japan":"日本","sweden":"瑞典","tunisia":"突尼斯","ivory coast":"科特迪瓦","cote d'ivoire":"科特迪瓦","ecuador":"厄瓜多尔","spain":"西班牙","cape verde":"佛得角","belgium":"比利时","egypt":"埃及","saudi arabia":"沙特","uruguay":"乌拉圭","iran":"伊朗","new zealand":"新西兰","france":"法国","senegal":"塞内加尔","iraq":"伊拉克","norway":"挪威","argentina":"阿根廷","algeria":"阿尔及利亚","austria":"奥地利","jordan":"约旦","portugal":"葡萄牙","dr congo":"刚果(金)","congo":"刚果(金)","uzbekistan":"乌兹别克斯坦","colombia":"哥伦比亚","england":"英格兰","croatia":"克罗地亚","ghana":"加纳","panama":"巴拿马"};
 var _pollTimer=null,_fastPollUntil=0,_lastPollDone=0;
+/* ─── ESPN team name → Chinese (reusable) ─── */
+function _espnTeamToCN(name){
+  var low=(name||'').toLowerCase().trim();
+  if(ESPN_TEAM_CN[low])return ESPN_TEAM_CN[low];
+  for(var k in ESPN_TEAM_CN){if(k.indexOf(low)>=0||low.indexOf(k)>=0)return ESPN_TEAM_CN[k];}
+  return name;
+}
+/* ─── Match date "6月12日" → ESPN "20260612" ─── */
+function _matchDateToESPN(dateStr){
+  var parts=dateStr.split('月');
+  var month=parseInt(parts[0]),day=parseInt(parts[1]);
+  return '2026'+String(month).padStart(2,'0')+String(day).padStart(2,'0');
+}
 async function _pollESPN(){
   try{
     var fmt=Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai'});
@@ -1305,9 +1391,7 @@ async function _pollESPN(){
       var h=comps.competitors[0],a=comps.competitors[1];
       var hn=(h.team.displayName||'').toLowerCase().trim();
       var an=(a.team.displayName||'').toLowerCase().trim();
-      var hcn=ESPN_TEAM_CN[hn]||hn,acn=ESPN_TEAM_CN[an]||an;
-      if(!ESPN_TEAM_CN[hn])for(var k in ESPN_TEAM_CN){if(k.indexOf(hn)>=0||hn.indexOf(k)>=0){hcn=ESPN_TEAM_CN[k];break}}
-      if(!ESPN_TEAM_CN[an])for(var k in ESPN_TEAM_CN){if(k.indexOf(an)>=0||an.indexOf(k)>=0){acn=ESPN_TEAM_CN[k];break}}
+      var hcn=_espnTeamToCN(hn),acn=_espnTeamToCN(an);
       var hs=parseInt(h.score)||0,as=parseInt(a.score)||0;
       var stInfo=evt.status,stType=stInfo.type.name||'';
       var dbSt='upcoming',period=stInfo.period||0,clock=stInfo.displayClock||'';
@@ -1395,6 +1479,248 @@ function _autoPoll(){
   _pollESPN();
   if(_pollTimer)clearTimeout(_pollTimer);
   (function schedule(){var now=Date.now();var iv=now<_fastPollUntil?5000:(now<_fastPollUntil+3600000?30000:120000);_pollTimer=setTimeout(function(){_pollESPN();schedule();},iv);})();
+}
+/* ════════════════════════════════════════════════════
+   MATCH DATA MODAL (inline ESPN data)
+   ════════════════════════════════════════════════════ */
+/* ─── Position abbreviation → Chinese ─── */
+var POS_CN={G:'门将',GK:'门将','CD-L':'左中卫','CD-R':'右中卫',LB:'左后卫',RB:'右后卫',CB:'中后卫',CDM:'后腰',CM:'中场',CAM:'前腰',LM:'左中场',RM:'右中场',LW:'左边锋',RW:'右边锋',ST:'前锋',LF:'左前锋',RF:'右前锋',CF:'中锋',LWB:'左边翼卫',RWB:'右边翼卫',DM:'防守中场',AM:'进攻中场',FW:'前锋',DF:'后卫',MF:'中场',SUB:'替补','AM-R':'右前腰','AM-L':'左前腰','CM-R':'右中场','CM-L':'左中场','CF-R':'右中锋','CF-L':'左中锋','RM-R':'右中场','LM-L':'左中场',CD:'中后卫',F:'前锋','CD-L/R':'中后卫','CB-L':'左中卫','CB-R':'右中卫',gk:'门将',lb:'左后卫',rb:'右后卫',cb:'中后卫',cdm:'后腰',cm:'中场',cam:'前腰',lm:'左中场',rm:'右中场',lw:'左边锋',rw:'右边锋',st:'前锋',cf:'中锋',lwb:'左边翼卫',rwb:'右边翼卫',fw:'前锋',df:'后卫',mf:'中场','am-r':'右前腰','am-l':'左前腰','cm-r':'右中场','cm-l':'左中场','cf-r':'右中锋','cf-l':'左中锋',cd:'中后卫',f:'前锋'};
+function posCN(abbr){if(!abbr)return'';return POS_CN[abbr]||POS_CN[abbr.toUpperCase()]||abbr;}
+/* ─── Player name → Chinese ─── */
+function pcn(name){
+  if(!name)return'';
+  if(TEAM_PLAYER_CN[name])return TEAM_PLAYER_CN[name];
+  var parts=name.split(' ');
+  if(parts.length<=1)return name;
+  var shortLinks=['Al','El','van','de','der','den','von','dos','da','Abu','bin','ibn'];
+  var last=parts[parts.length-1];
+  if(parts.length>=3&&shortLinks.indexOf(parts[parts.length-2])>=0)return parts[parts.length-2]+' '+last;
+  return last;
+}
+/* ─── Translate ESPN event text → Chinese ─── */
+function translateEvent(ev){
+  var txt=ev.text||ev.shortText||'';
+  if(!txt)return txt;
+  // Own Goal
+  var ogMatch=txt.match(/^(.+?)\s*\(([^)]+)\)\s*Own Goal/i);
+  if(ogMatch)return'⚽ 乌龙球: '+pcn(ogMatch[1])+' ('+ogMatch[2]+')';
+  // Goal
+  var goalMatch=txt.match(/Goal!.*?\.?\s*(.+?)\s*\(([^)]+)\)\s*(.*?)\.?\s*(?:Assisted by (.+?)\.?)?$/i);
+  if(goalMatch){
+    var scorer=goalMatch[1],team=goalMatch[2],rest=goalMatch[3],assist=goalMatch[4];
+    var cn=pcn(scorer),acn=assist?pcn(assist.trim()):'';
+    return'⚽ '+cn+' ('+team+') 进球'+(acn?', 助攻: '+acn:'')+(rest&&rest!=='.'?' '+rest:'');
+  }
+  // Penalty
+  var penMatch=txt.match(/(.+?)\s*\(([^)]+)\)\s*Penalty\s*[-–]\s*(Scored|Missed)/i);
+  if(penMatch){
+    var pn=pcn(penMatch[1]),pt=penMatch[2],act=penMatch[3].toLowerCase()==='scored'?'命中':'罚失';
+    return'🎯 '+pn+' ('+pt+') 点球'+act;
+  }
+  // Substitution
+  var subMatch=txt.match(/Substitution,\s*(.+?)\.\s*(.+?)\s+replaces\s+(.+?)(?:\s+because\s+of\s+an\s+injury)?\.?$/i);
+  if(subMatch){
+    var sTeam=subMatch[1],inP=pcn(subMatch[2]),outP=pcn(subMatch[3]);
+    return'🔄 '+sTeam+' 换人: '+inP+' ↑ '+outP+' ↓';
+  }
+  // Yellow card
+  var ycMatch=txt.match(/(.+?)\s*\(([^)]+)\)\s*is shown the yellow card/i);
+  if(ycMatch)return'🟨 黄牌: '+pcn(ycMatch[1])+' ('+ycMatch[2]+')';
+  // Second yellow → red
+  var rc2Match=txt.match(/(.+?)\s*\(([^)]+)\)\s*(?:is shown the |receives a )?second yellow card/i);
+  if(rc2Match)return'🟥 两黄变红: '+pcn(rc2Match[1])+' ('+rc2Match[2]+')';
+  // Red card
+  var rcMatch=txt.match(/(.+?)\s*\(([^)]+)\)\s*is shown the red card/i);
+  if(rcMatch)return'🟥 红牌: '+pcn(rcMatch[1])+' ('+rcMatch[2]+')';
+  // VAR
+  var varMatch=txt.match(/(.+?)\s*\(([^)]+)\)\s*VAR\s*[-–]\s*(.+)/i);
+  if(varMatch)return'📺 VAR: '+pcn(varMatch[1])+' ('+varMatch[2]+') — '+varMatch[3];
+  // Halftime / End
+  if(/halftime|half.time/i.test(txt))return'⏸️ 中场休息';
+  if(/end.*regular.*time|full.time|final.whistle/i.test(txt))return'⏹️ 常规时间结束';
+  if(/extra.time|overtime/i.test(txt))return'⏱️ 加时赛';
+  if(/penalty.*shootout|shootout/i.test(txt))return'🎯 点球大战';
+  // Fallback: replace known player names
+  var translated=txt;
+  var names=Object.keys(TEAM_PLAYER_CN).sort(function(a,b){return b.length-a.length;});
+  for(var ni=0;ni<names.length;ni++){if(txt.indexOf(names[ni])>=0)translated=translated.split(names[ni]).join(TEAM_PLAYER_CN[names[ni]]);}
+  if(translated!==txt)return translated;
+  return txt;
+}
+/* ─── Fetch ESPN data for a specific match ─── */
+var _matchDataCache={};
+async function fetchMatchData(matchDbId){
+  var cached=_matchDataCache[matchDbId];
+  if(cached&&(Date.now()-cached.ts)<60000)return cached;
+  var m=ALL_MATCHES[matchDbId-1];
+  if(!m)throw new Error('未找到比赛');
+  var espnDate=_matchDateToESPN(m.date);
+  // Also fetch previous day — Beijing time is ahead of UTC, ESPN dates may be 1 day earlier
+  var d=new Date(+espnDate.substring(0,4),+espnDate.substring(4,6)-1,+espnDate.substring(6,8));
+  d.setDate(d.getDate()-1);
+  var prevDate=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
+  var allEsEvents=[];
+  var datesToTry=[espnDate,prevDate];
+  for(var di=0;di<datesToTry.length;di++){
+    try{
+      var resp=await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates='+datesToTry[di]);
+      if(resp.ok){var data=await resp.json();if(data.events)allEsEvents=allEsEvents.concat(data.events);}
+    }catch(e){}
+  }
+  if(!allEsEvents.length)throw new Error('ESPN 数据不可用');
+  var eventId=null;
+  for(var i=0;i<allEsEvents.length;i++){
+    var comps=allEsEvents[i].competitions[0];
+    if(!comps||comps.competitors.length<2)continue;
+    var hn=(comps.competitors[0].team.displayName||'').toLowerCase().trim();
+    var an=(comps.competitors[1].team.displayName||'').toLowerCase().trim();
+    var hcn=_espnTeamToCN(hn),acn=_espnTeamToCN(an);
+    if((hcn===m.home&&acn===m.away)||(hcn===m.away&&acn===m.home)){eventId=allEsEvents[i].id;break;}
+  }
+  if(!eventId)throw new Error('未在ESPN中找到该场比赛');
+  var sumResp=await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/summary?event='+eventId);
+  if(!sumResp.ok)throw new Error('比赛摘要不可用');
+  var summary=await sumResp.json();
+  _matchDataCache[matchDbId]={summary:summary,eventId:eventId,ts:Date.now()};
+  return _matchDataCache[matchDbId];
+}
+/* ─── Render match data into #matchDataModal ─── */
+function renderMatchData(summary,matchObj){
+  var modal=document.getElementById('matchDataModal');
+  if(!summary){modal.innerHTML='<div class="data-empty">比赛数据暂不可用</div>';return;}
+  var hdr=summary.header,comp=hdr&&hdr.competitions?hdr.competitions[0]:null;
+  if(!comp){modal.innerHTML='<div class="data-empty">比赛数据加载中...</div>';return;}
+  var home=comp.competitors[0],away=comp.competitors[1];
+  var hn=_espnTeamToCN(home.team.displayName),an=_espnTeamToCN(away.team.displayName);
+  var hf=espnFlag2(home.team.displayName),af=espnFlag2(away.team.displayName);
+  var st=comp.status.type.name;
+  var live=st.indexOf('IN_PROGRESS')>=0||st.indexOf('HALF')>=0||st.indexOf('FIRST_HALF')>=0||st.indexOf('SECOND_HALF')>=0;
+  var done=comp.status.type.completed||st.indexOf('FULL_TIME')>=0||st.indexOf('FINAL')>=0;
+  var statusText=done?'已结束':(live?(st.indexOf('HALF')>=0?'中场休息':'直播中'):'未开始');
+  var clock=comp.status.displayClock||'';
+  var venue=(summary.gameInfo&&summary.gameInfo.venue)?summary.gameInfo.venue.fullName:matchObj.venue;
+  var dateStr=matchObj.date+' '+matchObj.time;
+  var closeBtn='<button class="team-modal-close" onclick="closeMatchData()" style="position:absolute;top:12px;right:12px;z-index:10">&times;</button>';
+  /* ─── Header ─── */
+  var html=closeBtn+'<div class="match-data-header"><div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--text-dim);margin-bottom:4px">'+venue+'</div><div class="match-data-teams-row"><div class="data-team-col"><span class="flag">'+hf+'</span><div class="name">'+hn+'</div></div><div class="data-score-col"><div class="data-score-box'+(live?' live':'')+'">'+home.score+' : '+away.score+'</div></div><div class="data-team-col"><span class="flag">'+af+'</span><div class="name">'+an+'</div></div></div><div class="data-match-meta"><span>'+(live?'<span style="color:#0fa84a">●</span> ':'')+statusText+(clock?' '+clock:'')+'</span><span>'+dateStr+' 北京时间</span></div></div>';
+  /* ─── Stats ─── */
+  var bs=summary.boxscore;
+  if(bs&&bs.teams&&bs.teams.length>=2){
+    var hs=bs.teams[0].statistics||[],as=bs.teams[1].statistics||[];
+    var keys=['possessionPct','totalShots','shotsOnTarget','totalPasses','passPct','foulsCommitted','wonCorners','offsides','yellowCards','redCards','saves'];
+    var labels={possessionPct:'控球率',totalShots:'射门',shotsOnTarget:'射正',totalPasses:'传球',passPct:'传球成功率',foulsCommitted:'犯规',wonCorners:'角球',offsides:'越位',yellowCards:'黄牌',redCards:'红牌',saves:'扑救'};
+    var isPctRaw={passPct:true,shotPct:true,crossPct:true},isPctDirect={possessionPct:true};
+    html+='<div class="data-stats-card" style="padding:18px 20px"><h3>📊 比赛数据</h3>';
+    for(var si=0;si<keys.length;si++){
+      var key=keys[si],hv=null,av=null;
+      for(var hi=0;hi<hs.length;hi++){if(hs[hi].name===key){hv=hs[hi].displayValue;break;}}
+      for(var ai=0;ai<as.length;ai++){if(as[ai].name===key){av=as[ai].displayValue;break;}}
+      if(hv==null&&av==null)continue;
+      var hN=parseFloat(hv)||0,aN=parseFloat(av)||0,tot=hN+aN||1;
+      var hDisp=hN,aDisp=aN;
+      if(isPctRaw[key]){hDisp=hN*100;aDisp=aN*100;}
+      var hp,ap;
+      if(isPctDirect[key]){hp=hN;ap=aN;}
+      else if(isPctRaw[key]){hp=hDisp/tot*100;ap=aDisp/tot*100;}
+      else{hp=hN/tot*100;ap=aN/tot*100;}
+      var hd=isPctRaw[key]||isPctDirect[key]?(hDisp.toFixed(1)+'%'):(hN>999?(hN/1000).toFixed(1)+'k':''+hN);
+      var ad=isPctRaw[key]||isPctDirect[key]?(aDisp.toFixed(1)+'%'):(aN>999?(aN/1000).toFixed(1)+'k':''+aN);
+      html+='<div class="data-stats-row"><span class="data-stats-val-h">'+hd+'</span><span class="data-stats-vs">'+labels[key]+'</span><span class="data-stats-val-a">'+ad+'</span><div class="data-stats-bar-wrap"><div class="data-stats-bar-h" style="width:'+hp.toFixed(1)+'%"></div><div class="data-stats-bar-a" style="width:'+ap.toFixed(1)+'%"></div></div></div>';
+    }
+    html+='</div>';
+  }
+  /* ─── Lineups ─── */
+  var rosters=summary.rosters;
+  if(rosters&&rosters.length>=2){
+    var rh=rosters[0],ra=rosters[1];
+    html+='<div class="data-stats-card" style="padding:18px 20px"><h3>👥 首发阵容</h3><div class="data-lineups-grid">';
+    [{r:rh,flag:hf,name:hn,fm:rh.formation||'?'},{r:ra,flag:af,name:an,fm:ra.formation||'?'}].forEach(function(t){
+      var starters=(t.r.roster||[]).filter(function(p){return p.starter;});
+      var subs=(t.r.roster||[]).filter(function(p){return !p.starter;});
+      html+='<div class="data-lineup-col"><h4>'+t.flag+' '+t.name+' <span class="fm">'+t.fm+'</span></h4>';
+      var fmParts=(t.fm||'4-4-2').split('-').map(function(n){return parseInt(n)||0;});
+      var gk=starters[0],field=starters.slice(1);
+      html+='<div class="data-formation-grid">';
+      var showOrder=fmParts.slice().reverse();
+      for(var ri=0;ri<showOrder.length;ri++){
+        var cnt=showOrder[ri];
+        html+='<div class="data-formation-row">';
+        var usedSoFar=0;
+        for(var prev=0;prev<ri;prev++)usedSoFar+=showOrder[prev];
+        var startFrom=field.length-usedSoFar-cnt;
+        for(var ci=0;ci<cnt;ci++){
+          var pi=startFrom+ci;
+          if(pi>=0&&pi<field.length){
+            var p=field[pi],nameCN=pcn(p.athlete.displayName);
+            html+='<div class="data-formation-player" title="'+p.athlete.displayName+'"><span class="data-fp-num">'+(p.jersey||'?')+'</span><span class="data-fp-name">'+nameCN+'</span></div>';
+          }
+        }
+        html+='</div>';
+        if(ri<showOrder.length-1)html+='<div class="data-formation-separator"></div>';
+      }
+      html+='<div class="data-formation-row"><div class="data-formation-player" title="'+gk.athlete.displayName+' · 门将"><span class="data-fp-num">'+(gk.jersey||'?')+'</span><span class="data-fp-name">'+pcn(gk.athlete.displayName)+'</span></div></div>';
+      html+='</div>';
+      if(subs.length>0){
+        html+='<div style="font-size:10px;color:var(--text-dim);margin:8px 0 4px">🔄 替补</div><div class="data-bench-grid">'+subs.map(function(p){return'<div class="data-bench-chip"><span class="bc-num">'+(p.jersey||'?')+'</span><span>'+pcn(p.athlete.displayName)+'</span></div>';}).join('')+'</div>';
+      }
+      html+='</div>';
+    });
+    html+='</div></div>';
+  }
+  /* ─── Events ─── */
+  var events=summary.keyEvents||[];
+  var seenEvents={},significant=[];
+  for(var ei=0;ei<events.length;ei++){
+    var ev=events[ei];
+    if(!ev.type||!ev.type.text)continue;
+    var eventKey=(ev.clock&&ev.clock.displayValue||'')+'|'+(ev.text||ev.shortText||'');
+    if(seenEvents[eventKey])continue;
+    seenEvents[eventKey]=true;
+    var type=ev.type.text,isGoal=type==='Goal',isRed=type.indexOf('Red')>=0,isYel=type.indexOf('Yellow')>=0,isSub=type.indexOf('Substitution')>=0,isPen=type.indexOf('Penalty')>=0,isVar=type.indexOf('VAR')>=0;
+    var cls=isGoal?'goal':(isRed?'card-r':(isYel?'card-y':(isSub?'sub':(isPen?'penalty':''))));
+    var icon=isGoal?'⚽':(isRed?'🟥':(isYel?'🟨':(isSub?'🔄':(isPen?'🎯':(isVar?'📺':'●')))));
+    var cText=ev.clock&&ev.clock.displayValue?ev.clock.displayValue:'';
+    var txt=translateEvent(ev);
+    significant.push({cls:cls,icon:icon,time:cText,text:txt});
+  }
+  if(significant.length>0){
+    html+='<div class="data-stats-card" style="padding:18px 20px"><h3>⏱️ 比赛事件</h3><div class="data-event-list">';
+    for(var ei2=0;ei2<significant.length;ei2++){
+      var se=significant[ei2];
+      html+='<div class="data-event-item '+se.cls+'"><span class="data-event-time">'+se.time+'</span><span class="data-event-icon">'+se.icon+'</span><span class="data-event-text">'+se.text+'</span></div>';
+    }
+    html+='</div></div>';
+  }
+  /* ─── Man of the Match ─── */
+  if(done){
+    var motm=summary.manOfTheMatch||(summary.header&&summary.header.manOfTheMatch)||(summary.header&&summary.header.competitions&&summary.header.competitions[0]&&summary.header.competitions[0].manOfTheMatch)||(summary.boxscore&&summary.boxscore.manOfTheMatch)||(summary.gameInfo&&summary.gameInfo.manOfTheMatch);
+    if(!motm&&comp&&comp.manOfTheMatch)motm=comp.manOfTheMatch;
+    if(motm){
+      var motmName=motm.displayName||motm.name||'',motmCN=pcn(motmName);
+      var motmTeam=motm.team?_espnTeamToCN(motm.team.displayName||motm.team.name||''):'';
+      html+='<div class="data-stats-card" style="padding:18px 20px"><h3>⭐ 全场最佳球员</h3><div class="data-motm"><span class="data-motm-star">⭐</span><div><div class="data-motm-name">'+motmCN+(motmTeam?' <span style="font-size:13px;color:var(--text-dim);font-weight:400">('+motmTeam+')</span>':'')+'</div><div style="font-size:11px;color:var(--text-dim);margin-top:2px">本场最佳球员</div></div></div></div>';
+    }
+  }
+  modal.innerHTML=html;
+}
+/* ─── Open/close match data modal ─── */
+function openMatchData(matchDbId){
+  var overlay=document.getElementById('dataOverlay'),modal=document.getElementById('matchDataModal');
+  modal.innerHTML='<div class="data-loading"><div class="data-loading-spinner"></div><p style="color:var(--text-dim);margin-top:8px">加载比赛数据...</p></div>';
+  overlay.classList.add('active');
+  var m=ALL_MATCHES[matchDbId-1];
+  fetchMatchData(matchDbId).then(function(result){renderMatchData(result.summary,m);}).catch(function(err){modal.innerHTML='<button class="team-modal-close" onclick="closeMatchData()" style="position:absolute;top:12px;right:12px;z-index:10">&times;</button><div class="data-empty" style="padding:50px"><p style="color:var(--accent-red);font-size:14px">加载失败</p><p style="color:var(--text-dim);font-size:12px;margin-top:8px">'+err.message+'</p><p style="color:var(--text-dim);font-size:10px;margin-top:4px">数据可能尚未在 ESPN 上发布</p></div>';});
+}
+function closeMatchData(e){
+  if(e&&e.target!==document.getElementById('dataOverlay'))return;
+  document.getElementById('dataOverlay').classList.remove('active');
+}
+/* ─── Flag helper for match data (reuse existing _espnTeamToCN for lookup) ─── */
+function espnFlag2(name){
+  var low=(name||'').toLowerCase().trim();
+  var map={austria:'🇦🇹',jordan:'🇯🇴',portugal:'🇵🇹','dr congo':'🇨🇩',england:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',croatia:'🇭🇷',ghana:'🇬🇭',panama:'🇵🇦',uzbekistan:'🇺🇿',colombia:'🇨🇴',mexico:'🇲🇽','south africa':'🇿🇦','south korea':'🇰🇷',czechia:'🇨🇿',canada:'🇨🇦','bosnia and herzegovina':'🇧🇦',bosnia:'🇧🇦','united states':'🇺🇸',paraguay:'🇵🇾',qatar:'🇶🇦',switzerland:'🇨🇭',brazil:'🇧🇷',morocco:'🇲🇦',haiti:'🇭🇹',scotland:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',australia:'🇦🇺',turkey:'🇹🇷',germany:'🇩🇪',curacao:'🇨🇼','ivory coast':'🇨🇮',ecuador:'🇪🇨',spain:'🇪🇸','cape verde':'🇨🇻',belgium:'🇧🇪',egypt:'🇪🇬','saudi arabia':'🇸🇦',uruguay:'🇺🇾','new zealand':'🇳🇿',france:'🇫🇷',senegal:'🇸🇳',norway:'🇳🇴',argentina:'🇦🇷',algeria:'🇩🇿',netherlands:'🇳🇱',japan:'🇯🇵',sweden:'🇸🇪',tunisia:'🇹🇳',iran:'🇮🇷',iraq:'🇮🇶'};
+  for(var k in map){if(low.indexOf(k)>=0||k.indexOf(low)>=0)return map[k];}
+  return'🏴';
 }
 async function loadMatchScores(){
   if(!SUPABASE_READY)return;
@@ -1543,11 +1869,10 @@ function renderMatchCard(m,idx,savedPanels){
     hasSidebar=' has-sidebar';
     predSidebarHTML='<div class="match-pred-wrap"><div class="match-pred-panel'+(panelWasOpen?' open':'')+'" id="predPanel-'+matchDbId+'"><div class="mpp-inner"><div class="mpp-label">我的预测</div><div class="mpp-score">'+existing.home_score+' : '+existing.away_score+'</div><div class="mpp-teams">'+m.home+' vs '+m.away+'</div></div></div><div class="match-pred-tab'+(panelWasOpen?' open':'')+'" id="predTab-'+matchDbId+'" onclick="event.stopPropagation();togglePredSide('+matchDbId+')" title="查看我的预测">'+(panelWasOpen?'收起':'我的预测')+'</div></div>';
   }
-  var dlHref='',dataLinkHTML='';
-  if(!isTBD&&(resolvedStatus==='live'||resolvedStatus==='halftime'||resolvedStatus==='finished')){
-    dlHref='relevantdata.html?h='+encodeURIComponent(m.home)+'&a='+encodeURIComponent(m.away);
-    dataLinkHTML='<a class="match-data-link" href="'+dlHref+'" onclick="event.stopPropagation()" title="查看比赛数据">📊 数据</a>';
-  }
+var dataLinkHTML='';
+	  if(!isTBD&&(resolvedStatus==='live'||resolvedStatus==='halftime'||resolvedStatus==='finished')){
+	    dataLinkHTML='<a class="match-data-link" href="javascript:void(0)" onclick="event.stopPropagation();openMatchData('+matchDbId+')" title="查看比赛数据">📊 数据</a>';
+	  }
   return `<div class="match-card reveal${cardStatus}${resolvedStatus==='finished'?' finished':''}${hasSidebar}" id="mc-${matchDbId}"><div class="match-date"><strong>${m.date}</strong>${m.time} 北京时间${dataLinkHTML}</div><div class="match-info"><div class="match-teams">${hName}<span class="match-vs">VS</span>${aName}</div><div class="match-venue">${m.venue}${m.group?' · '+m.group+'组':''} · <span style="font-size:10px;color:var(--text-dim)">${stageLabel}</span></div></div><div class="match-actions">${predHTML}<button class="chat-card-btn" onclick="event.stopPropagation();openChatRoom(${matchDbId},'${m.home.replace(/'/g,"\\'")} vs ${m.away.replace(/'/g,"\\'")}')" title="进入聊天室">💬 聊</button>${dataLinkHTML}<div class="match-status-row">${combinedStatus}</div></div>${predSidebarHTML}</div>`;
 	}
 	// Unified status display — used by both match cards and live scores
@@ -2069,7 +2394,7 @@ function observeReveals(){var els=document.querySelectorAll('.reveal:not(.visibl
 function createParticles(){const c=document.getElementById('particles');for(let i=0;i<30;i++){const p=document.createElement('div');p.classList.add('particle');const s=Math.random()*4+2;p.style.width=s+'px';p.style.height=s+'px';p.style.left=Math.random()*100+'%';p.style.animationDuration=(Math.random()*12+8)+'s';p.style.animationDelay=(Math.random()*10)+'s';p.style.opacity=(Math.random()*0.3).toString();c.appendChild(p);}}
 function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
 function setupSmoothScroll(){document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth'});});});}
-function setupKeyboard(){document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAuthModal();closeTeamModal();closePredHistory();closePlayerCard();const dd=document.getElementById('searchDropdown');if(dd)dd.classList.remove('open');}});}
+function setupKeyboard(){document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAuthModal();closeTeamModal();closePredHistory();closePlayerCard();closeMatchData();const dd=document.getElementById('searchDropdown');if(dd)dd.classList.remove('open');}});}
 
 /* ═══ SEARCH ═══ */
 let searchTimer=null;
