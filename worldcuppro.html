@@ -2253,7 +2253,7 @@ function openTeamPage(teamName){
   var stageNames={group:'小组赛',r32:'1/16决赛',r16:'1/8决赛',qf:'1/4决赛',sf:'半决赛','3rd':'季军赛',final:'决赛'};
   var teamMatches=ALL_MATCHES.filter(function(m){return m.home===teamName||m.away===teamName;});
   var matchCards=teamMatches.map(function(m){var opp=m.home===teamName?m.away:m.home;var isH=m.home===teamName;var sl=stageNames[m.stage]||m.stage;return'<div class="tmi"><div class="tmd">'+m.date+' '+m.time+' 北京时间</div><div class="tmt"><span class="tmte'+(isH?' tmhl':'')+'">'+(isH?teamName:opp)+'</span><span class="tmvs">VS</span><span class="tmte'+(!isH?' tmhl':'')+'">'+(!isH?teamName:opp)+'</span></div><div class="tmm"><span>'+sl+'</span><span>'+m.venue+'</span></div></div>';}).join('')||'<div style="text-align:center;padding:20px;color:var(--text-dim)">暂无赛程数据</div>';
-  var playerCards=info.players.map(function(p){var cn=TEAM_PLAYER_CN[p.n]||'';var cc=TEAM_CLUB_CN[p.club]||'';return'<div class="tpc"><div class="tpt"><div class="tpn">'+(p.num||'—')+'</div><div><div class="tpna">'+p.n+(cn?' <span style="color:var(--text-dim);font-size:11px;font-weight:400">'+cn+'</span>':'')+'</div><div class="tppo">'+posCN[p.pos]+'</div></div></div><div class="tpi"><span class="tptag tpclub">'+(cc||p.club||'—')+'</span><span class="tptag tpage">'+(p.age||'—')+'岁</span><span class="tptag tpval">'+(p.val||'—')+'</span></div></div>';}).join('');
+  var playerCards=info.players.map(function(p){var cc=TEAM_CLUB_CN[p.club]||'';return'<div class="tpc"><div class="tpt"><div class="tpn">'+(p.num||'—')+'</div><div><div class="tpna">'+p.n+'</div><div class="tppo">'+p.pos+'</div></div></div><div class="tpi"><span class="tptag tpclub">'+(cc||p.club||'—')+'</span><span class="tptag tpage">'+(p.age||'—')+'岁</span><span class="tptag tpval">'+(p.val||'—')+'</span></div></div>';}).join('');
   document.getElementById('teamModal').innerHTML='<button class="team-modal-close" onclick="closeTeamModal()" style="z-index:10">&times;</button>'
     +'<div class="team-modal-header" style="padding:24px 20px 20px;text-align:center;background:linear-gradient(135deg,rgba(13,140,60,0.2),rgba(13,140,60,0.05));position:relative">'+flagImg(info.cc,56)+'<div style="font-family:var(--font-display);font-size:clamp(26px,6vw,36px);letter-spacing:2px;color:#fff;margin-top:6px">'+info.name+'</div><div style="color:var(--text-dim);font-size:13px">'+info.en+'</div><div style="display:inline-block;margin-top:6px;padding:3px 12px;border-radius:100px;font-family:var(--font-mono);font-size:10px;letter-spacing:1px;background:rgba(13,140,60,0.25);color:var(--pitch-bright)">'+info.conf+'</div></div>'
     +'<div style="padding:16px 20px;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0">'
@@ -2437,7 +2437,7 @@ function buildSearchIndex(){
   const idx=[];
   Object.values(TEAM_INFO).forEach(t=>{
     idx.push({type:'team',icon:'🏴',name:t.name,sub:t.en+' · '+t.conf+' · 排名#'+t.rank,keywords:[t.name,t.en,t.conf,'FIFA'],act:'team',data:t.name});
-    t.players.forEach((p,pi)=>{var pcn=TEAM_PLAYER_CN[p.n]||'';idx.push({type:'player',icon:'👤',name:pcn||p.n,sub:t.name+' · '+p.club+' · '+p.pos,keywords:[p.n,t.name,p.club,p.pos,pcn].filter(Boolean),act:'player',data:{team:t.name,idx:pi}});});
+    t.players.forEach((p,pi)=>{idx.push({type:'player',icon:'👤',name:p.n,sub:t.name+' · '+p.club+' · '+p.pos,keywords:[p.n,t.name,p.club,p.pos].filter(Boolean),act:'player',data:{team:t.name,idx:pi}});});
   });
   ALL_MATCHES.forEach((m,i)=>{
     const venue=m.venue,group=m.group||'',date=m.date;
