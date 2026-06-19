@@ -1263,15 +1263,16 @@ async function handleAuthSubmit(e){
   }catch(err){console.error('Auth error:',err);errEl.textContent='网络连接失败: '+err.message+'. 请检查网络后重试';}
 }
 async function onLoginSuccess(isNewRegistration){
+  if(isNewRegistration){_mainTeamCache=null;}
   closeAuthModal();updateNavUI();
   /* 只在注册时记录设备绑定，登录不覆盖 */
   if(isNewRegistration){try{localStorage.setItem('wc26_device_user',currentUser.username);}catch(e){}
-    _mainTeamCache=null;loadMainTeam().then(function(t){if(!t)openTeamPicker();});
+    loadMainTeam().then(function(t){if(!t)openTeamPicker();});
   }
   showToast('欢迎回来，'+currentUser.username+'！','success');
   await loadUserPredictions();renderPredictions();renderLeaderboard();loadPublicChat();observeReveals();
 }
-async function handleLogout(){if(SUPABASE_READY)await sb.auth.signOut();currentUser=null;userPredictions={};updateNavUI();renderPredictions();showToast('已退出登录');}
+async function handleLogout(){if(SUPABASE_READY)await sb.auth.signOut();currentUser=null;userPredictions={};_mainTeamCache=null;updateNavUI();renderPredictions();showToast('已退出登录');}
 function updateNavUI(){
   const bl=document.getElementById('btnLogin'),bout=document.getElementById('btnLogout'),ne=document.getElementById('navUsername'),mt=document.getElementById('navMyTeam');
   if(currentUser){
