@@ -1552,7 +1552,7 @@ function renderMatchData(summary,matchObj){
   var hdr=summary.header,comp=hdr&&hdr.competitions?hdr.competitions[0]:null;
   if(!comp){modal.innerHTML='<div class="data-empty">比赛数据加载中...</div>';return;}
   var home=comp.competitors[0],away=comp.competitors[1];
-  var hn=_espnTeamToCN(home.team.displayName),an=_espnTeamToCN(away.team.displayName);
+  var hn=home.team.displayName,an=away.team.displayName;
   var hf=espnFlag2(home.team.displayName),af=espnFlag2(away.team.displayName);
   var st=comp.status.type.name;
   var live=st.indexOf('IN_PROGRESS')>=0||st.indexOf('HALF')>=0||st.indexOf('FIRST_HALF')>=0||st.indexOf('SECOND_HALF')>=0;
@@ -1571,7 +1571,7 @@ function renderMatchData(summary,matchObj){
     var keys=['possessionPct','totalShots','shotsOnTarget','totalPasses','passPct','foulsCommitted','wonCorners','offsides','yellowCards','redCards','saves'];
     var labels={possessionPct:'控球率',totalShots:'射门',shotsOnTarget:'射正',totalPasses:'传球',passPct:'传球成功率',foulsCommitted:'犯规',wonCorners:'角球',offsides:'越位',yellowCards:'黄牌',redCards:'红牌',saves:'扑救'};
     var isPctRaw={passPct:true,shotPct:true,crossPct:true},isPctDirect={possessionPct:true};
-    html+='<div class="data-stats-card" style="padding:18px 20px"><h3>📊 比赛数据</h3>';
+    html+='<div class="data-stats-card" style="padding:18px 20px"><h3>Match Stats</h3>';
     for(var si=0;si<keys.length;si++){
       var key=keys[si],hv=null,av=null;
       for(var hi=0;hi<hs.length;hi++){if(hs[hi].name===key){hv=hs[hi].displayValue;break;}}
@@ -1594,7 +1594,7 @@ function renderMatchData(summary,matchObj){
   var rosters=summary.rosters;
   if(rosters&&rosters.length>=2){
     var rh=rosters[0],ra=rosters[1];
-    html+='<div class="data-stats-card" style="padding:18px 20px"><h3>👥 首发阵容</h3><div class="data-lineups-grid">';
+    html+='<div class="data-stats-card" style="padding:18px 20px"><h3>Starting Lineups</h3><div class="data-lineups-grid">';
     [{r:rh,flag:hf,name:hn,fm:rh.formation||'?'},{r:ra,flag:af,name:an,fm:ra.formation||'?'}].forEach(function(t){
       var starters=(t.r.roster||[]).filter(function(p){return p.starter;});
       var subs=(t.r.roster||[]).filter(function(p){return !p.starter;});
@@ -1612,17 +1612,17 @@ function renderMatchData(summary,matchObj){
         for(var ci=0;ci<cnt;ci++){
           var pi=startFrom+ci;
           if(pi>=0&&pi<field.length){
-            var p=field[pi],nameCN=pcn(p.athlete.displayName);
-            html+='<div class="data-formation-player" title="'+p.athlete.displayName+'"><span class="data-fp-num">'+(p.jersey||'?')+'</span><span class="data-fp-name">'+nameCN+'</span></div>';
+            var p=field[pi],playerName=p.athlete.displayName;
+            html+='<div class="data-formation-player" title="'+playerName+'"><span class="data-fp-num">'+(p.jersey||'?')+'</span><span class="data-fp-name">'+playerName+'</span></div>';
           }
         }
         html+='</div>';
         if(ri<showOrder.length-1)html+='<div class="data-formation-separator"></div>';
       }
-      html+='<div class="data-formation-row"><div class="data-formation-player" title="'+gk.athlete.displayName+' · 门将"><span class="data-fp-num">'+(gk.jersey||'?')+'</span><span class="data-fp-name">'+pcn(gk.athlete.displayName)+'</span></div></div>';
+      html+='<div class="data-formation-row"><div class="data-formation-player" title="'+gk.athlete.displayName+' · GK"><span class="data-fp-num">'+(gk.jersey||'?')+'</span><span class="data-fp-name">'+gk.athlete.displayName+'</span></div></div>';
       html+='</div>';
       if(subs.length>0){
-        html+='<div style="font-size:10px;color:var(--text-dim);margin:8px 0 4px">🔄 替补</div><div class="data-bench-grid">'+subs.map(function(p){return'<div class="data-bench-chip"><span class="bc-num">'+(p.jersey||'?')+'</span><span>'+pcn(p.athlete.displayName)+'</span></div>';}).join('')+'</div>';
+        html+='<div style="font-size:10px;color:var(--text-dim);margin:8px 0 4px">Subs</div><div class="data-bench-grid">'+subs.map(function(p){return'<div class="data-bench-chip"><span class="bc-num">'+(p.jersey||'?')+'</span><span>'+p.athlete.displayName+'</span></div>';}).join('')+'</div>';
       }
       html+='</div>';
     });
@@ -1645,17 +1645,71 @@ function renderMatchData(summary,matchObj){
     if(!keep&&typeText.indexOf('VAR')>=0&&/no.goal|red.card|penalty/i.test(rawText))keep=true;
     if(!keep)continue;
     var type=typeText,isGoal=type.indexOf('Goal')>=0,isRed=type.indexOf('Red')>=0,isYel=type.indexOf('Yellow')>=0,isSub=type.indexOf('Substitution')>=0,isPen=type.indexOf('Penalty')>=0;
-    var cls=isGoal?'goal':(isRed?'card-r':(isYel?'card-y':(isSub?'sub':(isPen?'penalty':''))));
-    var icon=isGoal?'⚽':(isRed?'🟥':(isYel?'🟨':(isSub?'🔄':(isPen?'🎯':'●'))));
+    // Detect goal sub-type
+    var goalType='';
+    if(isGoal){
+      if(/own goal/i.test(rawText))goalType='own-goal';
+      else if(/penalty/i.test(rawText)&&/scored|converts/i.test(rawText))goalType='penalty';
+      else if(/free kick|direct.*free/i.test(rawText))goalType='freekick';
+      else if(/disallowed|no goal|var.*no goal/i.test(rawText))goalType='disallowed';
+      else goalType='goal';
+    }
+    // Determine CSS class
+    var cls='';
+    if(goalType==='goal')cls='event-goal';
+    else if(goalType==='penalty')cls='event-penalty';
+    else if(goalType==='own-goal')cls='event-own-goal';
+    else if(goalType==='freekick')cls='event-freekick';
+    else if(goalType==='disallowed')cls='event-disallowed';
+    else if(isRed)cls='event-red';
+    else if(isYel)cls='event-yellow';
+    else if(isSub)cls='event-sub';
+    else if(isPen)cls='event-penalty';
+    else cls='event-period';
+    // Icon
+    var icon='';
+    if(goalType==='goal')icon='⚽';
+    else if(goalType==='penalty')icon='🎯';
+    else if(goalType==='own-goal')icon='🔴';
+    else if(goalType==='freekick')icon='⚡';
+    else if(goalType==='disallowed')icon='❌';
+    else if(isRed)icon='🟥';
+    else if(isYel)icon='🟨';
+    else if(isSub)icon='🔄';
+    else if(isPen)icon='🎯';
+    else icon='●';
+    // Text class
+    var textCls='';
+    if(goalType==='goal')textCls='goal-text';
+    else if(goalType==='penalty')textCls='penalty-text';
+    else if(goalType==='own-goal')textCls='own-goal-text';
+    else if(goalType==='freekick')textCls='freekick-text';
+    else if(goalType==='disallowed')textCls='disallowed-text';
+    // Build display text with jersey numbers
+    var displayText=ev.text||ev.shortText||'';
+    var athletes=ev.athletes||[];
+    if(athletes.length>0){
+      for(var ai=0;ai<athletes.length;ai++){
+        var ath=athletes[ai],name=ath.displayName||'',jersey=ath.jersey||'';
+        if(jersey&&name&&displayText.indexOf(name)>=0){
+          displayText=displayText.split(name).join(name+' #'+jersey);
+        }
+      }
+    }
     var cText=ev.clock&&ev.clock.displayValue?ev.clock.displayValue:'';
-    var txt=translateEvent(ev);
-    significant.push({cls:cls,icon:icon,time:cText,text:txt});
+    significant.push({cls:cls,icon:icon,time:cText,text:displayText,textCls:textCls,goalType:goalType});
   }
   if(significant.length>0){
-    html+='<div class="data-stats-card" style="padding:18px 20px"><h3>⏱️ 比赛事件</h3><div class="data-event-list">';
+    // Determine if we need a legend (any goal events present)
+    var hasGoals=significant.some(function(s){return s.goalType||s.cls.indexOf('event-goal')>=0||s.cls==='event-penalty'||s.cls==='event-own-goal'||s.cls==='event-freekick'||s.cls==='event-disallowed';});
+    html+='<div class="data-stats-card" style="padding:18px 20px"><h3>Match Events</h3>';
+    if(hasGoals){
+      html+='<div class="data-event-legend"><span><span class="leg-dot" style="background:#4caf50"></span> Goal</span><span><span class="leg-dot" style="background:#ff8c00"></span> Penalty</span><span><span class="leg-dot" style="background:#c39bdb"></span> Free Kick</span><span><span class="leg-dot" style="background:#e03030"></span> Own Goal</span><span><span class="leg-dot" style="background:#666"></span> Disallowed</span></div>';
+    }
+    html+='<div class="data-event-cards">';
     for(var ei2=0;ei2<significant.length;ei2++){
       var se=significant[ei2];
-      html+='<div class="data-event-item '+se.cls+'"><span class="data-event-time">'+se.time+'</span><span class="data-event-icon">'+se.icon+'</span><span class="data-event-text">'+se.text+'</span></div>';
+      html+='<div class="data-event-card '+se.cls+'"><span class="data-event-card-time">'+se.time+'</span><span class="data-event-card-icon">'+se.icon+'</span><span class="data-event-card-text'+(se.textCls?' '+se.textCls:'')+'">'+se.text+'</span></div>';
     }
     html+='</div></div>';
   }
@@ -1664,9 +1718,9 @@ function renderMatchData(summary,matchObj){
     var motm=summary.manOfTheMatch||(summary.header&&summary.header.manOfTheMatch)||(summary.header&&summary.header.competitions&&summary.header.competitions[0]&&summary.header.competitions[0].manOfTheMatch)||(summary.boxscore&&summary.boxscore.manOfTheMatch)||(summary.gameInfo&&summary.gameInfo.manOfTheMatch);
     if(!motm&&comp&&comp.manOfTheMatch)motm=comp.manOfTheMatch;
     if(motm){
-      var motmName=motm.displayName||motm.name||'',motmCN=pcn(motmName);
-      var motmTeam=motm.team?_espnTeamToCN(motm.team.displayName||motm.team.name||''):'';
-      html+='<div class="data-stats-card" style="padding:18px 20px"><h3>⭐ 全场最佳球员</h3><div class="data-motm"><span class="data-motm-star">⭐</span><div><div class="data-motm-name">'+motmCN+(motmTeam?' <span style="font-size:13px;color:var(--text-dim);font-weight:400">('+motmTeam+')</span>':'')+'</div><div style="font-size:11px;color:var(--text-dim);margin-top:2px">本场最佳球员</div></div></div></div>';
+      var motmName=motm.displayName||motm.name||'';
+      var motmTeam=motm.team?(motm.team.displayName||motm.team.name||''):'';
+      html+='<div class="data-stats-card" style="padding:18px 20px"><h3>⭐ Man of the Match</h3><div class="data-motm"><span class="data-motm-star">⭐</span><div><div class="data-motm-name">'+motmName+(motmTeam?' <span style="font-size:13px;color:var(--text-dim);font-weight:400">('+motmTeam+')</span>':'')+'</div><div style="font-size:11px;color:var(--text-dim);margin-top:2px">Man of the Match</div></div></div></div>';
     }
   }
   html+='</div>';
