@@ -1691,7 +1691,7 @@ function renderMatchData(summary,matchObj){
     else if(goalType==='freekick')textCls='freekick-text';
     else if(goalType==='disallowed')textCls='disallowed-text';
     // Build display text with jersey numbers from roster lookup
-	    var displayText=ev.text||ev.shortText||'';if(!displayText&&/halftime|end.regular.time|full.time/i.test(typeText)){displayText=(/halftime/i.test(typeText)?'First Half ends':'Second Half ends')+', '+hn+' '+home.score+', '+an+' '+away.score+'.';}if(!displayText)displayText=typeText||'';
+	    var displayText=ev.text||ev.shortText||'';if(!displayText&&/halftime/i.test(typeText))displayText='First Half ends.';else if(!displayText&&/end.regular.time|full.time/i.test(typeText))displayText='Second Half ends.';if(!displayText)displayText=typeText||'';
 	    var names=Object.keys(nameToJersey).sort(function(a,b){return b.length-a.length;});
 	    for(var ai=0;ai<names.length;ai++){
 	      var pName=names[ai],pJersey=nameToJersey[pName];
