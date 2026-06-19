@@ -1623,7 +1623,7 @@ function renderMatchData(summary,matchObj){
         html+='</div>';
         if(ri<showOrder.length-1)html+='<div class="data-formation-separator"></div>';
       }
-      html+='<div class="data-formation-separator" style="width:80%;margin:2px 0;border-style:dashed"></div>';
+      html+='<div class="data-formation-separator"></div>';
       html+='<div class="data-formation-row"><div class="data-formation-player" title="'+gk.athlete.displayName+' · GK"><span class="data-fp-num">'+(gk.jersey||'?')+'</span><span class="data-fp-name">'+gk.athlete.displayName+'</span></div></div>';
       html+='</div>';
       if(subs.length>0){
@@ -1691,7 +1691,7 @@ function renderMatchData(summary,matchObj){
     else if(goalType==='freekick')textCls='freekick-text';
     else if(goalType==='disallowed')textCls='disallowed-text';
     // Build display text with jersey numbers from roster lookup
-	    var displayText=ev.text||ev.shortText||'';
+	    var displayText=ev.text||ev.shortText||typeText||'';
 	    var names=Object.keys(nameToJersey).sort(function(a,b){return b.length-a.length;});
 	    for(var ai=0;ai<names.length;ai++){
 	      var pName=names[ai],pJersey=nameToJersey[pName];
