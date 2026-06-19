@@ -1498,87 +1498,7 @@ function _autoPoll(){
 /* ════════════════════════════════════════════════════
    MATCH DATA MODAL (inline ESPN data)
    ════════════════════════════════════════════════════ */
-/* ─── Position abbreviation → Chinese ─── */
-var POS_CN={G:'门将',GK:'门将','CD-L':'左中卫','CD-R':'右中卫',LB:'左后卫',RB:'右后卫',CB:'中后卫',CDM:'后腰',CM:'中场',CAM:'前腰',LM:'左中场',RM:'右中场',LW:'左边锋',RW:'右边锋',ST:'前锋',LF:'左前锋',RF:'右前锋',CF:'中锋',LWB:'左边翼卫',RWB:'右边翼卫',DM:'防守中场',AM:'进攻中场',FW:'前锋',DF:'后卫',MF:'中场',SUB:'替补','AM-R':'右前腰','AM-L':'左前腰','CM-R':'右中场','CM-L':'左中场','CF-R':'右中锋','CF-L':'左中锋','RM-R':'右中场','LM-L':'左中场',CD:'中后卫',F:'前锋','CD-L/R':'中后卫','CB-L':'左中卫','CB-R':'右中卫',gk:'门将',lb:'左后卫',rb:'右后卫',cb:'中后卫',cdm:'后腰',cm:'中场',cam:'前腰',lm:'左中场',rm:'右中场',lw:'左边锋',rw:'右边锋',st:'前锋',cf:'中锋',lwb:'左边翼卫',rwb:'右边翼卫',fw:'前锋',df:'后卫',mf:'中场','am-r':'右前腰','am-l':'左前腰','cm-r':'右中场','cm-l':'左中场','cf-r':'右中锋','cf-l':'左中锋',cd:'中后卫',f:'前锋'};
-function posCN(abbr){if(!abbr)return'';return POS_CN[abbr]||POS_CN[abbr.toUpperCase()]||abbr;}
-/* ─── Player name → Chinese ─── */
-function pcn(name){
-  if(!name)return'';
-  if(TEAM_PLAYER_CN[name])return TEAM_PLAYER_CN[name];
-  var parts=name.split(' ');
-  if(parts.length<=1){if(PLAYER_SURNAME_CN[name])return PLAYER_SURNAME_CN[name];return name;}
-  var shortLinks=['Al','El','van','de','der','den','von','dos','da','Abu','bin','ibn'];
-  var last=parts[parts.length-1],secondLast=parts.length>=2?parts[parts.length-2]:'';
-  if(parts.length>=3&&shortLinks.indexOf(secondLast)>=0){
-    var compound=secondLast+' '+last;
-    if(PLAYER_SURNAME_CN[compound])return PLAYER_SURNAME_CN[compound];
-    return compound;
-  }
-  if(PLAYER_SURNAME_CN[last])return PLAYER_SURNAME_CN[last];
-  return last;
-}
 
-/* ─── Translate ESPN event text → Chinese ─── */
-function translateEvent(ev){
-  var txt=ev.text||ev.shortText||'';
-  if(!txt)return txt;
-  // Own Goal
-  var ogMatch=txt.match(/^(.+?)\s*\(([^)]+)\)\s*Own Goal/i);
-  if(ogMatch)return'⚽ 乌龙球: '+pcn(ogMatch[1])+' ('+ogMatch[2]+')';
-  // Goal
-  var goalMatch=txt.match(/Goal!.*?\.?\s*(.+?)\s*\(([^)]+)\)\s*(.*?)\.?\s*(?:Assisted by (.+?)\.?)?$/i);
-  if(goalMatch){
-    var scorer=goalMatch[1],team=goalMatch[2],rest=goalMatch[3],assist=goalMatch[4];
-    var cn=pcn(scorer),acn=assist?pcn(assist.trim()):'';
-    return'⚽ '+cn+' ('+team+') 进球'+(acn?', 助攻: '+acn:'')+(rest&&rest!=='.'?' '+rest:'');
-  }
-  // Penalty
-  var penMatch=txt.match(/(.+?)\s*\(([^)]+)\)\s*Penalty\s*[-–]\s*(Scored|Missed)/i);
-  if(penMatch){
-    var pn=pcn(penMatch[1]),pt=penMatch[2],act=penMatch[3].toLowerCase()==='scored'?'命中':'罚失';
-    return'🎯 '+pn+' ('+pt+') 点球'+act;
-  }
-  // Substitution
-  var subMatch=txt.match(/Substitution,\s*(.+?)\.\s*(.+?)\s+replaces\s+(.+?)(?:\s+because\s+of\s+an\s+injury)?\.?$/i);
-  if(subMatch){
-    var sTeam=subMatch[1],inP=pcn(subMatch[2]),outP=pcn(subMatch[3]);
-    return'🔄 '+sTeam+' 换人: '+inP+' ↑ '+outP+' ↓';
-  }
-  // Yellow card
-  var ycMatch=txt.match(/(.+?)\s*\(([^)]+)\)\s*is shown the yellow card/i);
-  if(ycMatch)return'🟨 黄牌: '+pcn(ycMatch[1])+' ('+ycMatch[2]+')';
-  // Second yellow → red
-  var rc2Match=txt.match(/(.+?)\s*\(([^)]+)\)\s*(?:is shown the |receives a )?second yellow card/i);
-  if(rc2Match)return'🟥 两黄变红: '+pcn(rc2Match[1])+' ('+rc2Match[2]+')';
-  // Red card
-  var rcMatch=txt.match(/(.+?)\s*\(([^)]+)\)\s*is shown the red card/i);
-  if(rcMatch)return'🟥 红牌: '+pcn(rcMatch[1])+' ('+rcMatch[2]+')';
-  // VAR
-  var varMatch=txt.match(/(.+?)\s*\(([^)]+)\)\s*VAR\s*[-–]\s*(.+)/i);
-  if(varMatch)return'📺 VAR: '+pcn(varMatch[1])+' ('+varMatch[2]+') — '+varMatch[3];
-  // Period starts
-  if(/first half begins/i.test(txt))return'▶️ 上半场开始';
-  if(/second half begins/i.test(txt))return'▶️ 下半场开始';
-  if(/first half.*extra/i.test(txt))return'▶️ 加时赛上半场';
-  if(/second half.*extra/i.test(txt))return'▶️ 加时赛下半场';
-  // Period ends
-  if(/first half ends/i.test(txt))return'⏸️ 上半场结束';
-  if(/second half ends/i.test(txt))return'⏹️ 全场比赛结束';
-  if(/end.*extra time.*first/i.test(txt))return'⏸️ 加时赛上半场结束';
-  if(/end.*extra time.*second/i.test(txt))return'⏹️ 加时赛下半场结束';
-  // Disallowed goal
-  if(/var.*no goal|disallowed.*goal|goal.*disallowed/i.test(txt)){
-    var dgMatch=txt.match(/(.+?)\\s*\\(([^)]+)\\)/i);
-    return'❌ 进球无效'+(dgMatch?': '+pcn(dgMatch[1])+' ('+dgMatch[2]+')':'');
-  }
-  // Halftime / End
-// Fallback: replace known player names
-  var translated=txt;
-  var names=Object.keys(TEAM_PLAYER_CN).sort(function(a,b){return b.length-a.length;});
-  for(var ni=0;ni<names.length;ni++){if(txt.indexOf(names[ni])>=0)translated=translated.split(names[ni]).join(TEAM_PLAYER_CN[names[ni]]);}
-  if(translated!==txt)return translated;
-  return txt;
-}
 /* ─── Fetch ESPN data for a specific match ─── */
 var _matchDataCache={};
 async function fetchMatchData(matchDbId){
@@ -2259,8 +2179,6 @@ async function openPredHistory(){
   }catch(e){console.error('Pred history error:',e);modal.innerHTML='<div style="text-align:center;padding:40px;color:var(--accent-red)">加载失败，请重试</div><button class="team-modal-close" onclick="closePredHistory()" style="position:absolute;top:12px;right:12px">&times;</button>';}
 }
 /* ═══ TEAM PAGE (renders in modal overlay — no popups) ═══ */
-var PLAYER_SURNAME_CN={"Silva":"席尔瓦","Costa":"科斯塔","Santos":"桑托斯","Pereira":"佩雷拉","Fernandes":"费尔南德斯","Rodriguez":"罗德里格斯","Gonzalez":"冈萨雷斯","Martinez":"马丁内斯","Hernandez":"埃尔南德斯","Lopez":"洛佩斯","Garcia":"加西亚","Torres":"托雷斯","Ramirez":"拉米雷斯","Sanchez":"桑切斯","Diaz":"迪亚斯","Moreno":"莫雷诺","Alvarez":"阿尔瓦雷斯","Romero":"罗梅罗","Navarro":"纳瓦罗","Ortega":"奥尔特加","Castillo":"卡斯蒂略","Flores":"弗洛雷斯","Morales":"莫拉莱斯","Ortiz":"奥尔蒂斯","Gomez":"戈麦斯","Jimenez":"希门尼斯","Ruiz":"鲁伊斯","Vazquez":"巴斯克斯","Gutierrez":"古铁雷斯","Mendez":"门德斯","Reyes":"雷耶斯","Medina":"梅迪纳","Aguilar":"阿吉拉尔","Cruz":"克鲁斯","Vargas":"巴尔加斯","Rojas":"罗哈斯","Mendoza":"门多萨","Guerrero":"格雷罗","Pena":"佩尼亚","Leon":"莱昂","Marquez":"马克斯","Herrera":"埃雷拉","Castro":"卡斯特罗","Oliveira":"奥利维拉","Souza":"索萨","Lima":"利马","Almeida":"阿尔梅达","Ribeiro":"里贝罗","Martins":"马丁斯","Goncalves":"贡萨尔维斯","Barbosa":"巴博萨","Carvalho":"卡瓦略","Ferreira":"费雷拉","Nunes":"努内斯","Neves":"内维斯","Vieira":"维埃拉","Araujo":"阿劳霍","Machado":"马查多","Ramos":"拉莫斯","Pinto":"平托","Cardoso":"卡多佐","Andrade":"安德拉德","Teixeira":"特谢拉","Correia":"科雷亚","Neto":"内托","Coelho":"科埃略","Soares":"苏亚雷斯","Monteiro":"蒙特罗","Nascimento":"纳西门托","Batista":"巴蒂斯塔","Freitas":"弗雷塔斯","Henrique":"恩里克","Duarte":"杜阿尔特","Borges":"博尔赫斯","Rocha":"罗沙","Xavier":"泽维尔","Valencia":"瓦伦西亚","Suarez":"苏亚雷斯","Murillo":"穆里略","Palacios":"帕拉西奥斯","Zapata":"萨帕塔","Cuadrado":"夸德拉多","Mina":"米纳","Borja":"博尔哈","Carrasco":"卡拉斯科","Valverde":"巴尔韦德","Gimenez":"希门尼斯","Caceres":"卡塞雷斯","Godin":"戈丁","Soteldo":"索特尔多","Paredes":"帕雷德斯","Almiron":"阿尔米隆","Veiga":"韦加","Cancelo":"坎塞洛","Inacio":"伊纳西奥","Dias":"迪亚斯","Leao":"莱昂","Felix":"费利克斯","Trincao":"特林康","Guedes":"格德斯","Semedo":"塞梅多","Dalot":"达洛特","Sa":"萨","Jota":"若塔","Conceicao":"孔塞桑","Muller":"穆勒","Schmidt":"施密特","Schulz":"舒尔茨","Fischer":"费舍尔","Wagner":"瓦格纳","Becker":"贝克尔","Hoffmann":"霍夫曼","Koch":"科赫","Bauer":"鲍尔","Schneider":"施奈德","Weber":"韦伯","Richter":"里希特","Klein":"克莱因","Wolf":"沃尔夫","Schroder":"施罗德","Neumann":"诺伊曼","Schwarz":"施瓦茨","Zimmermann":"齐默尔曼","Braun":"布劳恩","Kruger":"克鲁格","Werner":"维尔纳","Krause":"克劳斯","Meier":"迈尔","Lehmann":"莱曼","Maier":"迈尔","Herrmann":"赫尔曼","Konig":"柯尼希","Peters":"彼得斯","Vogel":"福格尔","Friedrich":"弗里德里希","Gunther":"京特","Keller":"凯勒","Berger":"贝格尔","Roth":"罗特","Beck":"贝克","Lorenz":"洛伦茨","Baumann":"鲍曼","Schuster":"舒斯特","Ludwig":"路德维希","Simon":"西蒙","Graf":"格拉夫","Bohm":"伯姆","Smith":"史密斯","Jones":"琼斯","Williams":"威廉姆斯","Brown":"布朗","Taylor":"泰勒","Davies":"戴维斯","Evans":"埃文斯","Thomas":"托马斯","Johnson":"约翰逊","Roberts":"罗伯茨","Walker":"沃克","Wright":"赖特","Robinson":"罗宾逊","Thompson":"汤普森","Wilson":"威尔逊","Harris":"哈里斯","Martin":"马丁","Jackson":"杰克逊","Clarke":"克拉克","White":"怀特","Green":"格林","Edwards":"爱德华兹","Turner":"特纳","Hill":"希尔","Moore":"摩尔","Cooper":"库珀","Ward":"沃德","Morris":"莫里斯","King":"金","Baker":"贝克","Allen":"艾伦","Cook":"库克","Hall":"霍尔","Young":"扬","Mitchell":"米切尔","Phillips":"菲利普斯","Suzuki":"铃木","Tanaka":"田中","Sato":"佐藤","Watanabe":"渡边","Yamamoto":"山本","Nakamura":"中村","Takahashi":"高桥","Kobayashi":"小林","Kato":"加藤","Yoshida":"吉田","Yamada":"山田","Sasaki":"佐佐木","Ito":"伊藤","Kimura":"木村","Inoue":"井上","Matsumoto":"松本","Hayashi":"林","Shimizu":"清水","Yamaguchi":"山口","Abe":"阿部","Mori":"森","Ishikawa":"石川","Maeda":"前田","Fujita":"藤田","Ogawa":"小川","Goto":"后藤","Okada":"冈田","Hasegawa":"长谷川","Murakami":"村上","Kondo":"近藤","Ishii":"石井","Saito":"斋藤","Sakamoto":"坂本","Endo":"远藤","Aoki":"青木","Nishimura":"西村","Fukuda":"福田","Ota":"太田","Miura":"三浦","Fujiwara":"藤原","Okamoto":"冈本","Nakano":"中野","Matsuda":"松田","Harada":"原田","Wada":"和田","Nakagawa":"中川","Nakajima":"中岛","Morita":"森田","Yamashita":"山下","Ishida":"石田","Ueda":"上田","Hara":"原","Kubo":"久保","Mitoma":"三笘","Kamada":"镰田","Taniguchi":"谷口","Kim":"金","Park":"朴","Lee":"李","Choi":"崔","Jung":"郑","Kang":"姜","Cho":"赵","Yoon":"尹","Jang":"张","Lim":"林","Han":"韩","Oh":"吴","Shin":"申","Seo":"徐","Kwon":"权","Hwang":"黄","Ahn":"安","Song":"宋","Yang":"梁","Hong":"洪","Moon":"文","Jeon":"全","Ko":"高","Heo":"许","Bae":"裴","Baek":"白","Yoo":"刘","Son":"孙","Nam":"南","Cha":"车","Joo":"朱","Woo":"禹","Diallo":"迪亚洛","Traore":"特拉奥雷","Coulibaly":"库利巴利","Kone":"科内","Toure":"图雷","Keita":"凯塔","Diarra":"迪亚拉","Doumbia":"敦比亚","Ouattara":"瓦塔拉","Cisse":"西塞","Camara":"卡马拉","Diop":"迪奥普","Sow":"索乌","Ba":"巴","Ndiaye":"恩迪亚耶","Sarr":"萨尔","Gueye":"盖耶","Mendy":"门迪","Kouyate":"库亚特","Balde":"巴尔德","Sane":"萨内","Sangare":"桑加雷","Sidibe":"西迪贝","Mahmoud":"马哈茂德","Hassan":"哈桑","Ali":"阿里","Ahmed":"艾哈迈德","Mohamed":"穆罕默德","Ibrahim":"易卜拉欣","Hussein":"侯赛因","Omar":"奥马尔","Khalid":"哈立德","Mustafa":"穆斯塔法","Salah":"萨拉赫","Amir":"阿米尔","Karim":"卡里姆","Mahrez":"马赫雷斯","Hakimi":"哈基米","Ziyech":"齐耶赫","Benzema":"本泽马","Feghouli":"费古利","Brahimi":"卜拉希米","Bounedjah":"布奈贾","Amrabat":"阿姆拉巴特","Ivanov":"伊万诺夫","Petrov":"彼得罗夫","Smirnov":"斯米尔诺夫","Kuznetsov":"库兹涅佐夫","Popov":"波波夫","Sokolov":"索科洛夫","Volkov":"沃尔科夫","Novikov":"诺维科夫","Morozov":"莫罗佐夫","Pavlov":"帕夫洛夫","Kozlov":"科兹洛夫","Stepanov":"斯捷潘诺夫","Kovalenko":"科瓦连科","Shevchenko":"舍甫琴科","Bondarenko":"邦达连科","Modric":"莫德里奇","Rakitic":"拉基蒂奇","Perisic":"佩里西奇","Brozovic":"布罗佐维奇","Kovacic":"科瓦契奇","Lovren":"洛夫伦","Vlasic":"弗拉希奇","Petkovic":"佩特科维奇","Kramaric":"克拉马里奇","Gvardiol":"格瓦迪奥尔","Sosa":"索萨","Stanisic":"斯塔尼希奇","Aubameyang":"奥巴梅扬","Mane":"马内","Hazard":"阿扎尔","Lukaku":"卢卡库","Courtois":"库尔图瓦","Vertonghen":"维尔通亨","Witsel":"维特塞尔","Meunier":"默尼耶","Tielemans":"蒂勒曼斯","Mertens":"梅尔滕斯","Dybala":"迪巴拉","Chiesa":"基耶萨","Barella":"巴雷拉","Verratti":"维拉蒂","Donnarumma":"多纳鲁马","Bonucci":"博努奇","Chiellini":"基耶利尼","Tonali":"托纳利","Zaniolo":"扎尼奥洛","Locatelli":"洛卡特利","Bastoni":"巴斯托尼","Mbappe":"姆巴佩","Dembele":"登贝莱","Coman":"科曼","Giroud":"吉鲁","Pogba":"博格巴","Kante":"坎特","Varane":"瓦拉内","Pavard":"帕瓦尔","Lloris":"洛里","Rabiot":"拉比奥","Gnabry":"格纳布里","Havertz":"哈弗茨","Gundogan":"京多安","Neuer":"诺伊尔","Rudiger":"吕迪格","Sule":"聚勒","Kimmich":"基米希","Goretzka":"格雷茨卡","Kroos":"克罗斯","Akanji":"阿坎吉","Xhaka":"扎卡","Shaqiri":"沙奇里","Embolo":"恩博洛","Dumfries":"邓弗里斯","Bergwijn":"贝尔温","Lewandowski":"莱万多夫斯基","Zielinski":"泽林斯基","Kulusevski":"库卢塞夫斯基","Isak":"伊萨克","Forsberg":"福斯贝里","Hummels":"胡梅尔斯","Reus":"罗伊斯","Adeyemi":"阿德耶米","Fullkrug":"菲尔克鲁格","Gotze":"格策","Bakambu":"巴坎布","Moutoussamy":"穆图萨米","Kayembe":"卡延贝","Mukau":"穆考","Tuanzebe":"图安泽贝","Kapuadi":"卡普阿迪","Masuaku":"马苏阿库","Mpasi":"姆帕西","Bongonda":"邦贡达","Cipenga":"西彭加","Kalulu":"卡卢卢","Fayulu":"法尤卢","Banza":"班扎","Sadiki":"萨迪基","Epolo":"埃波洛","Tshibola":"奇博拉","Mbuku":"姆布库","Batubinsika":"巴图宾西卡","Mayele":"马耶莱","Kakuta":"卡库塔","Pickel":"皮克尔","Elia":"埃利亚","Araújo":"阿劳霍","Mendes":"门德斯","Félix":"费利克斯","Sá":"萨","Trincão":"特林康","Conceição":"孔塞桑","Wan-Bissaka":"万-比萨卡","Vitinha":"维蒂尼亚","Wissa":"维萨","Leão":"莱昂","Moutinho":"穆蒂尼奥","Palhinha":"帕利尼亚","Inácio":"伊纳西奥","Otávio":"奥塔维奥","Otavio":"奥塔维奥","Ronaldo":"罗纳尔多","Bernardo":"贝尔纳多","Gonçalves":"贡萨尔维斯","Patrício":"帕特里西奥","Patricio":"帕特里西奥","Rui":"鲁伊","Rúben":"鲁本","Ruben":"鲁本","Diogo":"迪奥戈","Nuno":"努诺","João":"若昂","Joao":"若昂","Rafael":"拉斐尔","Gonçalo":"贡萨洛","Goncalo":"贡萨洛","Pedro":"佩德罗","Francisco":"弗朗西斯科","Nélson":"内尔松","Nelson":"内尔松","Matheus":"马特乌斯","António":"安东尼奥","Antonio":"安东尼奥","José":"若泽","Jose":"若泽","Pickford":"皮克福德","Stones":"斯通斯","Shaw":"肖","Trippier":"特里皮尔","Chilwell":"奇尔韦尔","Guehi":"格希","Dunk":"邓克","Konsa":"孔萨","Rice":"赖斯","Gallagher":"加拉格尔","Mainoo":"迈努","Foden":"福登","Grealish":"格里利什","Maddison":"麦迪逊","Saka":"萨卡","Palmer":"帕尔默","Rashford":"拉什福德","Watkins":"沃特金斯","Toney":"托尼","Bowen":"鲍恩","Gordon":"戈登","Alexander-Arnold":"亚历山大-阿诺德","Bellingham":"贝林厄姆","Kane":"凯恩","Henderson":"亨德森","Ramsdale":"拉姆斯代尔","Maguire":"马奎尔","James":"詹姆斯","George":"乔治","Henry":"亨利","Charles":"查尔斯","David":"戴维","Peter":"彼得","Paul":"保罗","Andrew":"安德鲁","Michael":"迈克尔","Robert":"罗伯特","William":"威廉","Richard":"理查德","Daniel":"丹尼尔","Matthew":"马修","Anthony":"安东尼","Mark":"马克","Steven":"史蒂文","Kevin":"凯文","Brian":"布赖恩","Edward":"爱德华","Ryan":"瑞安","Scott":"斯科特","Lewis":"刘易斯","Jarrod":"贾罗德","Ivan":"伊万","Ollie":"奥利","Phil":"菲尔","Jack":"杰克","Ben":"本","Luke":"卢克","Marc":"马克","Ezri":"埃兹里","Trent":"特伦特","Declan":"德克兰","Conor":"康纳","Kobbie":"科比","Bukayo":"布卡约","Cole":"科尔","Marcus":"马库斯"};
-var TEAM_PLAYER_CN={"Santiago Giménez":"圣地亚哥·希门尼斯","Edson Álvarez":"埃德森·阿尔瓦雷斯","Percy Tau":"佩西·塔乌","Ronwen Williams":"朗文·威廉姆斯","Son Heung-min":"孙兴慜","Kim Min-jae":"金玟哉","Patrik Schick":"帕特里克·希克","Tomáš Souček":"托马斯·绍切克","Alphonso Davies":"阿方索·戴维斯","Jonathan David":"乔纳森·戴维","Edin Džeko":"埃丁·哲科","Miralem Pjanić":"米拉莱姆·皮亚尼奇","Akram Afif":"阿克拉姆·阿菲夫","Almoez Ali":"阿尔莫埃兹·阿里","Granit Xhaka":"格拉尼特·扎卡","Manuel Akanji":"曼努埃尔·阿坎吉","Vinícius Júnior":"维尼修斯","Rodrygo":"罗德里戈","Achraf Hakimi":"阿什拉夫·哈基米","Brahim Díaz":"卜拉欣·迪亚斯","Frantzdy Pierrot":"弗朗茨迪·皮埃罗","Duckens Nazon":"杜肯斯·纳宗","Andy Robertson":"安迪·罗伯逊","Scott McTominay":"斯科特·麦克托米奈","Christian Pulisic":"克里斯蒂安·普利西奇","Giovanni Reyna":"乔瓦尼·雷纳","Miguel Almirón":"米格尔·阿尔米隆","Julio Enciso":"胡利奥·恩西索","Mathew Ryan":"马修·瑞安","Harry Souttar":"哈里·苏塔","Hakan Çalhanoğlu":"哈坎·恰尔汗奥卢","Arda Güler":"阿尔达·居莱尔","Jamal Musiala":"贾马尔·穆西亚拉","Florian Wirtz":"弗洛里安·维尔茨","Leandro Bacuna":"莱安德罗·巴库纳","Juninho Bacuna":"儒尼尼奥·巴库纳","Franck Kessié":"弗兰克·凯西","Simon Adingra":"西蒙·阿丁格拉","Moisés Caicedo":"莫伊塞斯·凯塞多","Piero Hincapié":"皮耶罗·因卡皮耶","Virgil van Dijk":"维吉尔·范迪克","Frenkie de Jong":"弗伦基·德容","Kaoru Mitoma":"三笘薰","Takefusa Kubo":"久保建英","Alexander Isak":"亚历山大·伊萨克","Dejan Kulusevski":"德扬·库卢塞夫斯基","Ellyes Skhiri":"埃利斯·斯希里","Hannibal Mejbri":"汉尼拔·梅布里","Kevin De Bruyne":"凯文·德布劳内","Jérémy Doku":"杰雷米·多库","Mohamed Salah":"穆罕默德·萨拉赫","Omar Marmoush":"奥马尔·马尔穆什","Mehdi Taremi":"迈赫迪·塔雷米","Sardar Azmoun":"萨达尔·阿兹蒙","Chris Wood":"克里斯·伍德","Sarpreet Singh":"萨普里特·辛格","Lamine Yamal":"拉明·亚马尔","Pedri":"佩德里","Ryan Mendes":"瑞安·门德斯","Jovane Cabral":"若瓦内·卡布拉尔","Salem Al-Dawsari":"萨勒姆·多萨里","Firas Al-Buraikan":"菲拉斯·布赖坎","Federico Valverde":"费德里科·巴尔韦德","Darwin Núñez":"达尔文·努涅斯","Kylian Mbappé":"基利安·姆巴佩","Aurélien Tchouaméni":"奥雷利安·楚阿梅尼","Sadio Mané":"萨迪奥·马内","Kalidou Koulibaly":"卡利杜·库利巴利","Aymen Hussein":"艾曼·侯赛因","Ali Jasim":"阿里·贾西姆","Erling Haaland":"埃尔林·哈兰德","Martin Ødegaard":"马丁·厄德高","Lionel Messi":"利昂内尔·梅西","Julián Álvarez":"胡利安·阿尔瓦雷斯","Riyad Mahrez":"里亚德·马赫雷斯","Ismaël Bennacer":"伊斯梅尔·本纳赛尔","David Alaba":"大卫·阿拉巴","Marcel Sabitzer":"马塞尔·萨比策","Musa Al-Taamari":"穆萨·塔马里","Yazan Al-Naimat":"亚赞·奈马特","Cristiano Ronaldo":"克里斯蒂亚诺·罗纳尔多","Bruno Fernandes":"布鲁诺·费尔南德斯","Yoane Wissa":"约安·维萨","Chancel Mbemba":"尚塞尔·姆本巴","Eldor Shomurodov":"埃尔多尔·绍穆罗多夫","Jaloliddin Masharipov":"贾洛利丁·马沙里波夫","Luis Díaz":"路易斯·迪亚斯","James Rodríguez":"哈梅斯·罗德里格斯","Jude Bellingham":"裘德·贝林厄姆","Harry Kane":"哈里·凯恩","Luka Modrić":"卢卡·莫德里奇","Joško Gvardiol":"约什科·格瓦迪奥尔","Mohammed Kudus":"穆罕默德·库杜斯","Thomas Partey":"托马斯·帕尔特伊","Ismael Díaz":"伊斯梅尔·迪亚斯","José Fajardo":"何塞·法哈多"};
 var TEAM_CLUB_CN={"Inter Miami":"迈阿密国际","Atlético Madrid":"马德里竞技","West Ham":"西汉姆联","AC Milan":"AC米兰","Al Ahly":"开罗国民","Mamelodi Sundowns":"马梅洛迪日落","Tottenham":"托特纳姆热刺","Bayern Munich":"拜仁慕尼黑","Bayer Leverkusen":"勒沃库森","Al Sadd":"萨德","Al Duhail":"杜海勒","Al Sharjah":"沙迦","Fenerbahçe":"费内巴切","Lille":"里尔","PSG":"巴黎圣日耳曼","Real Madrid":"皇家马德里","Barcelona":"巴塞罗那","Liverpool":"利物浦","Man City":"曼城","Arsenal":"阿森纳","Chelsea":"切尔西","Man United":"曼联","Newcastle":"纽卡斯尔联","Brighton":"布莱顿","B. Dortmund":"多特蒙德","Borussia Dortmund":"多特蒙德","Borussia Mönchengladbach":"门兴格拉德巴赫","Inter Milan":"国际米兰","Napoli":"那不勒斯","Lille":"里尔","Roma":"罗马","Al Nassr":"利雅得胜利","Al Hilal":"利雅得新月","Al Ahli":"吉达国民","Al Shorta":"巴格达警察","Como":"科莫","Real Sociedad":"皇家社会","Frankfurt":"法兰克福","Burnley":"伯恩利","Maccabi Haifa":"海法马卡比","Kayserispor":"开塞利体育","LAFC":"洛杉矶FC","Juventus":"尤文图斯","AZ Alkmaar":"阿尔克马尔","Leicester City":"莱斯特城","FC Groningen":"格罗宁根","Birmingham City":"伯明翰城","Union Berlin":"柏林联合","Nottm Forest":"诺丁汉森林","Sporting CP":"葡萄牙体育","Fatih Karagümrük":"卡拉古姆鲁克","Shabab Al Ahli":"迪拜青年国民","Montpellier":"蒙彼利埃","Brentford":"布伦特福德","Marseille":"马赛","Esteghlal":"德黑兰独立","Rayo Vallecano":"巴列卡诺","Universidad Católica":"天主教大学","Independiente":"独立队"};
 function openTeamPage(teamName){
   var info=TEAM_INFO[teamName];if(!info)return;
