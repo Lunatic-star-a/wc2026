@@ -277,6 +277,28 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,0.8
 .team-picker-btn.confirm:disabled{opacity:0.4;cursor:not-allowed}
 .team-picker-btn.skip{background:transparent;color:var(--text-dim);border:1px solid rgba(255,255,255,0.1)}
 .team-picker-btn.skip:hover{color:#fff;border-color:rgba(255,255,255,0.3)}
+/* My Team Page */
+.myteam-header{background:linear-gradient(135deg,rgba(212,168,67,0.15),rgba(13,140,60,0.1));padding:28px 24px 20px;text-align:center;position:relative}
+.myteam-header-name{font-family:var(--font-display);font-size:28px;letter-spacing:2px;color:#fff}
+.myteam-header-en{color:var(--text-dim);font-size:13px;margin-top:2px}
+.myteam-body{padding:20px 24px;display:flex;flex-direction:column;gap:16px}
+.myteam-card{background:var(--card);border:1px solid rgba(255,255,255,0.04);border-radius:var(--radius);overflow:hidden}
+.myteam-card-header{padding:14px 18px;background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.04);font-family:var(--font-display);font-size:14px;letter-spacing:1px;display:flex;align-items:center;gap:8px}
+.myteam-card-body{padding:16px 18px;font-size:13px;color:var(--text-dim);line-height:1.7}
+.myteam-ai-text{white-space:pre-line}
+.myteam-player-table{width:100%;border-collapse:collapse;font-size:12px}
+.myteam-player-table th{text-align:left;padding:8px 6px;border-bottom:1px solid rgba(255,255,255,0.06);color:var(--text-dim);font-weight:500;font-size:10px;text-transform:uppercase;letter-spacing:1px}
+.myteam-player-table td{padding:8px 6px;border-bottom:1px solid rgba(255,255,255,0.03);color:var(--text)}
+.myteam-schedule-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:13px}
+.myteam-schedule-date{min-width:70px;font-family:var(--font-mono);font-size:11px;color:var(--text-dim)}
+.myteam-schedule-opp{flex:1}
+.myteam-schedule-score{font-weight:600;min-width:50px;text-align:center}
+.myteam-schedule-result{min-width:28px;text-align:center;font-weight:700;font-size:11px}
+.myteam-news-item{padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.03);cursor:pointer}
+.myteam-news-item:last-child{border-bottom:none}
+.myteam-news-title{font-size:13px;color:#fff;margin-bottom:4px}
+.myteam-news-snippet{font-size:11px;color:var(--text-dim)}
+.myteam-news-full{font-size:12px;color:var(--text-dim);line-height:1.6;margin-top:8px;display:none;padding-top:8px;border-top:1px solid rgba(255,255,255,0.04)}
 /* Team modal cards */
 .tpc{background:linear-gradient(135deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:14px 16px;transition:border-color 0.2s}
 .tpc:hover{border-color:rgba(212,168,67,0.2)}
@@ -2336,6 +2358,104 @@ function closeTeamPicker(event){
   if(event&&event.target&&event.target!==document.getElementById('teamPickerOverlay'))return;
   if(event&&event.preventDefault)event.preventDefault();
   document.getElementById('teamPickerOverlay').classList.remove('active');
+}
+/* ─── My Team Page ─── */
+function closeMyTeamPage(event){
+  if(event&&event.target&&event.target!==document.getElementById('myTeamOverlay'))return;
+  document.getElementById('myTeamOverlay').classList.remove('active');
+}
+async function openMyTeamPage(teamName){
+  var info=TEAM_INFO[teamName];
+  if(!info){showToast('球队信息未找到');return;}
+
+  var overlay=document.getElementById('myTeamOverlay');
+  var modal=document.getElementById('myTeamModal');
+  overlay.classList.add('active');
+  modal.innerHTML='<div style="text-align:center;padding:40px"><div class="data-loading-spinner"></div><p style="color:var(--text-dim);margin-top:8px">加载中...</p></div>';
+
+  // Give loading state a moment to render, then build content
+  setTimeout(function(){
+    // AI analysis
+    var aiText=generateStaticAnalysis(teamName,info);
+
+    // Player table
+    var playerRows=info.players.map(function(p){
+      return'<tr><td>'+(p.num||'—')+'</td><td>'+p.n+'</td><td>'+p.pos+'</td><td>'+(p.age||'—')+'</td><td>'+(p.club||'—')+'</td><td>'+(p.val||'—')+'</td></tr>';
+    }).join('');
+
+    // Schedule
+    var teamMatches=ALL_MATCHES.filter(function(m){return m.home===teamName||m.away===teamName;});
+    var scheduleRows=teamMatches.map(function(m){
+      var opp=m.home===teamName?m.away:m.home;
+      var isH=m.home===teamName;
+      var dbId=ALL_MATCHES.indexOf(m)+1;
+      var ms=matchScores[dbId];
+      var scoreHTML='- : -';
+      var resultBadge='';
+      if(ms&&ms.home_score!=null){
+        scoreHTML=ms.home_score+' : '+ms.away_score;
+        var myScore=isH?ms.home_score:ms.away_score;
+        var oppScore=isH?ms.away_score:ms.home_score;
+        if(myScore>oppScore)resultBadge='<span style="color:#4caf50">W</span>';
+        else if(myScore<oppScore)resultBadge='<span style="color:#e03030">L</span>';
+        else resultBadge='<span style="color:#f0c040">D</span>';
+      }
+      return'<div class="myteam-schedule-item"><span class="myteam-schedule-date">'+m.date+'</span><span class="myteam-schedule-opp">'+(isH?'':'@')+opp+'</span><span class="myteam-schedule-score">'+scoreHTML+'</span><span class="myteam-schedule-result">'+resultBadge+'</span></div>';
+    }).join('')||'<div style="color:var(--text-dim);text-align:center;padding:10px">暂无赛程</div>';
+
+    var html='<button class="team-modal-close" onclick="closeMyTeamPage()" style="position:absolute;top:12px;right:12px;z-index:10">&times;</button>';
+    html+='<div class="myteam-header"><span class="flag" style="font-size:48px">'+flagImg(info.cc,48)+'</span><div class="myteam-header-name">'+teamName+'</div><div class="myteam-header-en">'+info.en+' · FIFA排名 #'+info.rank+'</div><div style="font-size:11px;color:var(--text-dim);margin-top:4px;cursor:pointer" onclick="openTeamPicker()">✎ 修改主队</div></div>';
+    html+='<div class="myteam-body">';
+
+    // AI Card
+    html+='<div class="myteam-card"><div class="myteam-card-header">📊 AI 分析预测</div><div class="myteam-card-body"><div class="myteam-ai-text">'+aiText+'</div></div></div>';
+
+    // Player Card
+    html+='<div class="myteam-card"><div class="myteam-card-header">👥 球员信息 ('+info.players.length+'人)</div><div class="myteam-card-body"><div style="overflow-x:auto"><table class="myteam-player-table"><thead><tr><th>#</th><th>姓名</th><th>位置</th><th>年龄</th><th>俱乐部</th><th>身价</th></tr></thead><tbody>'+playerRows+'</tbody></table></div></div></div>';
+
+    // Schedule Card
+    html+='<div class="myteam-card"><div class="myteam-card-header">📅 赛程安排</div><div class="myteam-card-body">'+scheduleRows+'</div></div>';
+
+    // News Card (placeholder — Task 4 will fill it)
+    html+='<div class="myteam-card"><div class="myteam-card-header">📰 最新资讯</div><div class="myteam-card-body" id="myTeamNewsBody"><div style="color:var(--text-dim);text-align:center;padding:10px">加载资讯中...</div></div></div>';
+
+    html+='</div>';
+    modal.innerHTML=html;
+
+    // Load news async (function defined in Task 4, safe to call now — will be no-op if not yet defined)
+    if(typeof loadTeamNews==='function')loadTeamNews(teamName);
+  },50);
+}
+
+function generateStaticAnalysis(teamName,info){
+  var group=GROUPS.find(function(g){return g.teams.some(function(t){return t.name===teamName;});});
+  var groupName=group?group.name:'?';
+  var opponents=group?group.teams.filter(function(t){return t.name!==teamName;}):[];
+  var avgAge=info.players.reduce(function(s,p){return s+(p.age||25);},0)/Math.max(1,info.players.length);
+  var totalVal=info.players.reduce(function(s,p){var v=p.val||'';var m=v.match(/[\d.]+/);return s+(m?parseFloat(m[0])*(v.indexOf('M')>=0?1:0.001):0);},0);
+
+  var lines=[];
+  lines.push('【球队概况】');
+  lines.push(teamName+'（'+info.en+'）目前FIFA排名第'+info.rank+'位，所属'+info.conf+'足联。世界杯历史最佳战绩：'+info.best+'，第'+info.apps+'次参赛。');
+  lines.push('');
+  lines.push('【小组形势】');
+  if(opponents.length>0){
+    lines.push(teamName+'分在'+groupName+'组，同组对手包括：'+opponents.map(function(t){return t.name+'（FIFA#'+t.rank+'）';}).join('、')+'。根据FIFA排名和球队实力分析，'+teamName+'在小组中的竞争力'+(info.rank<=Math.min.apply(null,opponents.map(function(t){return t.rank;}))?'较强':'一般')+'。');
+  }else{
+    lines.push(teamName+'已进入淘汰赛阶段，将面对更强的对手挑战。');
+  }
+  lines.push('');
+  lines.push('【阵容分析】');
+  lines.push('全队'+info.players.length+'名球员，平均年龄'+(avgAge.toFixed(1))+'岁，总身价约'+(totalVal>=1?totalVal.toFixed(1)+'亿欧元':(totalVal*1000).toFixed(0)+'万欧元')+'。攻防两端实力均衡，核心球员在五大联赛效力，具备一定的大赛经验。');
+  lines.push('');
+  lines.push('【前景预测】');
+  if(info.rank<=20)lines.push('作为世界排名前20的球队，'+teamName+'有望在小组中取得出线资格，甚至冲击更深轮次。球队整体实力和大赛经验将是最重要的优势。');
+  else if(info.rank<=40)lines.push('排名中间梯队的'+teamName+'争取小组出线是现实目标。若能在关键比赛中把握机会，有望晋级淘汰赛。');
+  else lines.push('作为排名较低的球队，'+teamName+'需要在小组赛中打出超常表现才能争取出线。无论如何，世界杯的每一场比赛都是宝贵的经历。');
+  lines.push('');
+  lines.push('（注：以上为基于数据的静态分析，DeepSeek AI 深度分析功能即将上线）');
+
+  return lines.join('\n');
 }
 function filterTeamPicker(){
   var q=(document.getElementById('teamPickerSearch').value||'').toLowerCase().trim();
