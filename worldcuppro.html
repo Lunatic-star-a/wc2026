@@ -1623,6 +1623,7 @@ function renderMatchData(summary,matchObj){
         html+='</div>';
         if(ri<showOrder.length-1)html+='<div class="data-formation-separator"></div>';
       }
+      html+='<div class="data-formation-separator" style="width:80%;margin:2px 0;border-style:dashed"></div>';
       html+='<div class="data-formation-row"><div class="data-formation-player" title="'+gk.athlete.displayName+' · GK"><span class="data-fp-num">'+(gk.jersey||'?')+'</span><span class="data-fp-name">'+gk.athlete.displayName+'</span></div></div>';
       html+='</div>';
       if(subs.length>0){
@@ -1645,7 +1646,7 @@ function renderMatchData(summary,matchObj){
     // Filter: only show goals, cards, penalties, substitutions, and period markers
     var keep=false;
     if(typeText.indexOf('Goal')>=0||typeText.indexOf('Penalty')>=0||typeText.indexOf('Yellow')>=0||typeText.indexOf('Red')>=0||typeText.indexOf('Substitution')>=0)keep=true;
-    if(!keep&&/halftime|half.time|end.regular.time|full.time|final.whistle|first.half|second.half|extra.time|penalty.shootout|own.goal|disallowed|no.goal|kickoff|kick.off|match.begins|match.starts/i.test(rawText))keep=true;
+    if(!keep&&/halftime|half.time|end.regular.time|full.time|final.whistle|first.half|second.half|extra.time|penalty.shootout|own.goal|disallowed|no.goal|kickoff|kick.off|match.begins|match.starts/i.test(rawText+'|'+typeText))keep=true;
     if(!keep&&typeText.indexOf('VAR')>=0&&/no.goal|red.card|penalty/i.test(rawText))keep=true;
     if(!keep)continue;
     var type=typeText,isGoal=type.indexOf('Goal')>=0,isRed=type.indexOf('Red')>=0,isYel=type.indexOf('Yellow')>=0,isSub=type.indexOf('Substitution')>=0,isPen=type.indexOf('Penalty')>=0;
