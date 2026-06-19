@@ -1687,13 +1687,13 @@ function renderMatchData(summary,matchObj){
     else if(goalType==='disallowed')textCls='disallowed-text';
     // Build display text with jersey numbers
     var displayText=ev.text||ev.shortText||'';
-    var athletes=ev.athletes||[];
-    if(athletes.length>0){
-      for(var ai=0;ai<athletes.length;ai++){
-        var ath=athletes[ai],name=ath.displayName||'',jersey=ath.jersey||'';
-        if(jersey&&name&&displayText.indexOf(name)>=0){
-          displayText=displayText.split(name).join(name+' #'+jersey);
-        }
+    var athletes=(ev.athletes||[]).slice();
+    // Sort by name length descending to prevent substring corruption
+    athletes.sort(function(a,b){return (b.displayName||'').length-(a.displayName||'').length;});
+    for(var ai=0;ai<athletes.length;ai++){
+      var ath=athletes[ai],name=ath.displayName||'',jersey=ath.jersey||'';
+      if(jersey&&name&&displayText.indexOf(name)>=0){
+        displayText=displayText.split(name).join(name+' #'+jersey);
       }
     }
     var cText=ev.clock&&ev.clock.displayValue?ev.clock.displayValue:'';
@@ -1701,7 +1701,7 @@ function renderMatchData(summary,matchObj){
   }
   if(significant.length>0){
     // Determine if we need a legend (any goal events present)
-    var hasGoals=significant.some(function(s){return s.goalType||s.cls.indexOf('event-goal')>=0||s.cls==='event-penalty'||s.cls==='event-own-goal'||s.cls==='event-freekick'||s.cls==='event-disallowed';});
+    var hasGoals=significant.some(function(s){return !!s.goalType;});
     html+='<div class="data-stats-card" style="padding:18px 20px"><h3>Match Events</h3>';
     if(hasGoals){
       html+='<div class="data-event-legend"><span><span class="leg-dot" style="background:#4caf50"></span> Goal</span><span><span class="leg-dot" style="background:#ff8c00"></span> Penalty</span><span><span class="leg-dot" style="background:#c39bdb"></span> Free Kick</span><span><span class="leg-dot" style="background:#e03030"></span> Own Goal</span><span><span class="leg-dot" style="background:#666"></span> Disallowed</span></div>';
