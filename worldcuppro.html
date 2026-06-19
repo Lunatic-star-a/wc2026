@@ -1593,6 +1593,7 @@ function renderMatchData(summary,matchObj){
   }
   /* ─── Lineups ─── */
   var rosters=summary.rosters;
+  var nameToJersey={};if(rosters){for(var ri2=0;ri2<rosters.length;ri2++){var rr=rosters[ri2].roster||[];for(var pi2=0;pi2<rr.length;pi2++){var pp=rr[pi2];var pn=pp.athlete&&pp.athlete.displayName;if(pn&&pp.jersey)nameToJersey[pn]=pp.jersey;}}}
   if(rosters&&rosters.length>=2){
     var rh=rosters[0],ra=rosters[1];
     html+='<div class="data-stats-card" style="padding:18px 20px"><h3>Starting Lineups</h3><div class="data-lineups-grid">';
@@ -1686,18 +1687,16 @@ function renderMatchData(summary,matchObj){
     else if(goalType==='own-goal')textCls='own-goal-text';
     else if(goalType==='freekick')textCls='freekick-text';
     else if(goalType==='disallowed')textCls='disallowed-text';
-    // Build display text with jersey numbers
-    var displayText=ev.text||ev.shortText||'';
-    var athletes=(ev.athletes||[]).slice();
-    // Sort by name length descending to prevent substring corruption
-    athletes.sort(function(a,b){return (b.displayName||'').length-(a.displayName||'').length;});
-    for(var ai=0;ai<athletes.length;ai++){
-      var ath=athletes[ai],name=ath.displayName||'',jersey=ath.jersey||ath.uniformNumber||ath.number||'';
-      if(jersey&&name&&displayText.indexOf(name)>=0){
-        displayText=displayText.split(name).join(name+' #'+jersey);
-      }
-    }
-    var cText=ev.clock&&ev.clock.displayValue?ev.clock.displayValue:'';
+    // Build display text with jersey numbers from roster lookup
+	    var displayText=ev.text||ev.shortText||'';
+	    var names=Object.keys(nameToJersey).sort(function(a,b){return b.length-a.length;});
+	    for(var ai=0;ai<names.length;ai++){
+	      var pName=names[ai],pJersey=nameToJersey[pName];
+	      if(pJersey&&displayText.indexOf(pName)>=0){
+	        displayText=displayText.split(pName).join(pName+' #'+pJersey);
+	      }
+	    }
+	    var cText=ev.clock&&ev.clock.displayValue?ev.clock.displayValue:'';
     significant.push({cls:cls,icon:icon,time:cText,text:displayText,textCls:textCls,goalType:goalType});
   }
   if(significant.length>0){
