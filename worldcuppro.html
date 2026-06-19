@@ -2319,7 +2319,7 @@ function openTeamPage(teamName){
   var stageNames={group:'小组赛',r32:'1/16决赛',r16:'1/8决赛',qf:'1/4决赛',sf:'半决赛','3rd':'季军赛',final:'决赛'};
   var teamMatches=ALL_MATCHES.filter(function(m){return m.home===teamName||m.away===teamName;});
   var matchCards=teamMatches.map(function(m){var opp=m.home===teamName?m.away:m.home;var isH=m.home===teamName;var sl=stageNames[m.stage]||m.stage;return'<div class="tmi"><div class="tmd">'+m.date+' '+m.time+' 北京时间</div><div class="tmt"><span class="tmte'+(isH?' tmhl':'')+'">'+(isH?teamName:opp)+'</span><span class="tmvs">VS</span><span class="tmte'+(!isH?' tmhl':'')+'">'+(!isH?teamName:opp)+'</span></div><div class="tmm"><span>'+sl+'</span><span>'+m.venue+'</span></div></div>';}).join('')||'<div style="text-align:center;padding:20px;color:var(--text-dim)">暂无赛程数据</div>';
-  var playerCards=info.players.map(function(p){var cc=TEAM_CLUB_CN[p.club]||'';return'<div class="tpc"><div class="tpt"><div class="tpn">'+(p.num||'—')+'</div><div><div class="tpna">'+p.n+'</div><div class="tppo">'+p.pos+'</div></div></div><div class="tpi"><span class="tptag tpclub">'+(cc||p.club||'—')+'</span><span class="tptag tpage">'+(p.age||'—')+'岁</span><span class="tptag tpval">'+(p.val||'—')+'</span></div></div>';}).join('');
+  var playerCards=info.players.map(function(p){var cc=TEAM_CLUB_CN[p.club]||'';return'<div class="tpc"><div class="tpt"><div class="tpn">'+(p.num||'—')+'</div><div><div class="tpna">'+getPlayerDisplayName(p.n)+'</div><div class="tppo">'+p.pos+'</div></div></div><div class="tpi"><span class="tptag tpclub">'+(cc||p.club||'—')+'</span><span class="tptag tpage">'+(p.age||'—')+'岁</span><span class="tptag tpval">'+(p.val||'—')+'</span></div></div>';}).join('');
   document.getElementById('teamModal').innerHTML='<button class="team-modal-close" onclick="closeTeamModal()" style="z-index:10">&times;</button>'
     +'<div class="team-modal-header" style="padding:24px 20px 20px;text-align:center;background:linear-gradient(135deg,rgba(13,140,60,0.2),rgba(13,140,60,0.05));position:relative">'+flagImg(info.cc,56)+'<div style="font-family:var(--font-display);font-size:clamp(26px,6vw,36px);letter-spacing:2px;color:#fff;margin-top:6px">'+info.name+'</div><div style="color:var(--text-dim);font-size:13px">'+info.en+'</div><div style="display:inline-block;margin-top:6px;padding:3px 12px;border-radius:100px;font-family:var(--font-mono);font-size:10px;letter-spacing:1px;background:rgba(13,140,60,0.25);color:var(--pitch-bright)">'+info.conf+'</div></div>'
     +'<div style="padding:16px 20px;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0">'
@@ -2380,7 +2380,7 @@ async function openMyTeamPage(teamName){
 
     // Player table
     var playerRows=info.players.map(function(p){
-      return'<tr><td>'+(p.num||'—')+'</td><td>'+p.n+'</td><td>'+p.pos+'</td><td>'+(p.age||'—')+'</td><td>'+(p.club||'—')+'</td><td>'+(p.val||'—')+'</td></tr>';
+      return'<tr><td>'+(p.num||'—')+'</td><td>'+getPlayerDisplayName(p.n)+'</td><td>'+p.pos+'</td><td>'+(p.age||'—')+'</td><td>'+(p.club||'—')+'</td><td>'+(p.val||'—')+'</td></tr>';
     }).join('');
 
     // Schedule
@@ -2886,6 +2886,80 @@ function renderLiveScores(){
     }
     return'<div class="livescore-row"><div class="livescore-row-stage">'+stageLabel+' '+fm.liveScoreStatusHTML+'</div><div class="livescore-row-teams"><span>'+m.home+'</span><span class="livescore-row-score'+fm.liveClass+'" style="'+(fm.scoreColor||'')+'"><span class="lsh">'+showH+'</span><span class="lscol">:</span><span class="lsa">'+showA+'</span></span><span>'+m.away+'</span></div></div>';
   }).join('');
+}
+
+/* ─── Chinese Player Name Cache (pre-compiled via WebSearch) ─── */
+var CN_NAME_CACHE={
+  // Mexico
+  "Santiago Giménez":"圣地亚哥·希门尼斯","Edson Álvarez":"埃德松·阿尔瓦雷斯","Guillermo Ochoa":"吉列尔莫·奥乔亚","César Huerta":"塞萨尔·韦尔塔","Julián Quiñones":"胡利安·基尼奥内斯","Érik Lira":"埃里克·利拉","Luis Chávez":"路易斯·查韦斯","Jorge Sánchez":"豪尔赫·桑切斯","César Montes":"塞萨尔·蒙特斯","Johan Vásquez":"霍安·巴斯克斯","Gerardo Arteaga":"赫拉尔多·阿特亚加","Israel Reyes":"伊斯雷尔·雷耶斯","Carlos Rodríguez":"卡洛斯·罗德里格斯","Orbelín Pineda":"奥韦林·皮内达","Roberto Alvarado":"罗伯托·阿尔瓦拉多","Raúl Jiménez":"劳尔·希门尼斯","Henry Martín":"亨利·马丁","Alexis Vega":"亚历克西斯·维加","Hirving Lozano":"伊尔文·洛萨诺","Uriel Antuna":"乌列尔·安图纳","Raúl Rangel":"劳尔·兰赫尔","Carlos Acevedo":"卡洛斯·阿塞韦多","Jesús Gallardo":"赫苏斯·加利亚多","Mateo Chávez":"马特奥·查韦斯","Álvaro Fidalgo":"阿尔瓦罗·菲达尔戈","Brian Gutiérrez":"布里安·古铁雷斯","Luis Romo":"路易斯·罗莫","Obed Vargas":"奥贝德·巴尔加斯","Gilberto Mora":"希尔韦托·莫拉","Guillermo Martínez":"吉列尔莫·马丁内斯","Armando González":"阿曼多·冈萨雷斯",
+  // Brazil
+  "Neymar":"内马尔","Vinícius Júnior":"维尼修斯","Raphinha":"拉菲尼亚","Alisson":"阿利松","Ederson":"埃德森","Weverton":"韦弗顿","Alex Sandro":"阿莱士·桑德罗","Bremer":"布雷默","Danilo":"达尼洛","Douglas Santos":"道格拉斯·桑托斯","Gabriel Magalhães":"加布里埃尔","Marquinhos":"马尔基尼奥斯","Léo Pereira":"莱奥·佩雷拉","Roger Ibañez":"罗杰·伊巴涅斯","Bruno Guimarães":"布鲁诺·吉马良斯","Casemiro":"卡塞米罗","Danilo Santos":"达尼洛·桑托斯","Fabinho":"法比尼奥","Lucas Paquetá":"卢卡斯·帕奎塔","Matheus Cunha":"马特乌斯·库尼亚","Endrick":"恩德里克","Gabriel Martinelli":"马丁内利","Igor Thiago":"伊戈尔·蒂亚戈","Luiz Henrique":"路易斯·恩里克","Rayan":"拉扬",
+  // Argentina
+  "Lionel Messi":"梅西","Emiliano Martínez":"达米安·马丁内斯","Juan Musso":"胡安·穆索","Gerónimo Rulli":"赫罗尼莫·鲁利","Gonzalo Montiel":"冈萨洛·蒙铁尔","Nahuel Molina":"纳韦尔·莫利纳","Cristian Romero":"克里斯蒂安·罗梅罗","Lisandro Martínez":"利桑德罗·马丁内斯","Nicolás Otamendi":"尼古拉斯·奥塔门迪","Leonardo Balerdi":"莱昂纳多·巴列尔迪","Nicolás Tagliafico":"尼古拉斯·塔利亚菲科","Facundo Medina":"法昆多·梅迪纳","Rodrigo De Paul":"罗德里戈·德保罗","Enzo Fernández":"恩佐·费尔南德斯","Alexis Mac Allister":"亚历克西斯·麦卡利斯特","Leandro Paredes":"莱安德罗·帕雷德斯","Giovani Lo Celso":"乔瓦尼·洛塞尔索","Exequiel Palacios":"埃塞克尔·帕拉西奥斯","Valentín Barco":"瓦伦丁·巴尔科","Julián Álvarez":"胡利安·阿尔瓦雷斯","Lautaro Martínez":"劳塔罗·马丁内斯","Nicolás González":"尼古拉斯·冈萨雷斯","Thiago Almada":"蒂亚戈·阿尔马达","Giuliano Simeone":"朱利亚诺·西蒙尼","Nico Paz":"尼科·帕斯","José Manuel López":"何塞·曼努埃尔·洛佩斯",
+  // England
+  "Jordan Pickford":"皮克福德","Dean Henderson":"迪恩·亨德森","James Trafford":"特拉福德","Ezri Konsa":"孔萨","Nico O'Reilly":"奥赖利","John Stones":"斯通斯","Marc Guéhi":"格伊","Tino Livramento":"利夫拉门托","Dan Burn":"丹·伯恩","Reece James":"里斯·詹姆斯","Djed Spence":"斯彭斯","Jarell Quansah":"宽萨","Declan Rice":"赖斯","Elliot Anderson":"埃利奥特·安德森","Jude Bellingham":"贝林厄姆","Jordan Henderson":"乔丹·亨德森","Kobbie Mainoo":"梅努","Morgan Rogers":"罗杰斯","Eberechi Eze":"埃泽","Bukayo Saka":"萨卡","Harry Kane":"凯恩","Marcus Rashford":"拉什福德","Anthony Gordon":"安东尼·戈登","Ollie Watkins":"沃特金斯","Noni Madueke":"马杜埃凯","Ivan Toney":"伊万·托尼",
+  // France
+  "Kylian Mbappé":"姆巴佩","Maignan":"迈尼昂","Brice Samba":"布莱斯·桑巴","Upamecano":"于帕梅卡诺","Saliba":"萨利巴","Konaté":"科纳特","Koundé":"孔德","Lucas Hernandez":"卢卡斯·埃尔南德斯","Digne":"迪涅","Gusto":"古斯托","Theo Hernandez":"特奥·埃尔南德斯","Lacroix":"拉克鲁瓦","Rabiot":"拉比奥","Tchouaméni":"楚阿梅尼","Kanté":"坎特","Kouadio Koné":"夸迪奥·科内","Zaïre-Emery":"扎伊尔·埃梅里","Dembélé":"登贝莱","Olise":"奥利塞","Cherki":"谢尔基","Doué":"杜埃","Barcola":"巴尔科拉","Marcus Thuram":"马库斯·图拉姆","Akliouche":"阿克利乌什","Mateta":"马特塔",
+  // Germany
+  "Manuel Neuer":"曼努埃尔·诺伊尔","Oliver Baumann":"奥利弗·鲍曼","Alexander Nübel":"亚历山大·努贝尔","Antonio Rüdiger":"安东尼奥·吕迪格","Waldemar Anton":"瓦尔德马·安东","Jonathan Tah":"约纳坦·塔","Joshua Kimmich":"约书亚·基米希","Pascal Groß":"帕斯卡尔·格罗斯","Nico Schlotterbeck":"尼科·施洛特贝克","Nathaniel Brown":"纳撒尼尔·布朗","David Raum":"大卫·劳姆","Malick Thiaw":"马利克·佳夫","Aleksandar Pavlović":"亚历山大·帕夫洛维奇","Angelo Stiller":"安杰洛·施蒂勒","Felix Nmecha":"费利克斯·恩梅查","Kai Havertz":"凯·哈弗茨","Leon Goretzka":"莱昂·格雷茨卡","Jamie Leweling":"杰米·勒韦林","Jamal Musiala":"贾马尔·穆西亚拉","Nick Woltemade":"尼克·沃尔特马德","Maximilian Beier":"马克西米利安·拜尔","Florian Wirtz":"弗洛里安·维尔茨","Leroy Sané":"勒鲁瓦·萨内","Nadiem Amiri":"纳迪姆·阿米里","Lennart Karl":"伦纳特·卡尔","Deniz Undav":"德尼兹·翁达夫",
+  // Spain
+  "Unai Simón":"乌奈·西蒙","David Raya":"大卫·拉亚","Joan García":"霍安·加西亚","Marc Cucurella":"库库雷利亚","Álex Grimaldo":"格里马尔多","Pau Cubarsí":"库巴西","Aymeric Laporte":"拉波尔特","Marc Pubill":"普维尔","Eric García":"埃里克·加西亚","Marcos Llorente":"马科斯·略伦特","Pedro Porro":"波罗","Pedri":"佩德里","Fabián Ruiz":"法比安·鲁伊斯","Martín Zubimendi":"苏维门迪","Gavi":"加维","Rodri":"罗德里","Álex Baena":"巴埃纳","Mikel Merino":"梅里诺","Mikel Oyarzabal":"奥亚萨瓦尔","Dani Olmo":"达尼·奥尔莫","Nico Williams":"尼科·威廉姆斯","Yeremy Pino":"耶雷米·皮诺","Ferran Torres":"费兰·托雷斯","Borja Iglesias":"博尔哈·伊格莱西亚斯","Víctor Muñoz":"维克托·穆尼奥斯","Lamine Yamal":"亚马尔",
+  // Portugal
+  "Cristiano Ronaldo":"C罗","Diogo Costa":"迪奥戈·科斯塔","José Sá":"若泽·萨","Rui Silva":"鲁伊·席尔瓦","Diogo Dalot":"迪奥戈·达洛特","Matheus Nunes":"马特乌斯·努内斯","Nélson Semedo":"塞梅多","João Cancelo":"坎塞洛","Nuno Mendes":"努诺·门德斯","Gonçalo Inácio":"贡萨洛·伊纳西奥","Renato Veiga":"雷纳托·韦加","Rúben Dias":"鲁本·迪亚斯","Tomás Araújo":"托马斯·阿劳若","Bruno Fernandes":"布鲁诺·费尔南德斯","Bernardo Silva":"贝尔纳多·席尔瓦","João Neves":"若昂·内维斯","Vitinha":"维蒂尼亚","Rúben Neves":"鲁本·内维斯","Samu Costa":"萨穆·科斯塔","João Félix":"菲利克斯","Francisco Trincão":"特林康","Francisco Conceição":"弗朗西斯科·孔塞桑","Pedro Neto":"佩德罗·内托","Rafael Leão":"拉斐尔·莱奥","Gonçalo Guedes":"贡萨洛·格德斯","Gonçalo Ramos":"贡萨洛·拉莫斯",
+  // Additional well-known players
+  "Mohamed Salah":"穆罕默德·萨拉赫","Robert Lewandowski":"罗伯特·莱万多夫斯基","Kevin De Bruyne":"凯文·德布劳内","Luka Modrić":"卢卡·莫德里奇","Erling Haaland":"埃尔林·哈兰德","Vinicius Junior":"维尼修斯","Son Heung-min":"孙兴慜","Kim Min-jae":"金玟哉","Takefusa Kubo":"久保建英","Alphonso Davies":"阿方索·戴维斯","Jonathan David":"乔纳森·戴维","Cyle Larin":"克莱·拉林","Ismaël Koné":"伊斯马尔·科内","Thibaut Courtois":"蒂博·库尔图瓦","Virgil van Dijk":"维吉尔·范迪克","Federico Valverde":"费德里科·巴尔韦德","Luis Suárez":"路易斯·苏亚雷斯","Darwin Núñez":"达尔文·努涅斯","Ousmane Dembélé":"奥斯曼·登贝莱","Achraf Hakimi":"阿什拉夫·哈基米","Hakim Ziyech":"哈基姆·齐耶赫","Heung-Min Son":"孙兴慜","Sergio Ramos":"塞尔吉奥·拉莫斯","Zlatan Ibrahimović":"兹拉坦·伊布拉希莫维奇","Gianluigi Donnarumma":"詹路易吉·多纳鲁马","N'Golo Kanté":"恩戈洛·坎特","Romelu Lukaku":"罗梅卢·卢卡库","Trent Alexander-Arnold":"特伦特·亚历山大-阿诺德","Cole Palmer":"科尔·帕尔默","Phil Foden":"菲尔·福登","Jack Grealish":"杰克·格里利什","Julián Alvarez":"胡利安·阿尔瓦雷斯","Emiliano Martinez":"达米安·马丁内斯","Rodrygo":"罗德里戈","Victor Osimhen":"维克托·奥斯梅恩","Sadio Mané":"萨迪奥·马内","Antoine Griezmann":"安托万·格里兹曼","Olivier Giroud":"奥利维尔·吉鲁","Karim Benzema":"卡里姆·本泽马","Toni Kroos":"托尼·克罗斯","Thomas Müller":"托马斯·穆勒","Ilkay Gündoğan":"伊尔卡伊·京多安","Jan Oblak":"扬·奥布拉克","Milan Škriniar":"米兰·什克里尼亚尔"
+};
+
+/* ─── Team News Cache (pre-compiled via WebSearch) ─── */
+var TEAM_NEWS_CACHE={
+  "墨西哥":[
+    {title:"墨西哥1-0战胜韩国 成为首支晋级32强球队",snippet:"北京时间6月19日，墨西哥凭借对手门将的失误1-0击败韩国队，两连胜积6分提前锁定A组头名，成为本届世界杯第一支晋级32强淘汰赛的球队。",url:"https://cn.chinadaily.com.cn/a/202606/19/WS6a34bf8ea310d709c2fb90ba.html"},
+    {title:"揭幕战墨西哥2-0南非 基尼奥内斯打入赛事首球",snippet:"第9分钟胡利安·基尼奥内斯打入本届赛事首球，第67分钟劳尔·希门尼斯头球锁定胜局，墨西哥在阿兹特克体育场8万多名观众面前取得开门红。",url:"https://news.youth.cn/jsxw/202606/t20260612_16709662.htm"},
+    {title:"墨西哥队公布世界杯大名单 奥乔亚第6次入选",snippet:"40岁传奇门将吉列尔莫·奥乔亚再次入选国家队，成为史上第6次参加世界杯的球员之一。主帅阿吉雷公布了26人最终名单。",url:"https://www.workercn.cn/c/2026-06-02/8815022.shtml"},
+    {title:"墨西哥两战零失球 防守表现稳固",snippet:"揭幕战2-0南非，第二轮1-0韩国，墨西哥队两场比赛打入3球且零失球，防守表现相当稳固，展现东道主实力。",url:"https://news.ifeng.com/c/8u5L89z1CvU"}
+  ],
+  "加拿大":[
+    {title:"加拿大6-0大胜卡塔尔 取得队史世界杯首胜",snippet:"乔纳森·戴维帽子戏法，克莱·拉林、内森·萨利巴各入一球，卡塔尔还送上乌龙大礼。加拿大在温哥华BC Place迎来历史性时刻。",url:"https://www.thecanadianpressnews.ca/sports/canada-routs-qatar-6-0-for-historic-first-win-at-fifa-world-cup/article_496ae7fc-fa83-50bc-894f-ac3bb2fb338e.html"},
+    {title:"科内重伤离场 加拿大胜利蒙上阴影",snippet:"中场球员伊斯马尔·科内在第52分钟被卡塔尔球员严重犯规，小腿疑似骨折被担架抬离球场，对加拿大队后续比赛造成重大打击。",url:"https://www.rte.ie/sport/world-cup-2026/2026/0618/1579160-canadas-historic-rout-of-qatar-marred-by-kone-injury/"},
+    {title:"加拿大将帅心系科内 大胜献给队友",snippet:"加拿大主帅和球员赛后纷纷表示将这场历史性胜利献给受伤的队友科内，展现球队团结精神。",url:"https://global.hk01.com/即时体育/60361948/世界杯2026-加拿大将帅心系干尼-大胜献队友-赛后火药味十足"},
+    {title:"加拿大B组形势：4分暂列榜首 末轮对阵瑞士",snippet:"加拿大1胜1平积4分，与瑞士同分暂列B组榜首。6月24日将在温哥华对阵瑞士，争夺小组头名出线资格。",url:"https://news.youth.cn/jsxw/202606/t20260619_16722273.htm"}
+  ]
+};
+
+/* ─── Load team news ─── */
+async function loadTeamNews(teamName){
+  var newsBody=document.getElementById('myTeamNewsBody');
+  if(!newsBody)return;
+  var cached=TEAM_NEWS_CACHE[teamName];
+  if(cached&&cached.length>0){renderNewsCards(newsBody,cached);return;}
+  // Fallback: show placeholder with team name
+  newsBody.innerHTML='<div style="color:var(--text-dim);text-align:center;padding:10px">暂无'+teamName+'相关资讯<br><span style="font-size:10px">资讯功能即将上线，敬请期待</span></div>';
+}
+
+/* ─── Render news cards ─── */
+function renderNewsCards(container,newsItems){
+  if(!newsItems||newsItems.length===0){container.innerHTML='<div style="color:var(--text-dim);text-align:center;padding:10px">暂无相关资讯</div>';return;}
+  var html='';
+  for(var i=0;i<newsItems.length;i++){
+    var item=newsItems[i];
+    var id='news-'+i+'-'+Date.now();
+    html+='<div class="myteam-news-item" onclick="toggleNews(\''+id+'\',\''+(item.url||'').replace(/'/g,"\\'")+'\')"><div class="myteam-news-title">'+(item.title||'')+'</div><div class="myteam-news-snippet">'+(item.snippet||'')+'</div><div class="myteam-news-full" id="'+id+'"><div style="color:var(--text-dim);font-size:11px">点击链接查看原文：<a href="'+(item.url||'#')+'" target="_blank" style="color:var(--gold)">'+(item.url||'#')+'</a></div></div></div>';
+  }
+  container.innerHTML=html;
+}
+
+/* ─── Toggle news card expand ─── */
+function toggleNews(id,url){
+  var el=document.getElementById(id);
+  if(!el)return;
+  el.style.display=el.style.display==='block'?'none':'block';
+}
+
+/* ─── Get player display name (CN preferred, EN fallback) ─── */
+function getPlayerDisplayName(enName){
+  if(!enName)return'';
+  if(CN_NAME_CACHE[enName])return CN_NAME_CACHE[enName];
+  return enName;
 }
 
 /* ═══ INIT ═══ */
