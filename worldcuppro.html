@@ -2360,6 +2360,7 @@ function selectTeamPicker(teamName,el){
 }
 async function confirmTeamPicker(){
   if(!_selectedMainTeam)return;
+  var btn=document.getElementById('teamPickerConfirm');if(btn){btn.disabled=true;btn.textContent='设置中…';}
   await saveMainTeam(_selectedMainTeam);
   closeTeamPicker();
   updateNavUI();
