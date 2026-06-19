@@ -1558,7 +1558,7 @@ function renderMatchData(summary,matchObj){
   var st=comp.status.type.name;
   var live=st.indexOf('IN_PROGRESS')>=0||st.indexOf('HALF')>=0||st.indexOf('FIRST_HALF')>=0||st.indexOf('SECOND_HALF')>=0;
   var done=comp.status.type.completed||st.indexOf('FULL_TIME')>=0||st.indexOf('FINAL')>=0;
-  var statusText=done?'FT':(live?(st.indexOf('HALF')>=0?'HT':'Live'):'Upcoming');
+  var statusText=done?'已结束':(live?(st.indexOf('HALF')>=0?'中场休息':'直播中'):'未开始');
   var clock=comp.status.displayClock||'';
   var venue=(summary.gameInfo&&summary.gameInfo.venue)?summary.gameInfo.venue.fullName:matchObj.venue;
   var dateStr=matchObj.date+' '+matchObj.time;
@@ -1692,7 +1692,7 @@ function renderMatchData(summary,matchObj){
     // Sort by name length descending to prevent substring corruption
     athletes.sort(function(a,b){return (b.displayName||'').length-(a.displayName||'').length;});
     for(var ai=0;ai<athletes.length;ai++){
-      var ath=athletes[ai],name=ath.displayName||'',jersey=ath.jersey||'';
+      var ath=athletes[ai],name=ath.displayName||'',jersey=ath.jersey||ath.uniformNumber||ath.number||'';
       if(jersey&&name&&displayText.indexOf(name)>=0){
         displayText=displayText.split(name).join(name+' #'+jersey);
       }
@@ -1906,31 +1906,32 @@ var dataLinkHTML='';
 	  if(st==='live'){
 	    var min=ms.match_minute||0,inj=ms.injury_time||0;
 	    if(!min||min<=0){
-	      statusBadge='<span class="match-live-badge" style="color:#0fa84a"><span class="live-dot-sm" style="background:#0fa84a"></span> Live</span>';
+	      statusBadge='<span class="match-live-badge" style="color:#0fa84a"><span class="live-dot-sm" style="background:#0fa84a"></span> 直播中</span>';
 	      minuteHTML='<span style="color:#0fa84a">0\'</span>';
 	      liveScoreStatusHTML='<span style="color:#0fa84a">0\'</span>';
+	      scoreColor='color:#0fa84a';liveClass=' live';
 	    }else if((min>=45&&min<90)||(min>=90)){
 	      // Injury time — show clock with orange styling
 	      var base=min>=90?90:45;
 	      var clockStr=inj&&inj>0?base+'+'+inj+"'":min+"'";
-	      statusBadge='<span class="match-live-badge" style="color:#f39c12"><span class="live-dot-sm" style="background:#f39c12"></span> '+clockStr+'</span>';
+	      statusBadge='<span class="match-live-badge" style="color:#f39c12"><span class="live-dot-sm" style="background:#f39c12"></span> 直播中</span>';
 	      minuteHTML='<span style="color:#f39c12">'+clockStr+'</span>';
 	      liveScoreStatusHTML='<span style="color:#f39c12">'+clockStr+'</span>';
-	      scoreColor='color:#f39c12';
+	      scoreColor='color:#f39c12';liveClass=' live';
 	    }else{
-	      statusBadge='<span class="match-live-badge" style="color:#0fa84a"><span class="live-dot-sm" style="background:#0fa84a"></span> Live</span>';
+	      statusBadge='<span class="match-live-badge" style="color:#0fa84a"><span class="live-dot-sm" style="background:#0fa84a"></span> 直播中</span>';
 	      minuteHTML='<span style="color:#0fa84a">'+min+"'</span>";
 	      scoreColor='color:#0fa84a';liveClass=' live';liveScoreStatusHTML=minuteHTML;
 	    }
 	  }else if(st==='halftime'){
-	    statusBadge='<span class="match-live-badge"><span class="live-dot-sm"></span> HT</span>';
-	    minuteHTML='';liveScoreStatusHTML='<span style="color:#f39c12;font-size:11px">HT</span>';
+	    statusBadge='<span class="match-live-badge"><span class="live-dot-sm"></span> 中场</span>';
+	    minuteHTML='';liveScoreStatusHTML='<span style="color:#f39c12;font-size:11px">中场</span>';
 	    scoreColor='color:#f39c12';
 	  }else if(st==='finished'){
-	    statusBadge='<span class="match-finished-badge">FT</span>';
-	    minuteHTML='';liveScoreStatusHTML='<span style="color:var(--text-dim);font-size:11px">FT</span>';
+	    statusBadge='<span class="match-finished-badge">已结束</span>';
+	    minuteHTML='';liveScoreStatusHTML='<span style="color:var(--text-dim);font-size:11px">已结束</span>';
 	  }else{
-	    minuteHTML='';liveScoreStatusHTML='<span style="color:var(--text-dim);font-size:11px">Upcoming</span>';
+	    minuteHTML='';liveScoreStatusHTML='<span style="color:var(--text-dim);font-size:11px">未开始</span>';
 	  }
 	  return {status:st,statusBadge:statusBadge,minuteHTML:minuteHTML,liveScoreStatusHTML:liveScoreStatusHTML,liveClass:liveClass,scoreColor:scoreColor};
 	}
@@ -2658,7 +2659,7 @@ function renderLiveScores(){
   el.innerHTML=todayMatches.map(function(m){
     var dbId=ALL_MATCHES.indexOf(m)+1;
     var ms=matchScores[dbId];
-    var fm=ms?formatMatchStatus(m,ms):{status:'upcoming',statusBadge:'',minuteHTML:'<span style="color:var(--text-dim);font-size:11px">Upcoming</span>',liveScoreStatusHTML:'<span style="color:var(--text-dim);font-size:11px">Upcoming</span>',liveClass:'',scoreColor:''};
+    var fm=ms?formatMatchStatus(m,ms):{status:'upcoming',statusBadge:'',minuteHTML:'<span style="color:var(--text-dim);font-size:11px">未开始</span>',liveScoreStatusHTML:'<span style="color:var(--text-dim);font-size:11px">未开始</span>',liveClass:'',scoreColor:''};
     var stageLabel=(stageCN[m.stage]||m.stage)+(m.group?' · '+m.group+'组':'');
     // 未开始的比赛统一显示 0:0；有比分的显示实际比分
     var showH = '-', showA = '-';
