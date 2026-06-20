@@ -916,7 +916,6 @@ body.loaded .hero::after{animation:heroGlow 4s ease-in-out infinite}
 <div class="player-card-overlay" id="playerCardOverlay" onclick="closePlayerCard()"><div class="player-card" id="playerCard" onclick="event.stopPropagation()"></div></div>
 <div class="modal-overlay" id="dataOverlay" onclick="closeMatchData(event)"><div class="team-modal" id="matchDataModal" onclick="event.stopPropagation()"></div></div>
 <div class="modal-overlay" id="teamPickerOverlay" onclick="closeTeamPicker(event)"><div class="team-modal" id="teamPickerModal" onclick="event.stopPropagation()" style="padding:28px 24px"></div></div>
-<div class="modal-overlay" id="myTeamOverlay" onclick="closeMyTeamPage(event)"><div class="team-modal" id="myTeamModal" onclick="event.stopPropagation()" style="max-width:720px;max-height:90vh;overflow-y:auto"></div></div>
 <div class="toast-container" id="toastContainer"></div>
 <main>
   <section class="hero">
@@ -1322,7 +1321,7 @@ function updateNavUI(){
   if(currentUser){
     bl.style.display='none';bout.style.display='inline-block';ne.style.display='inline';ne.textContent=currentUser.username;
     loadMainTeam().then(function(teamName){
-      if(teamName){mt.style.display='inline';mt.textContent='❤️ '+teamName;mt.onclick=function(){openMyTeamPage(teamName);};}
+      if(teamName){mt.style.display='inline';mt.textContent='❤️ '+teamName;mt.onclick=function(){window.location.href='myteam.html?team='+encodeURIComponent(teamName);};}
       else{mt.style.display='inline';mt.textContent='❤️ 我的主队';mt.onclick=function(){openTeamPicker();};}
     });
   }else{
@@ -2368,73 +2367,7 @@ function closeTeamPicker(event){
   if(event&&event.preventDefault)event.preventDefault();
   document.getElementById('teamPickerOverlay').classList.remove('active');
 }
-/* ─── My Team Page ─── */
-function closeMyTeamPage(event){
-  if(event&&event.target&&event.target!==document.getElementById('myTeamOverlay'))return;
-  document.getElementById('myTeamOverlay').classList.remove('active');
-}
-async function openMyTeamPage(teamName){
-  var info=TEAM_INFO[teamName];
-  if(!info){showToast('球队信息未找到');return;}
-
-  var overlay=document.getElementById('myTeamOverlay');
-  var modal=document.getElementById('myTeamModal');
-  overlay.classList.add('active');
-  modal.innerHTML='<div style="text-align:center;padding:40px"><div class="data-loading-spinner"></div><p style="color:var(--text-dim);margin-top:8px">加载中...</p></div>';
-
-  // Give loading state a moment to render, then build content
-  setTimeout(function(){
-    // AI analysis
-    var aiText=generateStaticAnalysis(teamName,info);
-
-    // Player table
-    var playerRows=info.players.map(function(p){
-      return'<tr><td>'+(p.num||'—')+'</td><td>'+getPlayerDisplayName(p.n)+'</td><td>'+p.pos+'</td><td>'+(p.age||'—')+'</td><td>'+(p.club||'—')+'</td><td>'+(p.val||'—')+'</td></tr>';
-    }).join('');
-
-    // Schedule
-    var teamMatches=ALL_MATCHES.filter(function(m){return m.home===teamName||m.away===teamName;});
-    var scheduleRows=teamMatches.map(function(m){
-      var opp=m.home===teamName?m.away:m.home;
-      var isH=m.home===teamName;
-      var dbId=ALL_MATCHES.indexOf(m)+1;
-      var ms=matchScores[dbId];
-      var scoreHTML='- : -';
-      var resultBadge='';
-      if(ms&&ms.home_score!=null){
-        scoreHTML=ms.home_score+' : '+ms.away_score;
-        var myScore=isH?ms.home_score:ms.away_score;
-        var oppScore=isH?ms.away_score:ms.home_score;
-        if(myScore>oppScore)resultBadge='<span style="color:#4caf50">W</span>';
-        else if(myScore<oppScore)resultBadge='<span style="color:#e03030">L</span>';
-        else resultBadge='<span style="color:#f0c040">D</span>';
-      }
-      return'<div class="myteam-schedule-item"><span class="myteam-schedule-date">'+m.date+'</span><span class="myteam-schedule-opp">'+(isH?'':'@')+opp+'</span><span class="myteam-schedule-score">'+scoreHTML+'</span><span class="myteam-schedule-result">'+resultBadge+'</span></div>';
-    }).join('')||'<div style="color:var(--text-dim);text-align:center;padding:10px">暂无赛程</div>';
-
-    var html='<button class="team-modal-close" onclick="closeMyTeamPage()" style="position:absolute;top:12px;right:12px;z-index:10">&times;</button>';
-    html+='<div class="myteam-header"><span class="flag" style="font-size:48px">'+flagImg(info.cc,48)+'</span><div class="myteam-header-name">'+teamName+'</div><div class="myteam-header-en">'+info.en+' · FIFA排名 #'+info.rank+'</div><div style="font-size:11px;color:var(--text-dim);margin-top:4px;cursor:pointer" onclick="openTeamPicker()">✎ 修改主队</div></div>';
-    html+='<div class="myteam-body">';
-
-    // AI Card
-    html+='<div class="myteam-card"><div class="myteam-card-header">📊 AI 分析预测</div><div class="myteam-card-body"><div class="myteam-ai-text">'+aiText+'</div></div></div>';
-
-    // Player Card
-    html+='<div class="myteam-card"><div class="myteam-card-header">👥 球员信息 ('+info.players.length+'人)</div><div class="myteam-card-body"><div style="overflow-x:auto"><table class="myteam-player-table"><thead><tr><th>#</th><th>姓名</th><th>位置</th><th>年龄</th><th>俱乐部</th><th>身价</th></tr></thead><tbody>'+playerRows+'</tbody></table></div></div></div>';
-
-    // Schedule Card
-    html+='<div class="myteam-card"><div class="myteam-card-header">📅 赛程安排</div><div class="myteam-card-body">'+scheduleRows+'</div></div>';
-
-    // News Card (placeholder — Task 4 will fill it)
-    html+='<div class="myteam-card"><div class="myteam-card-header">📰 最新资讯</div><div class="myteam-card-body" id="myTeamNewsBody"><div style="color:var(--text-dim);text-align:center;padding:10px">加载资讯中...</div></div></div>';
-
-    html+='</div>';
-    modal.innerHTML=html;
-
-    // Load news async (function defined in Task 4, safe to call now — will be no-op if not yet defined)
-    if(typeof loadTeamNews==='function')loadTeamNews(teamName);
-  },50);
-}
+/* My Team page now lives in standalone myteam.html (nav navigates there). */
 
 function generateStaticAnalysis(teamName,info){
   var group=GROUPS.find(function(g){return g.teams.some(function(t){return t.name===teamName;});});
@@ -2655,7 +2588,7 @@ function observeReveals(){var els=document.querySelectorAll('.reveal:not(.visibl
 function createParticles(){const c=document.getElementById('particles');for(let i=0;i<30;i++){const p=document.createElement('div');p.classList.add('particle');const s=Math.random()*4+2;p.style.width=s+'px';p.style.height=s+'px';p.style.left=Math.random()*100+'%';p.style.animationDuration=(Math.random()*12+8)+'s';p.style.animationDelay=(Math.random()*10)+'s';p.style.opacity=(Math.random()*0.3).toString();c.appendChild(p);}}
 function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
 function setupSmoothScroll(){document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth'});});});}
-function setupKeyboard(){document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAuthModal();closeTeamModal();closePredHistory();closePlayerCard();closeMatchData();closeTeamPicker();closeMyTeamPage();const dd=document.getElementById('searchDropdown');if(dd)dd.classList.remove('open');}});}
+function setupKeyboard(){document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAuthModal();closeTeamModal();closePredHistory();closePlayerCard();closeMatchData();closeTeamPicker();const dd=document.getElementById('searchDropdown');if(dd)dd.classList.remove('open');}});}
 
 /* ═══ SEARCH ═══ */
 let searchTimer=null;
