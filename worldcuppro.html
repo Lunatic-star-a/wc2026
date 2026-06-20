@@ -1310,20 +1310,23 @@ async function onLoginSuccess(isNewRegistration){
   closeAuthModal();updateNavUI();
   /* 只在注册时记录设备绑定，登录不覆盖 */
   if(isNewRegistration){try{localStorage.setItem('wc26_device_user',currentUser.username);}catch(e){}
-    loadMainTeam().then(function(t){if(!t)openTeamPicker();});
+    if(MYTEAM_ENABLED)loadMainTeam().then(function(t){if(!t)openTeamPicker();});
   }
   showToast('欢迎回来，'+currentUser.username+'！','success');
   await loadUserPredictions();renderPredictions();renderLeaderboard();loadPublicChat();observeReveals();
 }
 async function handleLogout(){if(SUPABASE_READY)await sb.auth.signOut();currentUser=null;userPredictions={};_mainTeamCache=null;updateNavUI();renderPredictions();showToast('已退出登录');}
+var MYTEAM_ENABLED=false; /* 主队功能暂时关闭：改回 true 即可恢复导航入口与注册后选队弹窗 */
 function updateNavUI(){
   const bl=document.getElementById('btnLogin'),bout=document.getElementById('btnLogout'),ne=document.getElementById('navUsername'),mt=document.getElementById('navMyTeam');
   if(currentUser){
     bl.style.display='none';bout.style.display='inline-block';ne.style.display='inline';ne.textContent=currentUser.username;
+    if(MYTEAM_ENABLED){
     loadMainTeam().then(function(teamName){
       if(teamName){mt.style.display='inline';mt.textContent='❤️ '+teamName;mt.onclick=function(){window.location.href='myteam.html?team='+encodeURIComponent(teamName);};}
       else{mt.style.display='inline';mt.textContent='❤️ 我的主队';mt.onclick=function(){openTeamPicker();};}
     });
+    }else{mt.style.display='none';}
   }else{
     bl.style.display='inline-block';bout.style.display='none';ne.style.display='none';mt.style.display='none';
   }
@@ -1481,7 +1484,7 @@ async function _pollESPN(){
       var stInfo=evt.status,stType=stInfo.type.name||'';
       var dbSt='upcoming',period=stInfo.period||0,clock=stInfo.displayClock||'';
       if(stType==='STATUS_FULL_TIME'||stType==='STATUS_FINAL')dbSt='finished';
-      else if(stType==='STATUS_HALF_TIME'||stType==='STATUS_END_OF_PERIOD')dbSt='halftime';
+      else if(stType==='STATUS_HALFTIME'||stType==='STATUS_END_OF_PERIOD')dbSt='halftime';
       else if(stType==='STATUS_IN_PROGRESS'||stType==='STATUS_SECOND_HALF'||stType==='STATUS_FIRST_HALF'||stType==='STATUS_DELAYED'||stType==='STATUS_RAIN_DELAY')dbSt='live';
       else dbSt='upcoming';
       var min=0,inj=0,cm=clock.match(/(\d+)'?\s*\+?\s*(\d*)'?/);
@@ -1518,7 +1521,7 @@ async function _pollESPN(){
           dbSt='halftime';
         }
         // 上半场补时（分钟数≥45）→ 保持 live 显示补时分钟数
-        // 仅当 ESPN 明确发送 STATUS_HALF_TIME 或 clock 含 HT 才设为 halftime
+        // 仅当 ESPN 明确发送 STATUS_HALFTIME 或 clock 含 HT 才设为 halftime
         else if(period===1&&min>=45){
           // keep live — injury time clock is still ticking
         }
@@ -1626,13 +1629,25 @@ function renderMatchData(summary,matchObj){
   var hn=home.team.displayName,an=away.team.displayName;
   var hf=espnFlag2(home.team.displayName),af=espnFlag2(away.team.displayName);
   var st=comp.status.type.name;
-  var live=st.indexOf('IN_PROGRESS')>=0||st.indexOf('HALF')>=0||st.indexOf('FIRST_HALF')>=0||st.indexOf('SECOND_HALF')>=0;
-  var done=comp.status.type.completed||st.indexOf('FULL_TIME')>=0||st.indexOf('FINAL')>=0;
-  var statusText=done?'已结束':(live?(st.indexOf('HALF_TIME')>=0?'中场':'直播中'):'未开始');
   var clock=comp.status.displayClock||'';
   var isInjury=clock.indexOf('+')>=0;
-  var isHalftime=st.indexOf('HALF_TIME')>=0;
-  var statusColor=isInjury||isHalftime?'#f39c12':(live&&!done?'#0fa84a':'');
+  /* 统一状态来源：优先用 matchScores（与比分板/比赛卡片同源），确保三处状态一致 */
+  var _dbId=ALL_MATCHES.indexOf(matchObj)+1;
+  var _ms=_dbId>0?matchScores[_dbId]:null;
+  var uStatus;
+  if(_ms){uStatus=resolveStatus(_ms,matchObj);}
+  else{
+    var _hadHalf=st.indexOf('HALFTIME')>=0;
+    var _done=comp.status.type.completed||st.indexOf('FULL_TIME')>=0||st.indexOf('FINAL')>=0;
+    var _liveS=st.indexOf('IN_PROGRESS')>=0||st.indexOf('FIRST_HALF')>=0||st.indexOf('SECOND_HALF')>=0||_hadHalf;
+    uStatus=_done?'finished':(_hadHalf?'halftime':(_liveS?'live':'upcoming'));
+  }
+  var live=uStatus==='live'||uStatus==='halftime';
+  var done=uStatus==='finished';
+  var _liveMin=_ms?(_ms.match_minute||0):0;
+  var statusText=uStatus==='finished'?'已结束':(uStatus==='halftime'?'中场':(uStatus==='live'?'直播中':'未开始'));
+  var statusColor=uStatus==='halftime'?'#f39c12':(uStatus==='live'?((isInjury||_liveMin>=45)?'#f39c12':'#0fa84a'):'');
+  if(uStatus==='finished'||uStatus==='upcoming')clock='';
   var venue=(summary.gameInfo&&summary.gameInfo.venue)?summary.gameInfo.venue.fullName:matchObj.venue;
   var dateStr=matchObj.date+' '+matchObj.time;
   var closeBtn='<button class="team-modal-close" onclick="closeMatchData()" style="position:absolute;top:12px;right:12px;z-index:10">&times;</button>';
