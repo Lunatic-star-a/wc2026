@@ -1629,10 +1629,11 @@ function renderMatchData(summary,matchObj){
   var st=comp.status.type.name;
   var live=st.indexOf('IN_PROGRESS')>=0||st.indexOf('HALF')>=0||st.indexOf('FIRST_HALF')>=0||st.indexOf('SECOND_HALF')>=0;
   var done=comp.status.type.completed||st.indexOf('FULL_TIME')>=0||st.indexOf('FINAL')>=0;
-  var statusText=done?'已结束':(live?(st.indexOf('HALF')>=0?'中场':'直播中'):'未开始');
+  var statusText=done?'已结束':(live?(st.indexOf('HALF_TIME')>=0?'中场':'直播中'):'未开始');
   var clock=comp.status.displayClock||'';
   var isInjury=clock.indexOf('+')>=0;
-  var statusColor=isInjury?'#f39c12':(live?'#0fa84a':'');
+  var isHalftime=st.indexOf('HALF_TIME')>=0;
+  var statusColor=isInjury||isHalftime?'#f39c12':(live&&!done?'#0fa84a':'');
   var venue=(summary.gameInfo&&summary.gameInfo.venue)?summary.gameInfo.venue.fullName:matchObj.venue;
   var dateStr=matchObj.date+' '+matchObj.time;
   var closeBtn='<button class="team-modal-close" onclick="closeMatchData()" style="position:absolute;top:12px;right:12px;z-index:10">&times;</button>';
